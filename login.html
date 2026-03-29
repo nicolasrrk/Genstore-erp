@@ -6,35 +6,35 @@
 <title>Genstore — Acceder</title>
 <link rel="icon" type="image/png" href="/fav.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@300;400;500&family=Playfair+Display:wght@400;500&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Geist+Mono:wght@300;400;500&family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,500;1,9..144,300&family=Geist:wght@300;400;500;600&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
 :root {
-  --bg:         #0f0e0c;
-  --surface:    #181714;
-  --surface2:   #201f1c;
-  --surface3:   #2a2825;
-  --border:     rgba(255,255,255,0.07);
-  --border2:    rgba(255,255,255,0.12);
-  --text:       #f5f0e8;
-  --text2:      #9e9a93;
-  --text3:      #5c5954;
-  --orange:     #e8602c;
-  --orange2:    #d04e1e;
-  --orange-dim: rgba(232,96,44,0.12);
-  --green:      #3d9970;
-  --green-bg:   rgba(61,153,112,0.1);
-  --red:        #c0504a;
-  --red-bg:     rgba(192,80,74,0.1);
-  --blue:       #4a7fc0;
-  --blue-bg:    rgba(74,127,192,0.1);
-  --sans:       'DM Sans', sans-serif;
-  --serif:      'Playfair Display', serif;
-  --mono:       'DM Mono', monospace;
-  --r:          8px;
-  --r-lg:       12px;
+  --bg:         #f7f4ef;
+  --surface:    #fdfcfa;
+  --surface2:   #f2efe9;
+  --surface3:   #ece8e1;
+  --border:     #e3dfd7;
+  --border2:    #d4cfc6;
+  --text:       #1c1916;
+  --text2:      #6b6560;
+  --text3:      #a89f96;
+  --orange:     #c8440e;
+  --orange2:    #a83608;
+  --orange-dim: rgba(200,68,14,0.08);
+  --green:      #1a6b42;
+  --green-bg:   #eaf4ee;
+  --red:        #a83030;
+  --red-bg:     #faeaea;
+  --blue:       #1a4a8a;
+  --blue-bg:    #eaf0fa;
+  --sans:       'Geist', sans-serif;
+  --serif:      'Fraunces', serif;
+  --mono:       'Geist Mono', monospace;
+  --r:          6px;
+  --r-lg:       10px;
 }
 
 html { font-size: 14px; }
@@ -50,171 +50,293 @@ body {
   flex-direction: column;
 }
 
-body::before {
+/* fondo grain muy sutil */
+body::after {
   content: '';
   position: fixed; inset: 0;
-  background:
-    radial-gradient(ellipse 700px 500px at 65% 10%, rgba(232,96,44,0.07) 0%, transparent 70%),
-    radial-gradient(ellipse 400px 400px at 10% 90%, rgba(232,96,44,0.04) 0%, transparent 60%);
-  pointer-events: none; z-index: 0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.035'/%3E%3C/svg%3E");
+  background-size: 200px;
+  pointer-events: none; z-index: 0; opacity: 0.6;
 }
 
-.login-wrap {
-  flex: 1; display: flex;
-  align-items: center; justify-content: center;
-  padding: 40px 20px;
+.login-split {
+  flex: 1;
+  display: flex;
+  min-height: 100vh;
+}
+
+/* panel izquierdo — branding */
+.login-brand {
+  width: 420px;
+  flex-shrink: 0;
+  background: var(--text);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 40px 44px;
+  position: relative;
+  overflow: hidden;
+}
+.login-brand::before {
+  content: '';
+  position: absolute;
+  bottom: -80px; right: -80px;
+  width: 320px; height: 320px;
+  border-radius: 50%;
+  background: var(--orange);
+  opacity: 0.12;
+}
+.login-brand::after {
+  content: '';
+  position: absolute;
+  top: -60px; left: -60px;
+  width: 200px; height: 200px;
+  border-radius: 50%;
+  background: var(--orange);
+  opacity: 0.07;
+}
+
+.brand-logo {
+  display: flex; align-items: center; gap: 10px;
   position: relative; z-index: 1;
 }
-.login-card { width: 100%; max-width: 380px; animation: fadeUp 0.3s ease; }
-
-.login-logo { display: flex; align-items: center; gap: 10px; margin-bottom: 44px; }
-.logo-mark {
-  width: 32px; height: 32px;
+.brand-mark {
+  width: 34px; height: 34px;
   background: var(--orange);
   border-radius: 8px;
   display: flex; align-items: center; justify-content: center;
-  font-family: var(--serif); font-size: 16px; color: #fff; font-weight: 500;
-  flex-shrink: 0; box-shadow: 0 2px 10px rgba(232,96,44,0.35);
+  font-family: var(--serif); font-size: 17px;
+  font-style: italic;
+  color: #fff; font-weight: 300;
+  flex-shrink: 0;
 }
-.logo-name {
-  font-family: var(--serif); font-size: 20px; font-weight: 500;
-  letter-spacing: -0.3px; color: var(--text);
+.brand-name {
+  font-family: var(--serif);
+  font-size: 20px; font-weight: 300;
+  font-style: italic;
+  letter-spacing: -0.2px;
+  color: #f5f0e8;
 }
-.logo-tag {
-  font-family: var(--mono); font-size: 8px; font-weight: 400;
-  color: var(--text3); letter-spacing: 1px; text-transform: uppercase;
-  border: 1px solid var(--border2); padding: 2px 6px; border-radius: 4px;
+
+.brand-body {
+  position: relative; z-index: 1;
+}
+.brand-headline {
+  font-family: var(--serif);
+  font-size: 36px; font-weight: 300;
+  font-style: italic;
+  line-height: 1.15;
+  letter-spacing: -0.5px;
+  color: #f5f0e8;
+  margin-bottom: 14px;
+}
+.brand-sub {
+  font-family: var(--mono);
+  font-size: 10px;
+  color: rgba(245,240,232,0.4);
+  letter-spacing: 0.3px;
+  line-height: 1.7;
+}
+
+.brand-footer {
+  position: relative; z-index: 1;
+  font-family: var(--mono);
+  font-size: 9px;
+  color: rgba(245,240,232,0.25);
+  letter-spacing: 0.3px;
+}
+
+/* panel derecho — formulario */
+.login-form-wrap {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 32px;
+  background: var(--surface);
+  position: relative; z-index: 1;
+}
+.login-card {
+  width: 100%;
+  max-width: 360px;
+  animation: fadeUp 0.3s ease;
 }
 
 .login-heading {
-  font-family: var(--serif); font-size: 30px; font-weight: 400;
-  letter-spacing: -0.5px; color: var(--text); line-height: 1.1; margin-bottom: 8px;
+  font-family: var(--serif);
+  font-size: 26px; font-weight: 300;
+  font-style: italic;
+  letter-spacing: -0.4px;
+  color: var(--text);
+  line-height: 1.1;
+  margin-bottom: 6px;
 }
 .login-sub {
-  font-family: var(--mono); font-size: 11px; color: var(--text3);
-  letter-spacing: 0.2px; margin-bottom: 32px;
+  font-family: var(--mono);
+  font-size: 10px;
+  color: var(--text3);
+  letter-spacing: 0.2px;
+  margin-bottom: 30px;
 }
 
 .login-tabs {
-  display: flex; background: var(--surface2);
-  border: 1px solid var(--border); border-radius: var(--r);
-  padding: 3px; margin-bottom: 28px;
+  display: flex;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: var(--r);
+  padding: 3px;
+  margin-bottom: 26px;
 }
 .tab-btn {
-  flex: 1; padding: 8px 0; border: none; background: transparent;
+  flex: 1; padding: 7px 0; border: none;
+  background: transparent;
   font-family: var(--sans); font-size: 12px; font-weight: 500;
-  color: var(--text3); border-radius: 6px; cursor: pointer; transition: all 0.15s;
+  color: var(--text3); border-radius: 4px; cursor: pointer; transition: all 0.14s;
 }
 .tab-btn.active {
-  background: var(--surface3); color: var(--text);
-  box-shadow: 0 1px 4px rgba(0,0,0,0.4);
+  background: var(--surface);
+  color: var(--text);
+  box-shadow: 0 1px 3px rgba(0,0,0,0.08), 0 0 0 1px var(--border);
 }
 
-.form-group { margin-bottom: 16px; }
+.form-group { margin-bottom: 14px; }
 .form-label {
-  display: block; font-family: var(--mono); font-size: 9px; font-weight: 500;
-  letter-spacing: 0.8px; text-transform: uppercase; color: var(--text3); margin-bottom: 7px;
+  display: block; font-family: var(--mono);
+  font-size: 9px; font-weight: 500;
+  letter-spacing: 0.7px; text-transform: uppercase;
+  color: var(--text3); margin-bottom: 6px;
 }
 .form-input {
-  width: 100%; height: 42px; padding: 0 14px;
+  width: 100%; height: 38px; padding: 0 12px;
   border: 1px solid var(--border); border-radius: var(--r);
   background: var(--surface2); color: var(--text);
-  font-family: var(--sans); font-size: 14px; outline: none;
-  transition: border-color 0.15s, background 0.15s;
+  font-family: var(--sans); font-size: 13px; outline: none;
+  transition: border-color 0.14s, background 0.14s;
 }
-.form-input:focus { border-color: var(--orange); background: var(--surface3); }
+.form-input:focus { border-color: var(--orange); background: var(--surface); box-shadow: 0 0 0 3px var(--orange-dim); }
 .form-input::placeholder { color: var(--text3); }
-.form-input:disabled { opacity: 0.4; cursor: not-allowed; }
+.form-input:disabled { opacity: 0.5; cursor: not-allowed; }
 
 .btn-submit {
-  width: 100%; height: 42px; border: none;
-  background: var(--orange); color: #fff;
-  font-family: var(--sans); font-size: 13px; font-weight: 600; letter-spacing: 0.2px;
+  width: 100%; height: 38px; border: none;
+  background: var(--text); color: #fdfcfa;
+  font-family: var(--sans); font-size: 13px; font-weight: 500;
   border-radius: var(--r); cursor: pointer;
-  transition: background 0.15s, transform 0.1s, box-shadow 0.15s;
+  transition: background 0.14s, transform 0.1s;
   display: flex; align-items: center; justify-content: center; gap: 6px;
-  margin-top: 22px; box-shadow: 0 2px 14px rgba(232,96,44,0.3);
+  margin-top: 20px;
+  letter-spacing: 0.1px;
 }
-.btn-submit:hover { background: var(--orange2); transform: translateY(-1px); box-shadow: 0 4px 20px rgba(232,96,44,0.4); }
+.btn-submit:hover { background: #2e2b27; transform: translateY(-1px); }
 .btn-submit:active { transform: translateY(0); }
 .btn-submit:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
 
+/* línea divisora con "o" */
+.or-divider {
+  display: flex; align-items: center; gap: 12px;
+  margin: 18px 0 0;
+}
+.or-line { flex: 1; height: 1px; background: var(--border); }
+.or-text { font-family: var(--mono); font-size: 9px; color: var(--text3); letter-spacing: 0.3px; }
+
 .notice {
   display: flex; align-items: flex-start; gap: 8px;
-  padding: 11px 13px; border-radius: var(--r);
-  font-size: 12px; line-height: 1.5; margin-bottom: 16px; font-family: var(--sans);
+  padding: 10px 12px; border-radius: var(--r);
+  font-size: 12px; line-height: 1.5; margin-bottom: 14px;
+  font-family: var(--sans);
 }
-.notice-error   { background: var(--red-bg);   color: #e07070; border: 1px solid rgba(192,80,74,0.2); }
-.notice-success { background: var(--green-bg); color: #5bbf90; border: 1px solid rgba(61,153,112,0.2); }
-.notice-info    { background: var(--blue-bg);  color: #7aaad4; border: 1px solid rgba(74,127,192,0.2); }
+.notice-error   { background: var(--red-bg);   color: var(--red);   border: 1px solid #e8c4c4; }
+.notice-success { background: var(--green-bg); color: var(--green); border: 1px solid #b8d8c4; }
+.notice-info    { background: var(--blue-bg);  color: var(--blue);  border: 1px solid #c4d4e8; }
 .notice-hidden  { display: none; }
 
-.login-footer {
-  padding: 18px 20px; text-align: center;
+.login-footer-bar {
+  padding: 14px 20px; text-align: center;
   border-top: 1px solid var(--border);
-  font-family: var(--mono); font-size: 9px; color: var(--text3); letter-spacing: 0.3px;
+  font-family: var(--mono); font-size: 9px;
+  color: var(--text3); letter-spacing: 0.3px;
+  background: var(--surface);
   position: relative; z-index: 1;
 }
 
 .spinner {
-  width: 13px; height: 13px;
+  width: 12px; height: 12px;
   border: 1.5px solid rgba(255,255,255,0.3);
   border-top-color: #fff; border-radius: 50%;
   animation: spin 0.6s linear infinite;
 }
 @keyframes spin { to { transform: rotate(360deg); } }
 @keyframes fadeUp {
-  from { opacity: 0; transform: translateY(10px); }
+  from { opacity: 0; transform: translateY(8px); }
   to   { opacity: 1; transform: translateY(0); }
 }
 
+@media (max-width: 860px) {
+  .login-brand { display: none; }
+  .login-split { min-height: 100vh; }
+  .login-form-wrap { padding: 48px 24px; }
+}
 @media (max-width: 480px) {
-  .login-wrap { padding: 32px 20px; align-items: flex-start; padding-top: 56px; }
-  .login-heading { font-size: 26px; }
-  .login-logo { margin-bottom: 36px; }
-  .login-footer { font-size: 8px; padding: 14px; }
+  .login-form-wrap { padding: 40px 20px; align-items: flex-start; padding-top: 56px; }
+  .login-heading { font-size: 22px; }
+  .login-footer-bar { font-size: 8px; padding: 12px; }
 }
 </style>
 </head>
 <body>
 
-<div class="login-wrap">
-  <div class="login-card">
+<div class="login-split">
 
-    <div class="login-logo">
-      <div class="logo-mark">G</div>
-      <span class="logo-name">Genstore</span>
-      <span class="logo-tag">ERP</span>
+  <!-- Panel izquierdo — branding -->
+  <div class="login-brand">
+    <div class="brand-logo">
+      <div class="brand-mark">G</div>
+      <span class="brand-name">Genstore</span>
     </div>
-
-    <div class="login-heading">Bienvenido</div>
-    <div class="login-sub">Ingresá a tu cuenta para continuar</div>
-
-    <div class="login-tabs">
-      <button class="tab-btn active" onclick="setMode('login')">Iniciar sesión</button>
-      <button class="tab-btn" onclick="setMode('register')">Registrarse</button>
+    <div class="brand-body">
+      <div class="brand-headline">Tu negocio,<br>en orden.</div>
+      <div class="brand-sub">
+        Ventas · Stock · Gastos · Clientes<br>
+        Todo en un solo lugar.
+      </div>
     </div>
-
-    <div id="notice" class="notice notice-hidden"></div>
-
-    <div class="form-group">
-      <label class="form-label" for="email">Email</label>
-      <input class="form-input" type="email" id="email" placeholder="tu@email.com" autocomplete="email">
-    </div>
-    <div class="form-group">
-      <label class="form-label" for="password">Contraseña</label>
-      <input class="form-input" type="password" id="password" placeholder="••••••••" autocomplete="current-password"
-             onkeydown="if(event.key==='Enter') handleSubmit()">
-    </div>
-
-    <button class="btn-submit" id="submit-btn" onclick="handleSubmit()">
-      <span id="btn-text">Entrar</span>
-    </button>
-
+    <div class="brand-footer">© 2025 Genstore ERP</div>
   </div>
+
+  <!-- Panel derecho — formulario -->
+  <div class="login-form-wrap">
+    <div class="login-card">
+
+      <div class="login-heading">Bienvenido</div>
+      <div class="login-sub">Ingresá a tu cuenta para continuar</div>
+
+      <div class="login-tabs">
+        <button class="tab-btn active" onclick="setMode('login')">Iniciar sesión</button>
+        <button class="tab-btn" onclick="setMode('register')">Registrarse</button>
+      </div>
+
+      <div id="notice" class="notice notice-hidden"></div>
+
+      <div class="form-group">
+        <label class="form-label" for="email">Email</label>
+        <input class="form-input" type="email" id="email" placeholder="tu@email.com" autocomplete="email">
+      </div>
+      <div class="form-group">
+        <label class="form-label" for="password">Contraseña</label>
+        <input class="form-input" type="password" id="password" placeholder="••••••••" autocomplete="current-password"
+               onkeydown="if(event.key==='Enter') handleSubmit()">
+      </div>
+
+      <button class="btn-submit" id="submit-btn" onclick="handleSubmit()">
+        <span id="btn-text">Entrar</span>
+      </button>
+
+    </div>
+  </div>
+
 </div>
 
-<footer class="login-footer">
+<footer class="login-footer-bar">
   Genstore ERP · Tus datos son privados y se almacenan de forma segura
 </footer>
 
@@ -277,4 +399,5 @@ function translateError(msg) {
 </script>
 </body>
 </html>
+
 
