@@ -6,33 +6,35 @@
 <title>Genstore — Acceder</title>
 <link rel="icon" type="image/png" href="/fav.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Geist+Mono:wght@300;400;500&family=Instrument+Serif:ital@0;1&family=Geist:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@300;400;500&family=Playfair+Display:wght@400;500&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
 :root {
-  --bg:        #fafaf8;
-  --surface:   #ffffff;
-  --surface2:  #f5f5f2;
-  --surface3:  #eeede9;
-  --border:    #e8e7e2;
-  --border2:   #dddcd7;
-  --text:      #1a1917;
-  --text2:     #6b6963;
-  --text3:     #a8a6a0;
-  --accent:    #1a1917;
-  --green:     #1d7a4f;
-  --green-bg:  #edf7f1;
-  --red:       #b94040;
-  --red-bg:    #fdf0f0;
-  --blue:      #1a4f8a;
-  --blue-bg:   #eff4fc;
-  --sans:      'Geist', sans-serif;
-  --serif:     'Instrument Serif', serif;
-  --mono:      'Geist Mono', monospace;
-  --r:         6px;
-  --r-lg:      10px;
+  --bg:         #0f0e0c;
+  --surface:    #181714;
+  --surface2:   #201f1c;
+  --surface3:   #2a2825;
+  --border:     rgba(255,255,255,0.07);
+  --border2:    rgba(255,255,255,0.12);
+  --text:       #f5f0e8;
+  --text2:      #9e9a93;
+  --text3:      #5c5954;
+  --orange:     #e8602c;
+  --orange2:    #d04e1e;
+  --orange-dim: rgba(232,96,44,0.12);
+  --green:      #3d9970;
+  --green-bg:   rgba(61,153,112,0.1);
+  --red:        #c0504a;
+  --red-bg:     rgba(192,80,74,0.1);
+  --blue:       #4a7fc0;
+  --blue-bg:    rgba(74,127,192,0.1);
+  --sans:       'DM Sans', sans-serif;
+  --serif:      'Playfair Display', serif;
+  --mono:       'DM Mono', monospace;
+  --r:          8px;
+  --r-lg:       12px;
 }
 
 html { font-size: 14px; }
@@ -48,221 +50,128 @@ body {
   flex-direction: column;
 }
 
-/* ── LAYOUT ───────────────────────────────────────── */
+body::before {
+  content: '';
+  position: fixed; inset: 0;
+  background:
+    radial-gradient(ellipse 700px 500px at 65% 10%, rgba(232,96,44,0.07) 0%, transparent 70%),
+    radial-gradient(ellipse 400px 400px at 10% 90%, rgba(232,96,44,0.04) 0%, transparent 60%);
+  pointer-events: none; z-index: 0;
+}
+
 .login-wrap {
-  flex: 1;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  flex: 1; display: flex;
+  align-items: center; justify-content: center;
   padding: 40px 20px;
+  position: relative; z-index: 1;
 }
+.login-card { width: 100%; max-width: 380px; animation: fadeUp 0.3s ease; }
 
-.login-card {
-  width: 100%;
-  max-width: 360px;
-}
-
-/* ── LOGO ─────────────────────────────────────────── */
-.login-logo {
-  display: flex;
-  align-items: baseline;
-  gap: 7px;
-  margin-bottom: 36px;
+.login-logo { display: flex; align-items: center; gap: 10px; margin-bottom: 44px; }
+.logo-mark {
+  width: 32px; height: 32px;
+  background: var(--orange);
+  border-radius: 8px;
+  display: flex; align-items: center; justify-content: center;
+  font-family: var(--serif); font-size: 16px; color: #fff; font-weight: 500;
+  flex-shrink: 0; box-shadow: 0 2px 10px rgba(232,96,44,0.35);
 }
 .logo-name {
-  font-family: var(--serif);
-  font-size: 22px;
-  letter-spacing: -0.3px;
-  color: var(--text);
+  font-family: var(--serif); font-size: 20px; font-weight: 500;
+  letter-spacing: -0.3px; color: var(--text);
 }
 .logo-tag {
-  font-family: var(--mono);
-  font-size: 9px;
-  font-weight: 400;
-  color: var(--text3);
-  letter-spacing: 0.5px;
-  text-transform: uppercase;
+  font-family: var(--mono); font-size: 8px; font-weight: 400;
+  color: var(--text3); letter-spacing: 1px; text-transform: uppercase;
+  border: 1px solid var(--border2); padding: 2px 6px; border-radius: 4px;
 }
 
-/* ── HEADING ──────────────────────────────────────── */
 .login-heading {
-  font-family: var(--serif);
-  font-size: 26px;
-  letter-spacing: -0.3px;
-  color: var(--text);
-  line-height: 1.1;
-  margin-bottom: 6px;
+  font-family: var(--serif); font-size: 30px; font-weight: 400;
+  letter-spacing: -0.5px; color: var(--text); line-height: 1.1; margin-bottom: 8px;
 }
 .login-sub {
-  font-family: var(--mono);
-  font-size: 10px;
-  color: var(--text3);
-  letter-spacing: 0.3px;
-  margin-bottom: 28px;
+  font-family: var(--mono); font-size: 11px; color: var(--text3);
+  letter-spacing: 0.2px; margin-bottom: 32px;
 }
 
-/* ── TABS ─────────────────────────────────────────── */
 .login-tabs {
-  display: flex;
-  gap: 0;
-  background: var(--surface3);
-  border-radius: var(--r);
-  padding: 3px;
-  margin-bottom: 24px;
+  display: flex; background: var(--surface2);
+  border: 1px solid var(--border); border-radius: var(--r);
+  padding: 3px; margin-bottom: 28px;
 }
 .tab-btn {
-  flex: 1;
-  padding: 7px 0;
-  border: none;
-  background: transparent;
-  font-family: var(--sans);
-  font-size: 12px;
-  font-weight: 500;
-  color: var(--text3);
-  border-radius: 4px;
-  cursor: pointer;
-  transition: all 0.15s;
+  flex: 1; padding: 8px 0; border: none; background: transparent;
+  font-family: var(--sans); font-size: 12px; font-weight: 500;
+  color: var(--text3); border-radius: 6px; cursor: pointer; transition: all 0.15s;
 }
 .tab-btn.active {
-  background: var(--surface);
-  color: var(--text);
-  box-shadow: 0 1px 3px rgba(0,0,0,0.07);
+  background: var(--surface3); color: var(--text);
+  box-shadow: 0 1px 4px rgba(0,0,0,0.4);
 }
 
-/* ── FORM ─────────────────────────────────────────── */
-.form-group {
-  margin-bottom: 14px;
-}
+.form-group { margin-bottom: 16px; }
 .form-label {
-  display: block;
-  font-family: var(--mono);
-  font-size: 9px;
-  font-weight: 500;
-  letter-spacing: 0.6px;
-  text-transform: uppercase;
-  color: var(--text3);
-  margin-bottom: 6px;
+  display: block; font-family: var(--mono); font-size: 9px; font-weight: 500;
+  letter-spacing: 0.8px; text-transform: uppercase; color: var(--text3); margin-bottom: 7px;
 }
 .form-input {
-  width: 100%;
-  height: 38px;
-  padding: 0 12px;
-  border: 1px solid var(--border);
-  border-radius: var(--r);
-  background: var(--surface);
-  color: var(--text);
-  font-family: var(--sans);
-  font-size: 13px;
-  outline: none;
-  transition: border-color 0.12s;
+  width: 100%; height: 42px; padding: 0 14px;
+  border: 1px solid var(--border); border-radius: var(--r);
+  background: var(--surface2); color: var(--text);
+  font-family: var(--sans); font-size: 14px; outline: none;
+  transition: border-color 0.15s, background 0.15s;
 }
-.form-input:focus {
-  border-color: var(--text3);
-}
-.form-input::placeholder {
-  color: var(--text3);
-}
-.form-input:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-}
+.form-input:focus { border-color: var(--orange); background: var(--surface3); }
+.form-input::placeholder { color: var(--text3); }
+.form-input:disabled { opacity: 0.4; cursor: not-allowed; }
 
-/* ── BTN ──────────────────────────────────────────── */
 .btn-submit {
-  width: 100%;
-  height: 38px;
-  border: none;
-  background: var(--text);
-  color: var(--bg);
-  font-family: var(--sans);
-  font-size: 13px;
-  font-weight: 500;
-  border-radius: var(--r);
-  cursor: pointer;
-  transition: background 0.12s;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 6px;
-  margin-top: 20px;
+  width: 100%; height: 42px; border: none;
+  background: var(--orange); color: #fff;
+  font-family: var(--sans); font-size: 13px; font-weight: 600; letter-spacing: 0.2px;
+  border-radius: var(--r); cursor: pointer;
+  transition: background 0.15s, transform 0.1s, box-shadow 0.15s;
+  display: flex; align-items: center; justify-content: center; gap: 6px;
+  margin-top: 22px; box-shadow: 0 2px 14px rgba(232,96,44,0.3);
 }
-.btn-submit:hover { background: #2d2c29; }
-.btn-submit:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-}
+.btn-submit:hover { background: var(--orange2); transform: translateY(-1px); box-shadow: 0 4px 20px rgba(232,96,44,0.4); }
+.btn-submit:active { transform: translateY(0); }
+.btn-submit:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
 
-/* ── NOTICE ───────────────────────────────────────── */
 .notice {
-  display: flex;
-  align-items: flex-start;
-  gap: 8px;
-  padding: 10px 12px;
-  border-radius: var(--r);
-  font-size: 12px;
-  line-height: 1.5;
-  margin-bottom: 16px;
+  display: flex; align-items: flex-start; gap: 8px;
+  padding: 11px 13px; border-radius: var(--r);
+  font-size: 12px; line-height: 1.5; margin-bottom: 16px; font-family: var(--sans);
 }
-.notice-error {
-  background: var(--red-bg);
-  color: var(--red);
-  border: 1px solid #efcbcb;
-}
-.notice-success {
-  background: var(--green-bg);
-  color: var(--green);
-  border: 1px solid #b8dfc9;
-}
-.notice-info {
-  background: var(--blue-bg);
-  color: var(--blue);
-  border: 1px solid #c5d8ef;
-}
-.notice-hidden { display: none; }
+.notice-error   { background: var(--red-bg);   color: #e07070; border: 1px solid rgba(192,80,74,0.2); }
+.notice-success { background: var(--green-bg); color: #5bbf90; border: 1px solid rgba(61,153,112,0.2); }
+.notice-info    { background: var(--blue-bg);  color: #7aaad4; border: 1px solid rgba(74,127,192,0.2); }
+.notice-hidden  { display: none; }
 
-/* ── DIVIDER ──────────────────────────────────────── */
-.divider {
-  height: 1px;
-  background: var(--border);
-  margin: 24px 0;
-}
-
-/* ── FOOTER ───────────────────────────────────────── */
 .login-footer {
-  padding: 20px;
-  text-align: center;
+  padding: 18px 20px; text-align: center;
   border-top: 1px solid var(--border);
-  font-family: var(--mono);
-  font-size: 9px;
-  color: var(--text3);
-  letter-spacing: 0.3px;
+  font-family: var(--mono); font-size: 9px; color: var(--text3); letter-spacing: 0.3px;
+  position: relative; z-index: 1;
 }
 
-/* ── SPINNER ──────────────────────────────────────── */
 .spinner {
-  width: 12px; height: 12px;
+  width: 13px; height: 13px;
   border: 1.5px solid rgba(255,255,255,0.3);
-  border-top-color: #fff;
-  border-radius: 50%;
+  border-top-color: #fff; border-radius: 50%;
   animation: spin 0.6s linear infinite;
 }
 @keyframes spin { to { transform: rotate(360deg); } }
-
-/* ── FADE IN ──────────────────────────────────────── */
-.login-card {
-  animation: fadeUp 0.25s ease;
-}
 @keyframes fadeUp {
-  from { opacity: 0; transform: translateY(8px); }
+  from { opacity: 0; transform: translateY(10px); }
   to   { opacity: 1; transform: translateY(0); }
 }
 
-/* ── RESPONSIVE ───────────────────────────────────── */
 @media (max-width: 480px) {
-  .login-wrap { padding: 24px 16px; align-items: flex-start; padding-top: 48px; }
-  .login-heading { font-size: 22px; }
-  .login-logo { margin-bottom: 28px; }
-  .login-sub { margin-bottom: 20px; }
+  .login-wrap { padding: 32px 20px; align-items: flex-start; padding-top: 56px; }
+  .login-heading { font-size: 26px; }
+  .login-logo { margin-bottom: 36px; }
   .login-footer { font-size: 8px; padding: 14px; }
 }
 </style>
@@ -273,23 +182,21 @@ body {
   <div class="login-card">
 
     <div class="login-logo">
+      <div class="logo-mark">G</div>
       <span class="logo-name">Genstore</span>
       <span class="logo-tag">ERP</span>
     </div>
 
-    <div class="login-heading">Acceder</div>
+    <div class="login-heading">Bienvenido</div>
     <div class="login-sub">Ingresá a tu cuenta para continuar</div>
 
-    <!-- Tabs login / registro -->
     <div class="login-tabs">
       <button class="tab-btn active" onclick="setMode('login')">Iniciar sesión</button>
       <button class="tab-btn" onclick="setMode('register')">Registrarse</button>
     </div>
 
-    <!-- Aviso -->
     <div id="notice" class="notice notice-hidden"></div>
 
-    <!-- Formulario -->
     <div class="form-group">
       <label class="form-label" for="email">Email</label>
       <input class="form-input" type="email" id="email" placeholder="tu@email.com" autocomplete="email">
@@ -312,31 +219,17 @@ body {
 </footer>
 
 <script>
-/* ═══════════════════════════════════════════
-   CONFIGURACIÓN — reemplazá con tus datos
-═══════════════════════════════════════════ */
-const SUPABASE_URL  = 'https://oynglftyzyzxghvnkwxb.supabase.co'   // ← tu URL
-const SUPABASE_KEY  = 'sb_publishable_WhLQuZPnJocu5ej3-pnapw_W8ASFml6'                      // ← tu anon key
-
+const SUPABASE_URL = 'https://oynglftyzyzxghvnkwxb.supabase.co'
+const SUPABASE_KEY = 'sb_publishable_WhLQuZPnJocu5ej3-pnapw_W8ASFml6'
 const { createClient } = supabase
 const db = createClient(SUPABASE_URL, SUPABASE_KEY)
+let mode = 'login'
 
-/* ═══════════════════════════════════════════
-   ESTADO
-═══════════════════════════════════════════ */
-let mode = 'login' // 'login' | 'register'
-
-/* ═══════════════════════════════════════════
-   INIT — si ya hay sesión, ir al ERP
-═══════════════════════════════════════════ */
 ;(async () => {
   const { data: { session } } = await db.auth.getSession()
   if (session) window.location.href = 'index.html'
 })()
 
-/* ═══════════════════════════════════════════
-   TABS
-═══════════════════════════════════════════ */
 function setMode(m) {
   mode = m
   document.querySelectorAll('.tab-btn').forEach((b, i) => {
@@ -346,65 +239,34 @@ function setMode(m) {
   clearNotice()
 }
 
-/* ═══════════════════════════════════════════
-   SUBMIT
-═══════════════════════════════════════════ */
 async function handleSubmit() {
   const email    = document.getElementById('email').value.trim()
   const password = document.getElementById('password').value
   const btn      = document.getElementById('submit-btn')
-
-  if (!email || !password) {
-    showNotice('Completá email y contraseña.', 'error')
-    return
-  }
-  if (password.length < 6) {
-    showNotice('La contraseña debe tener al menos 6 caracteres.', 'error')
-    return
-  }
-
-  // Loading state
+  if (!email || !password) { showNotice('Completá email y contraseña.', 'error'); return }
+  if (password.length < 6) { showNotice('La contraseña debe tener al menos 6 caracteres.', 'error'); return }
   btn.disabled = true
   document.getElementById('btn-text').innerHTML = ''
   btn.insertAdjacentHTML('beforeend', '<span class="spinner"></span>')
-
   if (mode === 'login') {
     const { error } = await db.auth.signInWithPassword({ email, password })
-    if (error) {
-      showNotice(translateError(error.message), 'error')
-    } else {
-      showNotice('Acceso correcto. Cargando...', 'success')
-      setTimeout(() => window.location.href = 'index.html', 800)
-      return
-    }
+    if (error) { showNotice(translateError(error.message), 'error') }
+    else { showNotice('Acceso correcto. Cargando...', 'success'); setTimeout(() => window.location.href = 'index.html', 800); return }
   } else {
     const { error } = await db.auth.signUp({ email, password })
-    if (error) {
-      showNotice(translateError(error.message), 'error')
-    } else {
-      showNotice('Cuenta creada. Revisá tu email para confirmar (si está habilitado) y luego iniciá sesión.', 'success')
-      setMode('login')
-    }
+    if (error) { showNotice(translateError(error.message), 'error') }
+    else { showNotice('Cuenta creada. Iniciá sesión para continuar.', 'success'); setMode('login') }
   }
-
-  // Restore button
   btn.disabled = false
   document.getElementById('btn-text').textContent = mode === 'login' ? 'Entrar' : 'Crear cuenta'
   btn.querySelector('.spinner')?.remove()
 }
 
-/* ═══════════════════════════════════════════
-   HELPERS
-═══════════════════════════════════════════ */
 function showNotice(msg, type) {
   const el = document.getElementById('notice')
-  el.textContent = msg
-  el.className = `notice notice-${type}`
+  el.textContent = msg; el.className = `notice notice-${type}`
 }
-function clearNotice() {
-  document.getElementById('notice').className = 'notice notice-hidden'
-}
-
+function clearNotice() { document.getElementById('notice').className = 'notice notice-hidden' }
 function translateError(msg) {
   if (msg.includes('Invalid login credentials')) return 'Email o contraseña incorrectos.'
   if (msg.includes('Email not confirmed'))        return 'Confirmá tu email antes de ingresar.'
@@ -415,3 +277,4 @@ function translateError(msg) {
 </script>
 </body>
 </html>
+
