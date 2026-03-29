@@ -9,34 +9,36 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Geist+Mono:wght@300;400;500&family=Instrument+Serif:ital@0;1&family=Geist:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@300;400;500&family=Playfair+Display:wght@400;500&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
 :root {
-  --bg:        #fafaf8;
-  --surface:   #ffffff;
-  --surface2:  #f5f5f2;
-  --surface3:  #eeede9;
-  --border:    #e8e7e2;
-  --border2:   #dddcd7;
-  --text:      #1a1917;
-  --text2:     #6b6963;
-  --text3:     #a8a6a0;
-  --accent:    #1a1917;
-  --green:     #1d7a4f;
-  --green-bg:  #edf7f1;
-  --red:       #b94040;
-  --red-bg:    #fdf0f0;
-  --amber:     #8a6000;
-  --amber-bg:  #fdf6e7;
-  --blue:      #1a4f8a;
-  --blue-bg:   #eff4fc;
-  --sans:      'Geist', sans-serif;
-  --serif:     'Instrument Serif', serif;
-  --mono:      'Geist Mono', monospace;
-  --r:         6px;
-  --r-lg:      10px;
+  --bg:        #0f0e0c;
+  --surface:   #181714;
+  --surface2:  #201f1c;
+  --surface3:  #2a2825;
+  --border:    rgba(255,255,255,0.07);
+  --border2:   rgba(255,255,255,0.12);
+  --text:      #f5f0e8;
+  --text2:     #9e9a93;
+  --text3:     #5c5954;
+  --accent:    #e8602c;
+  --orange:    #e8602c;
+  --orange2:   #d04e1e;
+  --green:     #3d9970;
+  --green-bg:  rgba(61,153,112,0.1);
+  --red:       #c05050;
+  --red-bg:    rgba(192,80,80,0.1);
+  --amber:     #c0882a;
+  --amber-bg:  rgba(192,136,42,0.1);
+  --blue:      #4a7fc0;
+  --blue-bg:   rgba(74,127,192,0.1);
+  --sans:      'DM Sans', sans-serif;
+  --serif:     'Playfair Display', serif;
+  --mono:      'DM Mono', monospace;
+  --r:         8px;
+  --r-lg:      12px;
 }
 
 html { font-size: 14px; }
@@ -62,22 +64,33 @@ body {
 .logo-wrap {
   padding: 22px 20px 18px;
   border-bottom: 1px solid var(--border);
-  display: flex; align-items: baseline; gap: 6px;
+  display: flex; align-items: center; gap: 10px;
+}
+.logo-mark-sm {
+  width: 26px; height: 26px;
+  background: var(--orange);
+  border-radius: 6px;
+  display: flex; align-items: center; justify-content: center;
+  font-family: var(--serif); font-size: 13px; color: #fff; font-weight: 500;
+  flex-shrink: 0; box-shadow: 0 1px 6px rgba(232,96,44,0.3);
 }
 .logo-name {
   font-family: var(--serif);
-  font-size: 19px;
-  letter-spacing: -0.3px;
+  font-size: 17px;
+  font-weight: 500;
+  letter-spacing: -0.2px;
   color: var(--text);
 }
 .logo-tag {
   font-family: var(--mono);
-  font-size: 9px;
+  font-size: 8px;
   font-weight: 400;
   color: var(--text3);
-  letter-spacing: 0.5px;
+  letter-spacing: 0.8px;
   text-transform: uppercase;
-  margin-top: 1px;
+  border: 1px solid var(--border2);
+  padding: 1px 5px;
+  border-radius: 4px;
 }
 
 .nav { padding: 10px 0; flex: 1; overflow-y: auto; }
@@ -106,7 +119,7 @@ body {
 }
 .nav-item:hover { background: var(--surface2); color: var(--text); }
 .nav-item.active { background: var(--surface2); color: var(--text); font-weight: 500; }
-.nav-item.active .nav-dot { background: var(--text); }
+.nav-item.active .nav-dot { background: var(--orange); }
 
 .nav-dot {
   width: 4px; height: 4px; border-radius: 50%;
@@ -130,7 +143,7 @@ body {
   width: 5px; height: 5px; border-radius: 50%;
   background: var(--border2); flex-shrink: 0;
 }
-.status-dot.live { background: var(--green); }
+.status-dot.live { background: var(--orange); box-shadow: 0 0 5px rgba(232,96,44,0.5); }
 
 /* ── MAIN ────────────────────────────────────────── */
 .main { margin-left: 232px; min-height: 100vh; display: flex; flex-direction: column; }
@@ -151,20 +164,21 @@ body {
 .btn {
   display: inline-flex; align-items: center; gap: 5px;
   padding: 0 12px; height: 30px;
-  border: 1px solid var(--border);
+  border: 1px solid var(--border2);
   border-radius: var(--r);
-  background: var(--surface);
+  background: var(--surface2);
   color: var(--text2);
   font-family: var(--sans); font-size: 12px; font-weight: 500;
   cursor: pointer; transition: all 0.12s;
   white-space: nowrap;
 }
-.btn:hover { background: var(--surface2); color: var(--text); border-color: var(--border2); }
+.btn:hover { background: var(--surface3); color: var(--text); border-color: var(--border2); }
 .btn-primary {
-  background: var(--text); color: var(--bg);
-  border-color: var(--text);
+  background: var(--orange); color: #fff;
+  border-color: var(--orange);
+  box-shadow: 0 1px 8px rgba(232,96,44,0.25);
 }
-.btn-primary:hover { background: #2d2c29; color: #fff; border-color: #2d2c29; }
+.btn-primary:hover { background: var(--orange2); color: #fff; border-color: var(--orange2); box-shadow: 0 2px 12px rgba(232,96,44,0.35); }
 
 .content { padding: 28px; flex: 1; max-width: 1400px; }
 
@@ -554,6 +568,7 @@ tbody td { padding: 11px 16px; font-size: 12px; vertical-align: middle; }
 <!-- SIDEBAR -->
 <aside class="sidebar">
   <div class="logo-wrap">
+    <div class="logo-mark-sm">G</div>
     <span class="logo-name">Genstore</span>
     <span class="logo-tag">ERP</span>
   </div>
@@ -1454,7 +1469,7 @@ function renderClientes() {
 /* ══════════════════════════════════════════════════
    CHARTS
 ══════════════════════════════════════════════════ */
-const PALETTE = ['#1d7a4f','#1a4f8a','#8a6000','#b94040','#4a1a8a','#1a7a6e','#8a3d1a'];
+const PALETTE = ['#e8602c','#3d9970','#4a7fc0','#c0882a','#7a4fc0','#c04a7a','#4ac0b0'];
 
 function mkBar(id, labels, data) {
   const ctx = document.getElementById(id);
@@ -1462,13 +1477,13 @@ function mkBar(id, labels, data) {
   if (CH[id]) CH[id].destroy();
   CH[id] = new Chart(ctx, {
     type: 'bar',
-    data: { labels, datasets: [{ data, backgroundColor: '#1d7a4f22', borderColor: '#1d7a4f', borderWidth: 1.5, borderRadius: 3 }] },
+    data: { labels, datasets: [{ data, backgroundColor: 'rgba(232,96,44,0.15)', borderColor: '#e8602c', borderWidth: 1.5, borderRadius: 3 }] },
     options: {
       responsive:true, maintainAspectRatio:false,
       plugins:{ legend:{display:false} },
       scales:{
-        x:{ grid:{color:'#e8e7e2'}, ticks:{color:'#a8a6a0',font:{family:"'Geist Mono'",size:9}} },
-        y:{ grid:{color:'#e8e7e2'}, ticks:{color:'#a8a6a0',font:{family:"'Geist Mono'",size:9},callback:v=>'$'+(v/1000).toFixed(0)+'k'} }
+        x:{ grid:{color:'rgba(255,255,255,0.04)'}, ticks:{color:'#5c5954',font:{family:"'DM Mono'",size:9}} },
+        y:{ grid:{color:'rgba(255,255,255,0.04)'}, ticks:{color:'#5c5954',font:{family:"'DM Mono'",size:9},callback:v=>'$'+(v/1000).toFixed(0)+'k'} }
       }
     }
   });
@@ -1479,11 +1494,11 @@ function mkDoughnut(id, labels, data) {
   if (CH[id]) CH[id].destroy();
   CH[id] = new Chart(ctx, {
     type: 'doughnut',
-    data: { labels, datasets: [{ data, backgroundColor:PALETTE.map(c=>c+'cc'), borderColor:'#ffffff', borderWidth:2 }] },
+    data: { labels, datasets: [{ data, backgroundColor:PALETTE.map(c=>c+'cc'), borderColor:'#181714', borderWidth:2 }] },
     options: {
       responsive:true, maintainAspectRatio:false,
       plugins:{
-        legend:{position:'bottom',labels:{color:'#6b6963',font:{family:"'Geist Mono'",size:9},padding:6,boxWidth:8}}
+        legend:{position:'bottom',labels:{color:'#9e9a93',font:{family:"'DM Mono'",size:9},padding:6,boxWidth:8}}
       }
     }
   });
