@@ -765,6 +765,16 @@ tbody td { padding: 11px 16px; font-size: 12px; vertical-align: middle; }
     <!-- ═══ VENTAS ════════════════════════════════ -->
     <div class="page" id="page-ventas">
       <div class="section-hd">
+        <!-- FORMULARIO CARGA MANUAL -->
+<div style="margin-bottom:20px; padding:15px; border:1px solid #ddd; border-radius:8px;">
+  <h3 style="margin-bottom:10px;">➕ Nueva venta</h3>
+
+  <input id="v-producto" placeholder="Producto" style="margin-right:5px;">
+  <input id="v-cantidad" type="number" placeholder="Cantidad" style="margin-right:5px;">
+  <input id="v-precio" type="number" placeholder="Precio" style="margin-right:5px;">
+
+  <button onclick="agregarVenta()">Guardar</button>
+</div>
         <div>
           <div class="section-title">Ventas</div>
           <div class="section-sub">Registro completo de operaciones</div>
@@ -1372,6 +1382,57 @@ function rb(id, pct, label, _) {
 function set(id, v) { const el=document.getElementById(id); if(el) el.textContent=v; }
 
 /* ── VENTAS ─────────────────────────────────────── */
+  // ===============================
+// AGREGAR VENTA MANUAL
+// ===============================
+async function agregarVenta() {
+
+  // 1. Tomar valores del formulario
+  const producto = document.getElementById("v-producto").value
+  const cantidad = +document.getElementById("v-cantidad").value
+  const precio = +document.getElementById("v-precio").value
+
+  // 2. Validación básica
+  if (!producto || !cantidad || !precio) {
+    alert("Completá todos los campos")
+    return
+  }
+
+  // 3. Crear objeto venta (igual que Excel)
+  const nuevaVenta = {
+    fecha: new Date().toISOString(),       // fecha actual
+    producto: producto,
+    cliente: "",
+    contacto: "",
+    canal: "manual",          // importante para diferenciar
+    cantidad: cantidad,
+    precio: precio,
+    costo: 0,
+    total: cantidad * precio,
+    costoTotal: 0,
+    ganancia: cantidad * precio,
+    margen: 100,
+    estado: "pagado",
+    notas: ""
+  }
+
+  // 4. Agregar a tu estado global
+  DATA.ventas.push(nuevaVenta)
+
+  // 5. Guardar en Supabase (YA EXISTE en tu código)
+  await saveToSupabase()
+
+  // 6. Re-renderizar dashboard y tablas
+  renderAll()
+
+  // 7. Limpiar inputs (UX)
+  document.getElementById("v-producto").value = ""
+  document.getElementById("v-cantidad").value = ""
+  document.getElementById("v-precio").value = ""
+
+  // 8. Feedback
+  alert("Venta guardada 🚀")
+}
 function renderVentas() {
   const v = DATA.ventas;
   set('vt-ct', v.length+' registros');
@@ -1453,7 +1514,8 @@ function renderGastos() {
 }
 
 /* ── CLIENTES ───────────────────────────────────── */
-function renderClientes() {
+
+  function renderClientes() {
   const mp = {};
   DATA.ventas.forEach(v=>{
     const k=v.cliente||'Sin nombre';
