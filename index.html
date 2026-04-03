@@ -11,6 +11,67 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Geist+Mono:wght@300;400;500&family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;1,9..144,300&family=Geist:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
+  /* ===============================
+   ERP FORM STYLE
+================================ */
+
+.erp-card {
+  background: var(--surface, #fff);
+  border: 1px solid var(--border, #e5e7eb);
+  border-radius: 12px;
+  padding: 16px;
+  margin-bottom: 20px;
+}
+
+.erp-card-header {
+  margin-bottom: 12px;
+}
+
+.erp-card-title {
+  font-weight: 600;
+  font-size: 16px;
+  color: var(--text, #111);
+}
+
+.erp-card-sub {
+  font-size: 12px;
+  color: var(--text2, #666);
+}
+
+.erp-form-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr auto;
+  gap: 10px;
+}
+
+.erp-input {
+  padding: 10px;
+  border: 1px solid var(--border2, #d1d5db);
+  border-radius: 8px;
+  font-size: 14px;
+  background: var(--surface2, #fafafa);
+  outline: none;
+}
+
+.erp-input:focus {
+  border-color: var(--accent, #3b82f6);
+  box-shadow: 0 0 0 2px rgba(59,130,246,0.1);
+}
+
+.erp-btn-primary {
+  background: var(--accent, #3b82f6);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  padding: 10px 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.erp-btn-primary:hover {
+  opacity: 0.9;
+}
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
 :root {
@@ -763,49 +824,73 @@ tbody td { padding: 11px 16px; font-size: 12px; vertical-align: middle; }
     </div>
 
     <!-- ═══ VENTAS ════════════════════════════════ -->
-    <div class="page" id="page-ventas">
-      <div class="section-hd">
-        <!-- FORMULARIO CARGA MANUAL -->
-<div style="margin-bottom:20px; padding:15px; border:1px solid #ddd; border-radius:8px;">
-  <h3 style="margin-bottom:10px;">➕ Nueva venta</h3>
+<div class="page" id="page-ventas">
 
-  <input id="v-producto" placeholder="Producto" style="margin-right:5px;">
-  <input id="v-cantidad" type="number" placeholder="Cantidad" style="margin-right:5px;">
-  <input id="v-precio" type="number" placeholder="Precio" style="margin-right:5px;">
+  <!-- HEADER -->
+  <div class="section-hd">
+    <div>
+      <div class="section-title">Ventas</div>
+      <div class="section-sub">Registro completo de operaciones</div>
+    </div>
+  </div>
 
-  <button onclick="agregarVenta()">Guardar</button>
-</div>
-        <div>
-          <div class="section-title">Ventas</div>
-          <div class="section-sub">Registro completo de operaciones</div>
-        </div>
-      </div>
-      <div class="table-box">
-        <div class="table-hd">
-          <span class="table-hd-title">Todas las ventas</span>
-          <span class="table-hd-count" id="vt-ct">0 registros</span>
-        </div>
-        <div class="table-scroll">
-          <table>
-            <thead><tr>
-              <th>Fecha</th><th>Producto</th><th>Cliente</th><th>Contacto</th>
-              <th>Canal</th><th>Cant.</th><th>Precio</th><th>Costo</th>
-              <th>Total</th><th>Ganancia</th><th>Margen</th><th>Estado</th>
-            </tr></thead>
-            <tbody id="vt-body">
-              <tr><td colspan="12"><div class="empty"><div class="empty-ico">↗</div><div class="empty-t">Sin ventas</div><div class="empty-s">Importá la hoja VENTAS</div></div></td></tr>
-            </tbody>
-          </table>
-        </div>
-        <div class="table-foot" id="vt-foot">
-          <span class="foot-item">Total <span>—</span></span>
-          <span class="foot-item">Ganancia <span class="g">—</span></span>
-          <span class="foot-item">Margen prom. <span class="a">—</span></span>
-          <span class="foot-item">Ticket prom. <span>—</span></span>
-        </div>
+  <!-- FORMULARIO (SEPARADO) -->
+  <div class="erp-card">
+    <div class="erp-card-header">
+      <div>
+        <div class="erp-card-title">Nueva venta</div>
+        <div class="erp-card-sub">Registrá una operación manualmente</div>
       </div>
     </div>
 
+    <div class="erp-form-grid">
+      <input id="v-producto" placeholder="Producto" class="erp-input">
+      <input id="v-cantidad" type="number" placeholder="Cantidad" class="erp-input">
+      <input id="v-precio" type="number" placeholder="Precio" class="erp-input">
+
+      <button onclick="agregarVenta()" class="erp-btn-primary">
+        Guardar venta
+      </button>
+    </div>
+  </div>
+
+  <!-- TABLA -->
+  <div class="table-box">
+    <div class="table-hd">
+      <span class="table-hd-title">Todas las ventas</span>
+      <span class="table-hd-count" id="vt-ct">0 registros</span>
+    </div>
+
+    <div class="table-scroll">
+      <table>
+        <thead><tr>
+          <th>Fecha</th><th>Producto</th><th>Cliente</th><th>Contacto</th>
+          <th>Canal</th><th>Cant.</th><th>Precio</th><th>Costo</th>
+          <th>Total</th><th>Ganancia</th><th>Margen</th><th>Estado</th>
+        </tr></thead>
+        <tbody id="vt-body">
+          <tr>
+            <td colspan="12">
+              <div class="empty">
+                <div class="empty-ico">↗</div>
+                <div class="empty-t">Sin ventas</div>
+                <div class="empty-s">Importá la hoja VENTAS</div>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="table-foot" id="vt-foot">
+      <span class="foot-item">Total <span>—</span></span>
+      <span class="foot-item">Ganancia <span class="g">—</span></span>
+      <span class="foot-item">Margen prom. <span class="a">—</span></span>
+      <span class="foot-item">Ticket prom. <span>—</span></span>
+    </div>
+  </div>
+
+</div>
     <!-- ═══ STOCK ══════════════════════════════════ -->
     <div class="page" id="page-stock">
       <div class="section-hd">
