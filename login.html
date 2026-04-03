@@ -12,29 +12,42 @@
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
 :root {
-  --bg:         #f7f4ef;
-  --surface:    #fdfcfa;
-  --surface2:   #f2efe9;
-  --surface3:   #ece8e1;
-  --border:     #e3dfd7;
-  --border2:    #d4cfc6;
-  --text:       #1c1916;
-  --text2:      #6b6560;
-  --text3:      #a89f96;
-  --orange:     #c8440e;
-  --orange2:    #a83608;
-  --orange-dim: rgba(200,68,14,0.08);
-  --green:      #1a6b42;
-  --green-bg:   #eaf4ee;
-  --red:        #a83030;
-  --red-bg:     #faeaea;
-  --blue:       #1a4a8a;
-  --blue-bg:    #eaf0fa;
+  /* Fondos - De negro profundo a morado oscuro espacial */
+  --bg:         #050208; 
+  --surface:    #0d0816;
+  --surface2:   #150e24;
+  --surface3:   #1f1635;
+
+  /* Bordes - Con un toque de brillo amatista */
+  --border:     #2d1b4d;
+  --border2:    #4a2b86;
+
+  /* Textos - Blanco azulado y grises neón */
+  --text:       #f1ebfa;
+  --text2:      #a594c5;
+  --text3:      #6e5d8d;
+
+  /* Colores de Acento - El "Orange" ahora es Morado Eléctrico */
+  --orange:     #bc13fe; /* Morado neón principal */
+  --orange2:    #8a00d4; /* Morado oscuro para hover */
+  --orange-dim: rgba(188, 19, 254, 0.12);
+
+  /* Estados - Mantienen su semántica pero con tonos futuristas */
+  --green:      #00f5d4; /* Turquesa/Cian futurista */
+  --green-bg:   rgba(0, 245, 212, 0.1);
+  
+  --red:        #ff0055; /* Rosa neón / Rojo láser */
+  --red-bg:     rgba(255, 0, 85, 0.1);
+  
+  --blue:       #3aa0ff; /* Azul ciber */
+  --blue-bg:    rgba(58, 160, 255, 0.1);
+
+  /* Tipografía y Radios */
   --sans:       'Geist', sans-serif;
   --serif:      'Fraunces', serif;
   --mono:       'Geist Mono', monospace;
-  --r:          6px;
-  --r-lg:       10px;
+  --r:          4px; /* Bordes más afilados/técnicos */
+  --r-lg:       8px;
 }
 
 html { font-size: 14px; }
