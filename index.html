@@ -649,6 +649,147 @@ input:focus, select:focus {
 .section-title {
   text-shadow: 0 0 6px rgba(56,189,248,0.15);
 }
+
+/* ── MODAL NUEVA VENTA ─────────────────────────────── */
+.modal-backdrop {
+  position: fixed; inset: 0;
+  background: rgba(0,0,0,0.7);
+  backdrop-filter: blur(4px);
+  z-index: 999;
+  display: flex; align-items: center; justify-content: center;
+  padding: 16px;
+  opacity: 0; pointer-events: none;
+  transition: opacity 0.18s;
+}
+.modal-backdrop.open {
+  opacity: 1; pointer-events: all;
+}
+.modal {
+  background: var(--surface);
+  border: 1px solid var(--border2);
+  border-radius: var(--r-lg);
+  width: 100%; max-width: 520px;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: 0 24px 60px rgba(0,0,0,0.5), 0 0 0 1px rgba(56,189,248,0.08);
+  transform: translateY(12px);
+  transition: transform 0.18s;
+}
+.modal-backdrop.open .modal {
+  transform: translateY(0);
+}
+.modal-head {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 18px 20px 16px;
+  border-bottom: 1px solid var(--border);
+}
+.modal-title {
+  font-family: var(--serif);
+  font-size: 18px; font-weight: 300;
+  font-style: italic; letter-spacing: -0.3px;
+  color: var(--text);
+}
+.modal-close {
+  width: 28px; height: 28px;
+  border: 1px solid var(--border);
+  border-radius: 50%;
+  background: var(--surface2);
+  color: var(--text3);
+  font-size: 14px; cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  transition: all 0.12s;
+}
+.modal-close:hover { border-color: var(--border2); color: var(--text); }
+.modal-body { padding: 20px; }
+.modal-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+}
+.modal-grid .full { grid-column: 1 / -1; }
+.m-label {
+  display: block;
+  font-family: var(--mono);
+  font-size: 9px; font-weight: 500;
+  letter-spacing: 0.7px; text-transform: uppercase;
+  color: var(--text3); margin-bottom: 5px;
+}
+.m-input, .m-select {
+  width: 100%; height: 36px;
+  padding: 0 11px;
+  border: 1px solid var(--border);
+  border-radius: var(--r);
+  background: var(--surface2);
+  color: var(--text);
+  font-family: var(--sans); font-size: 13px;
+  outline: none; transition: all 0.13s;
+  appearance: none; -webkit-appearance: none;
+}
+.m-input:focus, .m-select:focus {
+  border-color: var(--orange);
+  box-shadow: 0 0 0 3px var(--orange-dim);
+}
+.m-input::placeholder { color: var(--text3); }
+.m-input:disabled { opacity: 0.45; cursor: not-allowed; }
+.m-select { cursor: pointer; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%2364748b'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 10px center; padding-right: 28px; }
+.m-preview {
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: var(--r);
+  padding: 12px 14px;
+  display: grid; grid-template-columns: 1fr 1fr;
+  gap: 6px 20px;
+}
+.m-preview-item { font-family: var(--mono); font-size: 11px; color: var(--text3); }
+.m-preview-item span { color: var(--text); font-weight: 500; }
+.m-preview-item.highlight span { color: var(--green); }
+.modal-foot {
+  padding: 14px 20px;
+  border-top: 1px solid var(--border);
+  display: flex; gap: 10px; justify-content: flex-end;
+}
+.btn-cancel {
+  height: 36px; padding: 0 16px;
+  border: 1px solid var(--border);
+  border-radius: var(--r);
+  background: transparent;
+  color: var(--text3);
+  font-family: var(--sans); font-size: 13px;
+  cursor: pointer; transition: all 0.12s;
+}
+.btn-cancel:hover { border-color: var(--border2); color: var(--text); }
+.btn-save {
+  height: 36px; padding: 0 20px;
+  border: none; border-radius: var(--r);
+  background: var(--orange);
+  color: #000;
+  font-family: var(--sans); font-size: 13px; font-weight: 500;
+  cursor: pointer; transition: all 0.13s;
+  display: flex; align-items: center; gap: 6px;
+}
+.btn-save:hover { background: var(--orange2); transform: translateY(-1px); }
+.btn-save:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+
+/* Botón "Nueva venta" en el encabezado de sección */
+.btn-new-sale {
+  height: 32px; padding: 0 14px;
+  border: 1px solid var(--orange);
+  border-radius: var(--r);
+  background: var(--orange-dim);
+  color: var(--orange);
+  font-family: var(--sans); font-size: 12px; font-weight: 500;
+  cursor: pointer; transition: all 0.12s;
+  display: flex; align-items: center; gap: 6px;
+  white-space: nowrap;
+}
+.btn-new-sale:hover { background: var(--orange); color: #000; }
+
+@media (max-width: 540px) {
+  .modal-grid { grid-template-columns: 1fr; }
+  .modal-grid .full { grid-column: 1; }
+  .modal-foot { flex-direction: column-reverse; }
+  .btn-cancel, .btn-save { width: 100%; justify-content: center; height: 40px; }
+}
 </style>
 </head>
 <body>
@@ -844,6 +985,10 @@ input:focus, select:focus {
           <div class="section-title">Ventas</div>
           <div class="section-sub">Registro completo de operaciones</div>
         </div>
+        <button class="btn-new-sale" onclick="openNewSaleModal()">
+          <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M6 1v10M1 6h10" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+          Nueva venta
+        </button>
       </div>
       <div class="table-box">
         <div class="table-hd">
@@ -1132,6 +1277,120 @@ input:focus, select:focus {
         </div>
       </div>
     </div>
+
+
+<!-- ═══ MODAL NUEVA VENTA ══════════════════════════ -->
+<div class="modal-backdrop" id="modal-nueva-venta" onclick="handleModalBackdrop(event)">
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modal-title-nv">
+    <div class="modal-head">
+      <span class="modal-title" id="modal-title-nv">Registrar venta</span>
+      <button class="modal-close" onclick="closeNewSaleModal()" title="Cerrar">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="modal-grid">
+
+        <!-- Fecha -->
+        <div>
+          <label class="m-label" for="nv-fecha">Fecha</label>
+          <input class="m-input" type="date" id="nv-fecha">
+        </div>
+
+        <!-- Canal -->
+        <div>
+          <label class="m-label" for="nv-canal">Canal</label>
+          <select class="m-select" id="nv-canal">
+            <option value="">— Seleccioná —</option>
+            <option value="facebook">Facebook</option>
+            <option value="instagram">Instagram</option>
+            <option value="whatsapp">WhatsApp</option>
+            <option value="mercadolibre">Mercado Libre</option>
+            <option value="presencial">Presencial</option>
+            <option value="otro">Otro</option>
+          </select>
+        </div>
+
+        <!-- Producto (autocomplete desde stock) -->
+        <div class="full">
+          <label class="m-label" for="nv-producto">Producto</label>
+          <input class="m-input" type="text" id="nv-producto" placeholder="Nombre del producto" list="nv-producto-list" oninput="nvAutoFill()">
+          <datalist id="nv-producto-list"></datalist>
+        </div>
+
+        <!-- Cliente -->
+        <div>
+          <label class="m-label" for="nv-cliente">Cliente</label>
+          <input class="m-input" type="text" id="nv-cliente" placeholder="Nombre o razón social">
+        </div>
+
+        <!-- Contacto -->
+        <div>
+          <label class="m-label" for="nv-contacto">Contacto</label>
+          <input class="m-input" type="text" id="nv-contacto" placeholder="Tel / @usuario">
+        </div>
+
+        <!-- Cantidad -->
+        <div>
+          <label class="m-label" for="nv-cantidad">Cantidad</label>
+          <input class="m-input" type="number" id="nv-cantidad" value="1" min="1" oninput="nvCalc()">
+        </div>
+
+        <!-- Precio unitario -->
+        <div>
+          <label class="m-label" for="nv-precio">Precio unitario</label>
+          <input class="m-input" type="number" id="nv-precio" placeholder="0" min="0" oninput="nvCalc()">
+        </div>
+
+        <!-- Costo unitario -->
+        <div>
+          <label class="m-label" for="nv-costo">Costo unitario</label>
+          <input class="m-input" type="number" id="nv-costo" placeholder="0" min="0" oninput="nvCalc()">
+        </div>
+
+        <!-- Estado -->
+        <div>
+          <label class="m-label" for="nv-estado">Estado</label>
+          <select class="m-select" id="nv-estado">
+            <option value="pagado">Pagado</option>
+            <option value="pendiente">Pendiente</option>
+            <option value="enviado">Enviado</option>
+            <option value="cancelado">Cancelado</option>
+          </select>
+        </div>
+
+        <!-- Notas (full width) -->
+        <div class="full">
+          <label class="m-label" for="nv-notas">Notas</label>
+          <input class="m-input" type="text" id="nv-notas" placeholder="Observaciones, entrega, etc.">
+        </div>
+
+        <!-- Preview calculado -->
+        <div class="full">
+          <div class="m-preview" id="nv-preview">
+            <div class="m-preview-item">Total <span id="nv-prev-total">—</span></div>
+            <div class="m-preview-item highlight">Ganancia <span id="nv-prev-gan">—</span></div>
+            <div class="m-preview-item">Costo total <span id="nv-prev-costo">—</span></div>
+            <div class="m-preview-item">Margen <span id="nv-prev-margen">—</span></div>
+          </div>
+        </div>
+
+        <!-- Aviso para futuras automatizaciones -->
+        <div class="full" id="nv-auto-hint" style="display:none;">
+          <div style="font-family:var(--mono);font-size:10px;color:var(--orange);padding:8px 10px;background:var(--orange-dim);border-radius:var(--r);border:1px solid rgba(56,189,248,0.2);">
+            ⚡ Producto detectado en stock — el stock se podrá actualizar automáticamente en futuras versiones.
+          </div>
+        </div>
+
+      </div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn-cancel" onclick="closeNewSaleModal()">Cancelar</button>
+      <button class="btn-save" id="nv-save-btn" onclick="saveNewSale()">
+        <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M2 6l3 3 5-5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        Guardar venta
+      </button>
+    </div>
+  </div>
+</div>
 
   </div><!-- /content -->
 </div><!-- /main -->
@@ -1627,6 +1886,145 @@ function exportData() {
   ]), 'GASTOS');
   XLSX.writeFile(wb, 'genstore-plantilla.xlsx');
 }
+
+
+/* ══════════════════════════════════════════════════
+   MODAL — NUEVA VENTA MANUAL
+══════════════════════════════════════════════════ */
+
+function openNewSaleModal() {
+  // Prellenar fecha de hoy
+  const today = new Date().toISOString().split('T')[0]
+  document.getElementById('nv-fecha').value = today
+
+  // Poblar datalist con productos del stock
+  const dl = document.getElementById('nv-producto-list')
+  dl.innerHTML = DATA.stock.map(s => `<option value="${s.producto}">`).join('')
+
+  nvCalc()
+  document.getElementById('modal-nueva-venta').classList.add('open')
+  setTimeout(() => document.getElementById('nv-producto').focus(), 180)
+}
+
+function closeNewSaleModal() {
+  document.getElementById('modal-nueva-venta').classList.remove('open')
+  // Resetear formulario
+  ;['nv-producto','nv-cliente','nv-contacto','nv-notas'].forEach(id =>
+    document.getElementById(id).value = ''
+  )
+  document.getElementById('nv-cantidad').value = 1
+  document.getElementById('nv-precio').value = ''
+  document.getElementById('nv-costo').value = ''
+  document.getElementById('nv-canal').value = ''
+  document.getElementById('nv-estado').value = 'pagado'
+  document.getElementById('nv-auto-hint').style.display = 'none'
+  nvCalc()
+}
+
+function handleModalBackdrop(e) {
+  if (e.target === e.currentTarget) closeNewSaleModal()
+}
+
+// Autocompletado de precio/costo desde stock al escribir producto
+function nvAutoFill() {
+  const nombre = document.getElementById('nv-producto').value.trim().toLowerCase()
+  const match  = DATA.stock.find(s => s.producto.toLowerCase() === nombre)
+  const hint   = document.getElementById('nv-auto-hint')
+
+  if (match) {
+    if (!document.getElementById('nv-precio').value)
+      document.getElementById('nv-precio').value = match.precioVenta || ''
+    if (!document.getElementById('nv-costo').value)
+      document.getElementById('nv-costo').value  = match.costoUnitario || ''
+    hint.style.display = 'block'
+  } else {
+    hint.style.display = 'none'
+  }
+  nvCalc()
+}
+
+// Recalcular preview en tiempo real
+function nvCalc() {
+  const qty   = +document.getElementById('nv-cantidad').value || 0
+  const price = +document.getElementById('nv-precio').value   || 0
+  const cost  = +document.getElementById('nv-costo').value    || 0
+  const total = qty * price
+  const cTot  = qty * cost
+  const gan   = total - cTot
+  const mrg   = total > 0 ? (gan / total * 100) : 0
+
+  document.getElementById('nv-prev-total').textContent  = total  ? f$(total)          : '—'
+  document.getElementById('nv-prev-gan').textContent    = gan    ? f$(gan)             : '—'
+  document.getElementById('nv-prev-costo').textContent  = cTot   ? f$(cTot)           : '—'
+  document.getElementById('nv-prev-margen').textContent = total  ? mrg.toFixed(1)+'%' : '—'
+}
+
+async function saveNewSale() {
+  const producto = document.getElementById('nv-producto').value.trim()
+  const precio   = +document.getElementById('nv-precio').value
+  const cantidad = +document.getElementById('nv-cantidad').value || 1
+
+  if (!producto)        { nvFlash('Ingresá un producto.');          return }
+  if (!precio)          { nvFlash('Ingresá el precio unitario.');   return }
+
+  const costo   = +document.getElementById('nv-costo').value   || 0
+  const total   = cantidad * precio
+  const cTot    = cantidad * costo
+  const gan     = total - cTot
+  const margen  = total > 0 ? gan / total * 100 : 0
+  const fechaRaw = document.getElementById('nv-fecha').value
+  const fecha   = fechaRaw ? new Date(fechaRaw + 'T12:00:00') : new Date()
+
+  const venta = {
+    fecha,
+    producto,
+    cliente:    document.getElementById('nv-cliente').value.trim(),
+    contacto:   document.getElementById('nv-contacto').value.trim(),
+    canal:      document.getElementById('nv-canal').value.toLowerCase(),
+    cantidad,
+    precio,
+    costo,
+    total,
+    costoTotal: cTot,
+    ganancia:   gan,
+    margen:     +margen.toFixed(2),
+    estado:     document.getElementById('nv-estado').value,
+    notas:      document.getElementById('nv-notas').value.trim(),
+    // 🔧 Campo reservado para automatizaciones futuras
+    fuente:     'manual',
+  }
+
+  // Deshabilitar botón mientras guarda
+  const btn = document.getElementById('nv-save-btn')
+  btn.disabled = true
+  btn.innerHTML = '<span style="display:inline-block;width:11px;height:11px;border:1.5px solid rgba(0,0,0,0.3);border-top-color:#000;border-radius:50%;animation:spin 0.6s linear infinite"></span> Guardando…'
+
+  DATA.ventas.unshift(venta)  // más reciente primero
+  await saveToSupabase()
+
+  // Actualizar UI de estado
+  document.getElementById('status-dot').classList.add('live')
+  document.getElementById('status-txt').textContent = 'Guardado ' + new Date().toLocaleTimeString('es-AR', {hour:'2-digit', minute:'2-digit'})
+
+  renderAll()
+  closeNewSaleModal()
+
+  btn.disabled = false
+  btn.innerHTML = '<svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M2 6l3 3 5-5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg> Guardar venta'
+}
+
+function nvFlash(msg) {
+  const preview = document.getElementById('nv-preview')
+  const orig    = preview.innerHTML
+  preview.innerHTML = `<div style="grid-column:1/-1;font-family:var(--mono);font-size:11px;color:var(--red);">⚠ ${msg}</div>`
+  setTimeout(() => { preview.innerHTML = orig; nvCalc() }, 2200)
+}
+
+// Cerrar modal con Escape
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') closeNewSaleModal()
+})
+
 </script>
 </body>
 </html>
