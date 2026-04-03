@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Genstore — ERP</title>
-<link rel="icon" type="image/png" href="/favin.png">
+<link rel="icon" type="image/png" href="/fav.png">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -12,125 +12,34 @@
 <link href="https://fonts.googleapis.com/css2?family=Geist+Mono:wght@300;400;500&family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;1,9..144,300&family=Geist:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-/* ===============================
-   ERP FORM STYLE
-================================ */
-
-.erp-card {
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: 12px;
-  padding: 16px;
-  margin-bottom: 20px;
-}
-
-.erp-card-header {
-  margin-bottom: 12px;
-}
-
-.erp-card-title {
-  font-weight: 600;
-  font-size: 16px;
-  color: var(--text);
-}
-
-.erp-card-sub {
-  font-size: 12px;
-  color: var(--text2);
-}
-
-.erp-form-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr 1fr auto;
-  gap: 10px;
-}
-@media (max-width: 768px) {
-  .erp-form-grid {
-    grid-template-columns: 1fr 1fr;
-  }
-  .erp-form-grid .erp-btn-primary {
-    grid-column: 1 / -1;
-  }
-}
-@media (max-width: 480px) {
-  .erp-form-grid {
-    grid-template-columns: 1fr;
-  }
-}
-
-.erp-input {
-  padding: 10px;
-  border: 1px solid var(--border2);
-  border-radius: 8px;
-  font-size: 14px;
-  background: var(--surface2);
-  outline: none;
-  color: var(--text); /* ✅ usa el color del tema */
-}
-
-/* placeholder */
-.erp-input::placeholder {
-  color: #9ca3af;
-}
-
-.erp-input:focus {
-  border-color: var(--accent, #3b82f6);
-  box-shadow: 0 0 0 2px rgba(59,130,246,0.1);
-}
-
-.erp-btn-primary {
-  background: var(--accent);
-  color: white;
-  border: none;
-  border-radius: 8px;
-  padding: 10px 14px;
-  font-weight: 500;
-  cursor: pointer;
-  transition: 0.2s;
-  white-space: nowrap;
-}
-
-.erp-btn-primary:hover {
-  background: var(--orange2);
-}
 
 :root {
-  --bg:        #0b0f14;
-  --surface:   #0f141b;
-  --surface2:  #121821;
-  --surface3:  #161d26;
-
-  --border:    #1f2733;
-  --border2:   #2a3442;
-
-  --text:      #e6edf3;
-  --text2:     #9aa4af;
-  --text3:     #6b7682;
-
-  /* 🔵 Nuevo celeste premium */
-  --accent:    #3aa0ff;
-  --orange:    #3aa0ff;
-  --orange2:   #2b7fd1;
-  --orange-dim: rgba(58,160,255,0.08);
-
-  --green:     #22c55e;
-  --green-bg:  rgba(34,197,94,0.08);
-
-  --red:       #ef4444;
-  --red-bg:    rgba(239,68,68,0.08);
-
-  --amber:     #f59e0b;
-  --amber-bg:  rgba(245,158,11,0.08);
-
-  --blue:      #3aa0ff;
-  --blue-bg:   rgba(58,160,255,0.08);
-
-  --sans: 'Geist', sans-serif;
-  --serif: 'Fraunces', serif;
-  --mono: 'Geist Mono', monospace;
-
-  --r: 6px;
-  --r-lg: 10px;
+  --bg:        #f7f4ef;
+  --surface:   #fdfcfa;
+  --surface2:  #f2efe9;
+  --surface3:  #ece8e1;
+  --border:    #e3dfd7;
+  --border2:   #d4cfc6;
+  --text:      #1c1916;
+  --text2:     #6b6560;
+  --text3:     #a89f96;
+  --accent:    #c8440e;
+  --orange:    #c8440e;
+  --orange2:   #a83608;
+  --orange-dim:rgba(200,68,14,0.08);
+  --green:     #1a6b42;
+  --green-bg:  #eaf4ee;
+  --red:       #a83030;
+  --red-bg:    #faeaea;
+  --amber:     #8a5e00;
+  --amber-bg:  #fdf3e0;
+  --blue:      #1a4a8a;
+  --blue-bg:   #eaf0fa;
+  --sans:      'Geist', sans-serif;
+  --serif:     'Fraunces', serif;
+  --mono:      'Geist Mono', monospace;
+  --r:         6px;
+  --r-lg:      10px;
 }
 
 html { font-size: 14px; }
@@ -269,10 +178,10 @@ body {
 }
 .btn:hover { background: var(--surface2); color: var(--text); border-color: var(--border2); }
 .btn-primary {
-  background: var(--accent); color: #fff;
-  border-color: var(--accent);
+  background: var(--text); color: var(--surface);
+  border-color: var(--text);
 }
-.btn-primary:hover { background: var(--orange2); color: #fff; border-color: var(--orange2); }
+.btn-primary:hover { background: #2e2b27; color: #fff; border-color: #2e2b27; }
 
 .content { padding: 28px; flex: 1; max-width: 1400px; }
 
@@ -844,75 +753,39 @@ tbody td { padding: 11px 16px; font-size: 12px; vertical-align: middle; }
     </div>
 
     <!-- ═══ VENTAS ════════════════════════════════ -->
-<div class="page" id="page-ventas">
-
-  <!-- HEADER -->
-  <div class="section-hd">
-    <div>
-      <div class="section-title">Ventas</div>
-      <div class="section-sub">Registro completo de operaciones</div>
-    </div>
-  </div>
-
-  <!-- FORMULARIO (SEPARADO) -->
-  <div class="erp-card">
-    <div class="erp-card-header">
-      <div>
-        <div class="erp-card-title">Nueva venta</div>
-        <div class="erp-card-sub">Registrá una operación manualmente</div>
+    <div class="page" id="page-ventas">
+      <div class="section-hd">
+        <div>
+          <div class="section-title">Ventas</div>
+          <div class="section-sub">Registro completo de operaciones</div>
+        </div>
+      </div>
+      <div class="table-box">
+        <div class="table-hd">
+          <span class="table-hd-title">Todas las ventas</span>
+          <span class="table-hd-count" id="vt-ct">0 registros</span>
+        </div>
+        <div class="table-scroll">
+          <table>
+            <thead><tr>
+              <th>Fecha</th><th>Producto</th><th>Cliente</th><th>Contacto</th>
+              <th>Canal</th><th>Cant.</th><th>Precio</th><th>Costo</th>
+              <th>Total</th><th>Ganancia</th><th>Margen</th><th>Estado</th>
+            </tr></thead>
+            <tbody id="vt-body">
+              <tr><td colspan="12"><div class="empty"><div class="empty-ico">↗</div><div class="empty-t">Sin ventas</div><div class="empty-s">Importá la hoja VENTAS</div></div></td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="table-foot" id="vt-foot">
+          <span class="foot-item">Total <span>—</span></span>
+          <span class="foot-item">Ganancia <span class="g">—</span></span>
+          <span class="foot-item">Margen prom. <span class="a">—</span></span>
+          <span class="foot-item">Ticket prom. <span>—</span></span>
+        </div>
       </div>
     </div>
 
-    <div id="venta-notice" style="display:none;margin-top:10px" class="notice"></div>
-
-    <div class="erp-form-grid">
-      <input id="v-producto" placeholder="Producto" class="erp-input">
-      <input id="v-cantidad" type="number" placeholder="Cantidad" class="erp-input">
-      <input id="v-precio" type="number" placeholder="Precio" class="erp-input">
-
-      <button onclick="agregarVenta()" class="erp-btn-primary">
-        Guardar venta
-      </button>
-    </div>
-  </div>
-
-  <!-- TABLA -->
-  <div class="table-box">
-    <div class="table-hd">
-      <span class="table-hd-title">Todas las ventas</span>
-      <span class="table-hd-count" id="vt-ct">0 registros</span>
-    </div>
-
-    <div class="table-scroll">
-      <table>
-        <thead><tr>
-          <th>Fecha</th><th>Producto</th><th>Cliente</th><th>Contacto</th>
-          <th>Canal</th><th>Cant.</th><th>Precio</th><th>Costo</th>
-          <th>Total</th><th>Ganancia</th><th>Margen</th><th>Estado</th>
-        </tr></thead>
-        <tbody id="vt-body">
-          <tr>
-            <td colspan="12">
-              <div class="empty">
-                <div class="empty-ico">↗</div>
-                <div class="empty-t">Sin ventas</div>
-                <div class="empty-s">Importá la hoja VENTAS</div>
-              </div>
-            </td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
-
-    <div class="table-foot" id="vt-foot">
-      <span class="foot-item">Total <span>—</span></span>
-      <span class="foot-item">Ganancia <span class="g">—</span></span>
-      <span class="foot-item">Margen prom. <span class="a">—</span></span>
-      <span class="foot-item">Ticket prom. <span>—</span></span>
-    </div>
-  </div>
-
-</div>
     <!-- ═══ STOCK ══════════════════════════════════ -->
     <div class="page" id="page-stock">
       <div class="section-hd">
@@ -1112,7 +985,6 @@ tbody td { padding: 11px 16px; font-size: 12px; vertical-align: middle; }
           </div>
         </div>
         <div class="guide-card">
-          <div class="guide-card">
           <div class="guide-num">07</div>
           <div>
             <div class="guide-title">Fechas</div>
@@ -1120,7 +992,6 @@ tbody td { padding: 11px 16px; font-size: 12px; vertical-align: middle; }
             <span class="code-block">DD/MM/YYYY → 15/03/2025</span>
           </div>
         </div>
-      </div><!-- /guide-grid -->
       <!-- tabla ejemplo -->
       <div class="table-box" style="margin-top:16px">
         <div class="table-hd">
@@ -1490,64 +1361,7 @@ function rb(id, pct, label, _) {
 }
 function set(id, v) { const el=document.getElementById(id); if(el) el.textContent=v; }
 
-function showVentaNotice(msg, type) {
-  const el = document.getElementById('venta-notice')
-  if (!el) return
-  el.textContent = msg
-  el.className = `notice notice-${type === 'success' ? 'info' : 'warn'}`
-  el.style.display = 'flex'
-  clearTimeout(el._t)
-  el._t = setTimeout(() => { el.style.display = 'none' }, 3000)
-}
-
 /* ── VENTAS ─────────────────────────────────────── */
-  // ===============================
-async function agregarVenta() {
-
-  const producto = document.getElementById("v-producto").value
-  const cantidad = +document.getElementById("v-cantidad").value
-  const precio = +document.getElementById("v-precio").value
-
-  if (!producto || !cantidad || !precio) {
-    showVentaNotice('Completá todos los campos.', 'warn')
-    return
-  }
-
-  const nuevaVenta = {
-    fecha: new Date().toISOString(),
-    producto,
-    cliente: "",
-    contacto: "",
-    canal: "manual",
-    cantidad,
-    precio,
-    costo: 0,
-    total: cantidad * precio,
-    costoTotal: 0,
-    ganancia: cantidad * precio,
-    margen: 100,
-    estado: "pagado",
-    notas: ""
-  }
-DATA.ventas.push(nuevaVenta)
-
-// 🔥 primero renderiza
-renderAll()
-
-// 🔥 después guarda en background
-saveToSupabase()
-
-  // 🔥 limpiar inputs
-  ["v-producto", "v-cantidad", "v-precio"].forEach(id => {
-    const el = document.getElementById(id)
-    if (el) el.value = ""
-  })
-
-  // 🔥 focus UX
-  document.getElementById("v-producto").focus()
-
-  showVentaNotice('Venta guardada ✓', 'success')
-}
 function renderVentas() {
   const v = DATA.ventas;
   set('vt-ct', v.length+' registros');
@@ -1629,8 +1443,7 @@ function renderGastos() {
 }
 
 /* ── CLIENTES ───────────────────────────────────── */
-
-  function renderClientes() {
+function renderClientes() {
   const mp = {};
   DATA.ventas.forEach(v=>{
     const k=v.cliente||'Sin nombre';
@@ -1667,13 +1480,13 @@ function mkBar(id, labels, data) {
   if (CH[id]) CH[id].destroy();
   CH[id] = new Chart(ctx, {
     type: 'bar',
-    data: { labels, datasets: [{ data, backgroundColor: 'rgba(58,160,255,0.15)', borderColor: '#3aa0ff', borderWidth: 1.5, borderRadius: 3 }] },
+    data: { labels, datasets: [{ data, backgroundColor: 'rgba(200,68,14,0.1)', borderColor: '#c8440e', borderWidth: 1.5, borderRadius: 3 }] },
     options: {
       responsive:true, maintainAspectRatio:false,
       plugins:{ legend:{display:false} },
       scales:{
-        x:{ grid:{color:'#1f2733'}, ticks:{color:'#6b7682',font:{family:"'Geist Mono'",size:9}} },
-        y:{ grid:{color:'#1f2733'}, ticks:{color:'#6b7682',font:{family:"'Geist Mono'",size:9},callback:v=>'$'+(v/1000).toFixed(0)+'k'} }
+        x:{ grid:{color:'#ece8e1'}, ticks:{color:'#a89f96',font:{family:"'Geist Mono'",size:9}} },
+        y:{ grid:{color:'#ece8e1'}, ticks:{color:'#a89f96',font:{family:"'Geist Mono'",size:9},callback:v=>'$'+(v/1000).toFixed(0)+'k'} }
       }
     }
   });
@@ -1684,11 +1497,11 @@ function mkDoughnut(id, labels, data) {
   if (CH[id]) CH[id].destroy();
   CH[id] = new Chart(ctx, {
     type: 'doughnut',
-    data: { labels, datasets: [{ data, backgroundColor:PALETTE.map(c=>c+'cc'), borderColor:'#0f141b', borderWidth:2 }] },
+    data: { labels, datasets: [{ data, backgroundColor:PALETTE.map(c=>c+'cc'), borderColor:'#fdfcfa', borderWidth:2 }] },
     options: {
       responsive:true, maintainAspectRatio:false,
       plugins:{
-        legend:{position:'bottom',labels:{color:'#9aa4af',font:{family:"'Geist Mono'",size:9},padding:6,boxWidth:8}}
+        legend:{position:'bottom',labels:{color:'#6b6560',font:{family:"'Geist Mono'",size:9},padding:6,boxWidth:8}}
       }
     }
   });
@@ -1732,4 +1545,3 @@ function exportData() {
 </script>
 </body>
 </html>
-
