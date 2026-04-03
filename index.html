@@ -1015,7 +1015,99 @@ input:focus, select:focus {
         </div>
       </div>
     </div>
+    <!-- ═══ MODAL NUEVA VENTA ══════════════════════════ -->
+<div class="modal-backdrop" id="modal-nueva-venta" onclick="handleModalBackdrop(event)">
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modal-title-nv">
+    <div class="modal-head">
+      <span class="modal-title" id="modal-title-nv">Registrar venta</span>
+      <button class="modal-close" onclick="closeNewSaleModal()" title="Cerrar">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="modal-grid">
 
+        <!-- Fecha -->
+        <div>
+          <label class="m-label" for="nv-fecha">Fecha</label>
+          <input class="m-input" type="date" id="nv-fecha">
+        </div>
+
+        <!-- Canal -->
+        <div>
+          <label class="m-label" for="nv-canal">Canal</label>
+          <select class="m-select" id="nv-canal">
+            <option value="">— Seleccioná —</option>
+            <option value="facebook">Facebook</option>
+            <option value="instagram">Instagram</option>
+            <option value="whatsapp">WhatsApp</option>
+            <option value="mercadolibre">Mercado Libre</option>
+            <option value="presencial">Presencial</option>
+            <option value="otro">Otro</option>
+          </select>
+        </div>
+
+        <!-- Producto (autocomplete desde stock) -->
+        <div class="full">
+          <label class="m-label" for="nv-producto">Producto</label>
+          <input class="m-input" type="text" id="nv-producto" placeholder="Nombre del producto" list="nv-producto-list" oninput="nvAutoFill()">
+          <datalist id="nv-producto-list"></datalist>
+        </div>
+
+        <!-- Cliente -->
+        <div>
+          <label class="m-label" for="nv-cliente">Cliente</label>
+          <input class="m-input" type="text" id="nv-cliente" placeholder="Nombre o razón social">
+        </div>
+
+        <!-- Contacto -->
+        <div>
+          <label class="m-label" for="nv-contacto">Contacto</label>
+          <input class="m-input" type="text" id="nv-contacto" placeholder="Tel / @usuario">
+        </div>
+
+        <!-- Cantidad -->
+        <div>
+          <label class="m-label" for="nv-cantidad">Cantidad</label>
+          <input class="m-input" type="number" id="nv-cantidad" value="1" min="1" oninput="nvCalc()">
+        </div>
+
+        <!-- Precio unitario -->
+        <div>
+          <label class="m-label" for="nv-precio">Precio unitario</label>
+          <input class="m-input" type="number" id="nv-precio" placeholder="0" min="0" oninput="nvCalc()">
+        </div>
+
+        <!-- Costo unitario -->
+        <div>
+          <label class="m-label" for="nv-costo">Costo unitario</label>
+          <input class="m-input" type="number" id="nv-costo" placeholder="0" min="0" oninput="nvCalc()">
+        </div>
+
+        <!-- Estado -->
+        <div>
+          <label class="m-label" for="nv-estado">Estado</label>
+          <select class="m-select" id="nv-estado">
+            <option value="pagado">Pagado</option>
+            <option value="pendiente">Pendiente</option>
+            <option value="enviado">Enviado</option>
+            <option value="cancelado">Cancelado</option>
+          </select>
+        </div>
+
+        <!-- Notas (full width) -->
+        <div class="full">
+          <label class="m-label" for="nv-notas">Notas</label>
+          <input class="m-input" type="text" id="nv-notas" placeholder="Observaciones, entrega, etc.">
+        </div>
+
+        <!-- Preview calculado -->
+        <div class="full">
+          <div class="m-preview" id="nv-preview">
+            <div class="m-preview-item">Total <span id="nv-prev-total">—</span></div>
+            <div class="m-preview-item highlight">Ganancia <span id="nv-prev-gan">—</span></div>
+            <div class="m-preview-item">Costo total <span id="nv-prev-costo">—</span></div>
+            <div class="m-preview-item">Margen <span id="nv-prev-margen">—</span></div>
+          </div>
+        </div>
     <!-- ═══ STOCK ══════════════════════════════════ -->
     <div class="page" id="page-stock">
       <div class="section-hd">
@@ -1047,6 +1139,24 @@ input:focus, select:focus {
         </div>
       </div>
     </div>
+                <!-- Aviso para futuras automatizaciones -->
+        <div class="full" id="nv-auto-hint" style="display:none;">
+          <div style="font-family:var(--mono);font-size:10px;color:var(--orange);padding:8px 10px;background:var(--orange-dim);border-radius:var(--r);border:1px solid rgba(56,189,248,0.2);">
+            ⚡ Producto detectado en stock — el stock se podrá actualizar automáticamente en futuras versiones.
+          </div>
+        </div>
+
+      </div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn-cancel" onclick="closeNewSaleModal()">Cancelar</button>
+      <button class="btn-save" id="nv-save-btn" onclick="saveNewSale()">
+        <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M2 6l3 3 5-5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        Guardar venta
+      </button>
+    </div>
+  </div>
+</div>
 
     <!-- ═══ GASTOS ══════════════════════════════════ -->
     <div class="page" id="page-gastos">
@@ -1277,121 +1387,6 @@ input:focus, select:focus {
         </div>
       </div>
     </div>
-
-
-<!-- ═══ MODAL NUEVA VENTA ══════════════════════════ -->
-<div class="modal-backdrop" id="modal-nueva-venta" onclick="handleModalBackdrop(event)">
-  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modal-title-nv">
-    <div class="modal-head">
-      <span class="modal-title" id="modal-title-nv">Registrar venta</span>
-      <button class="modal-close" onclick="closeNewSaleModal()" title="Cerrar">✕</button>
-    </div>
-    <div class="modal-body">
-      <div class="modal-grid">
-
-        <!-- Fecha -->
-        <div>
-          <label class="m-label" for="nv-fecha">Fecha</label>
-          <input class="m-input" type="date" id="nv-fecha">
-        </div>
-
-        <!-- Canal -->
-        <div>
-          <label class="m-label" for="nv-canal">Canal</label>
-          <select class="m-select" id="nv-canal">
-            <option value="">— Seleccioná —</option>
-            <option value="facebook">Facebook</option>
-            <option value="instagram">Instagram</option>
-            <option value="whatsapp">WhatsApp</option>
-            <option value="mercadolibre">Mercado Libre</option>
-            <option value="presencial">Presencial</option>
-            <option value="otro">Otro</option>
-          </select>
-        </div>
-
-        <!-- Producto (autocomplete desde stock) -->
-        <div class="full">
-          <label class="m-label" for="nv-producto">Producto</label>
-          <input class="m-input" type="text" id="nv-producto" placeholder="Nombre del producto" list="nv-producto-list" oninput="nvAutoFill()">
-          <datalist id="nv-producto-list"></datalist>
-        </div>
-
-        <!-- Cliente -->
-        <div>
-          <label class="m-label" for="nv-cliente">Cliente</label>
-          <input class="m-input" type="text" id="nv-cliente" placeholder="Nombre o razón social">
-        </div>
-
-        <!-- Contacto -->
-        <div>
-          <label class="m-label" for="nv-contacto">Contacto</label>
-          <input class="m-input" type="text" id="nv-contacto" placeholder="Tel / @usuario">
-        </div>
-
-        <!-- Cantidad -->
-        <div>
-          <label class="m-label" for="nv-cantidad">Cantidad</label>
-          <input class="m-input" type="number" id="nv-cantidad" value="1" min="1" oninput="nvCalc()">
-        </div>
-
-        <!-- Precio unitario -->
-        <div>
-          <label class="m-label" for="nv-precio">Precio unitario</label>
-          <input class="m-input" type="number" id="nv-precio" placeholder="0" min="0" oninput="nvCalc()">
-        </div>
-
-        <!-- Costo unitario -->
-        <div>
-          <label class="m-label" for="nv-costo">Costo unitario</label>
-          <input class="m-input" type="number" id="nv-costo" placeholder="0" min="0" oninput="nvCalc()">
-        </div>
-
-        <!-- Estado -->
-        <div>
-          <label class="m-label" for="nv-estado">Estado</label>
-          <select class="m-select" id="nv-estado">
-            <option value="pagado">Pagado</option>
-            <option value="pendiente">Pendiente</option>
-            <option value="enviado">Enviado</option>
-            <option value="cancelado">Cancelado</option>
-          </select>
-        </div>
-
-        <!-- Notas (full width) -->
-        <div class="full">
-          <label class="m-label" for="nv-notas">Notas</label>
-          <input class="m-input" type="text" id="nv-notas" placeholder="Observaciones, entrega, etc.">
-        </div>
-
-        <!-- Preview calculado -->
-        <div class="full">
-          <div class="m-preview" id="nv-preview">
-            <div class="m-preview-item">Total <span id="nv-prev-total">—</span></div>
-            <div class="m-preview-item highlight">Ganancia <span id="nv-prev-gan">—</span></div>
-            <div class="m-preview-item">Costo total <span id="nv-prev-costo">—</span></div>
-            <div class="m-preview-item">Margen <span id="nv-prev-margen">—</span></div>
-          </div>
-        </div>
-
-        <!-- Aviso para futuras automatizaciones -->
-        <div class="full" id="nv-auto-hint" style="display:none;">
-          <div style="font-family:var(--mono);font-size:10px;color:var(--orange);padding:8px 10px;background:var(--orange-dim);border-radius:var(--r);border:1px solid rgba(56,189,248,0.2);">
-            ⚡ Producto detectado en stock — el stock se podrá actualizar automáticamente en futuras versiones.
-          </div>
-        </div>
-
-      </div>
-    </div>
-    <div class="modal-foot">
-      <button class="btn-cancel" onclick="closeNewSaleModal()">Cancelar</button>
-      <button class="btn-save" id="nv-save-btn" onclick="saveNewSale()">
-        <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M2 6l3 3 5-5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
-        Guardar venta
-      </button>
-    </div>
-  </div>
-</div>
-
   </div><!-- /content -->
 </div><!-- /main -->
 
