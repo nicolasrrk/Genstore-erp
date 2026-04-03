@@ -1108,6 +1108,24 @@ input:focus, select:focus {
             <div class="m-preview-item">Margen <span id="nv-prev-margen">—</span></div>
           </div>
         </div>
+                 <!-- Aviso para futuras automatizaciones -->
+        <div class="full" id="nv-auto-hint" style="display:none;">
+          <div style="font-family:var(--mono);font-size:10px;color:var(--orange);padding:8px 10px;background:var(--orange-dim);border-radius:var(--r);border:1px solid rgba(56,189,248,0.2);">
+            ⚡ Producto detectado en stock — el stock se podrá actualizar automáticamente en futuras versiones.
+          </div>
+        </div>
+
+      </div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn-cancel" onclick="closeNewSaleModal()">Cancelar</button>
+      <button class="btn-save" id="nv-save-btn" onclick="saveNewSale()">
+        <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M2 6l3 3 5-5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        Guardar venta
+      </button>
+    </div>
+  </div>
+</div>
     <!-- ═══ STOCK ══════════════════════════════════ -->
     <div class="page" id="page-stock">
       <div class="section-hd">
@@ -1139,25 +1157,6 @@ input:focus, select:focus {
         </div>
       </div>
     </div>
-                <!-- Aviso para futuras automatizaciones -->
-        <div class="full" id="nv-auto-hint" style="display:none;">
-          <div style="font-family:var(--mono);font-size:10px;color:var(--orange);padding:8px 10px;background:var(--orange-dim);border-radius:var(--r);border:1px solid rgba(56,189,248,0.2);">
-            ⚡ Producto detectado en stock — el stock se podrá actualizar automáticamente en futuras versiones.
-          </div>
-        </div>
-
-      </div>
-    </div>
-    <div class="modal-foot">
-      <button class="btn-cancel" onclick="closeNewSaleModal()">Cancelar</button>
-      <button class="btn-save" id="nv-save-btn" onclick="saveNewSale()">
-        <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M2 6l3 3 5-5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
-        Guardar venta
-      </button>
-    </div>
-  </div>
-</div>
-
     <!-- ═══ GASTOS ══════════════════════════════════ -->
     <div class="page" id="page-gastos">
       <div class="section-hd">
