@@ -12,54 +12,44 @@
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
 :root {
-  /* Fondos - Negro profundo con un matiz verde petróleo muy sutil */
-  --bg:         #030504; 
-  --surface:    #0a0f0d;
-  --surface2:   #121a16;
-  --surface3:   #1a241f;
+  /* 🖤 Fondos - más profundos tipo cyber */
+  --bg:         #020303; 
+  --surface:    #050808;
+  --surface2:   #0a1110;
+  --surface3:   #0f1a17;
 
-  /* Bordes - Verde bosque oscuro y digital */
-  --border:     #1a2e24;
-  --border2:    #2d523e;
+  /* 🧱 Bordes - neón sutil */
+  --border:     #0f2a22;
+  --border2:    #00ff88;
 
-  /* Textos - Blanco menta y grises verdosos */
-  --text:       #e0f2e9;
-  --text2:      #8ba899;
-  --text3:      #566b60;
+  /* ✍️ Texto - alto contraste con toque neón */
+  --text:       #e6fff5;
+  --text2:      #7fffd4;
+  --text3:      #3aa68c;
 
-  /* Colores de Acento - El "Orange" ahora es Verde Neón/Ciber */
-  --orange:     #00ff88; /* Verde neón puro */
-  --orange2:    #00cc6a; /* Verde más profundo para estados hover */
-  --orange-dim: rgba(0, 255, 136, 0.1);
+  /* ⚡ Accent (verde cyber principal) */
+  --orange:     #00ff88;
+  --orange2:    #00e676;
+  --orange-dim: rgba(0, 255, 136, 0.15);
 
-  /* Estados - Adaptados a la paleta verde */
-  --green:      #aaff00; /* Verde lima eléctrico */
-  --green-bg:   rgba(170, 255, 0, 0.1);
+  /* 📊 Estados */
+  --green:      #aaff00;
+  --green-bg:   rgba(170, 255, 0, 0.12);
   
-  --red:        #ff3e3e; /* Rojo técnico (contraste) */
-  --red-bg:     rgba(255, 62, 62, 0.1);
+  --red:        #ff3e3e;
+  --red-bg:     rgba(255, 62, 62, 0.12);
   
-  --blue:       #00e5ff; /* Cian glaciar */
-  --blue-bg:    rgba(0, 229, 255, 0.1);
+  --blue:       #00e5ff;
+  --blue-bg:    rgba(0, 229, 255, 0.12);
 
-  /* Tipografía y Radios */
+  /* 🔤 Tipografía */
   --sans:       'Geist', sans-serif;
   --serif:      'Fraunces', serif;
   --mono:       'Geist Mono', monospace;
-  --r:          4px; 
-  --r-lg:       8px;
-}
-html { font-size: 14px; }
-body {
-  background: var(--bg);
-  color: var(--text);
-  font-family: var(--sans);
-  font-weight: 400;
-  line-height: 1.5;
-  -webkit-font-smoothing: antialiased;
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
+
+  /* 📐 Radios */
+  --r:          6px; 
+  --r-lg:       10px;
 }
 
 /* fondo grain muy sutil */
