@@ -21,9 +21,9 @@
   --border:     rgba(255,255,255,0.06);
   --border2:    rgba(255,255,255,0.12);
  
-  --text:       #e8e6f0;
-  --text2:      #8a879a;
-  --text3:      #4a4858;
+  --text:       #f2f0ff;
+  --text2:      #b0adc4;
+  --text3:      #6e6b82;
  
   --cyan:       #00e5ff;
   --cyan2:      #00b3cc;
@@ -322,9 +322,9 @@ body::after {
 .form-label {
   display: flex; align-items: center; gap: 6px;
   font-family: var(--mono);
-  font-size: 9px; font-weight: 400;
+  font-size: 10px; font-weight: 400;
   letter-spacing: 1px; text-transform: uppercase;
-  color: var(--text3); margin-bottom: 7px;
+  color: var(--text2); margin-bottom: 7px;
 }
 .form-label::before {
   content: '//';
@@ -462,8 +462,8 @@ body::after {
 }
 .topbar-sep { width: 1px; height: 20px; background: var(--border2); }
 .topbar-section {
-  font-family: var(--mono); font-size: 10px;
-  color: var(--text3); letter-spacing: 1px; text-transform: uppercase;
+  font-family: var(--mono); font-size: 11px;
+  color: var(--text2); letter-spacing: 1px; text-transform: uppercase;
 }
  
 .topbar-right {
@@ -477,7 +477,7 @@ body::after {
   border-radius: var(--r);
 }
 .user-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--green); box-shadow: 0 0 6px var(--green); animation: blink 2s infinite; }
-.user-email { font-family: var(--mono); font-size: 10px; color: var(--text2); letter-spacing: 0.3px; }
+.user-email { font-family: var(--mono); font-size: 11px; color: var(--text2); letter-spacing: 0.3px; }
 .btn-logout {
   padding: 6px 14px;
   background: transparent;
@@ -505,14 +505,14 @@ body::after {
   display: flex; flex-direction: column; gap: 2px;
 }
 .sidebar-label {
-  font-family: var(--mono); font-size: 8px; font-weight: 400;
+  font-family: var(--mono); font-size: 9px; font-weight: 400;
   color: var(--text3); letter-spacing: 1.5px; text-transform: uppercase;
   padding: 12px 20px 6px;
 }
 .sidebar-item {
   display: flex; align-items: center; gap: 10px;
-  padding: 9px 20px;
-  font-family: var(--sans); font-size: 12px; font-weight: 500;
+  padding: 10px 20px;
+  font-family: var(--sans); font-size: 13px; font-weight: 500;
   color: var(--text2);
   cursor: pointer; transition: all 0.12s;
   border-left: 2px solid transparent;
@@ -581,9 +581,9 @@ body::after {
 .stat-card.violet::before { background: var(--violet); }
 .stat-card.green::before  { background: var(--green); box-shadow: 0 0 8px var(--green); }
 .stat-card.yellow::before { background: var(--yellow); }
-.stat-label { font-family: var(--mono); font-size: 9px; color: var(--text3); letter-spacing: 1px; text-transform: uppercase; margin-bottom: 8px; }
+.stat-label { font-family: var(--mono); font-size: 10px; color: var(--text2); letter-spacing: 1px; text-transform: uppercase; margin-bottom: 8px; }
 .stat-val { font-family: var(--bebas); font-size: 32px; color: var(--text); letter-spacing: 1px; line-height: 1; }
-.stat-sub { font-family: var(--mono); font-size: 9px; color: var(--text3); margin-top: 4px; }
+.stat-sub { font-family: var(--mono); font-size: 10px; color: var(--text3); margin-top: 4px; }
  
 /* Table */
 .table-wrap {
@@ -591,6 +591,10 @@ body::after {
   border: 1px solid var(--border);
   border-radius: var(--r-lg);
   overflow: hidden;
+}
+.table-scroll-wrap {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
 }
 .table-toolbar {
   display: flex; align-items: center; justify-content: space-between;
@@ -607,13 +611,13 @@ body::after {
 }
 .table-search input {
   background: transparent; border: none; outline: none;
-  font-family: var(--mono); font-size: 11px; color: var(--text);
+  font-family: var(--mono); font-size: 12px; color: var(--text);
   width: 200px; letter-spacing: 0.3px;
 }
 .table-search input::placeholder { color: var(--text3); }
 .search-icon { font-size: 12px; color: var(--text3); }
 .count-badge {
-  font-family: var(--mono); font-size: 9px; color: var(--text3);
+  font-family: var(--mono); font-size: 10px; color: var(--text3);
   letter-spacing: 0.5px; text-transform: uppercase;
 }
  
@@ -621,8 +625,8 @@ table { width: 100%; border-collapse: collapse; }
 thead tr { border-bottom: 1px solid var(--border2); }
 thead th {
   text-align: left; padding: 10px 16px;
-  font-family: var(--mono); font-size: 9px; font-weight: 400;
-  color: var(--text3); letter-spacing: 1px; text-transform: uppercase;
+  font-family: var(--mono); font-size: 10px; font-weight: 400;
+  color: var(--text2); letter-spacing: 1px; text-transform: uppercase;
 }
 tbody tr {
   border-bottom: 1px solid var(--border);
@@ -632,15 +636,15 @@ tbody tr:last-child { border-bottom: none; }
 tbody tr:hover { background: rgba(0,229,255,0.02); }
 tbody td {
   padding: 12px 16px;
-  font-family: var(--sans); font-size: 12px; color: var(--text2);
+  font-family: var(--sans); font-size: 13px; color: var(--text2);
 }
-tbody td:first-child { color: var(--text); font-weight: 500; }
+tbody td:first-child { color: var(--text); font-weight: 600; }
  
-.td-mono { font-family: var(--mono) !important; font-size: 11px !important; }
+.td-mono { font-family: var(--mono) !important; font-size: 12px !important; }
 .td-tag {
   display: inline-flex; align-items: center; gap: 4px;
-  padding: 2px 8px; border-radius: 2px;
-  font-family: var(--mono); font-size: 9px; text-transform: uppercase; letter-spacing: 0.5px;
+  padding: 3px 9px; border-radius: 2px;
+  font-family: var(--mono); font-size: 10px; text-transform: uppercase; letter-spacing: 0.5px; font-weight: 500;
 }
 .td-tag.green { background: var(--green-dim); color: var(--green-txt); border: 1px solid rgba(0,255,148,0.15); }
 .td-tag.yellow { background: rgba(255,204,0,0.08); color: var(--yellow); border: 1px solid rgba(255,204,0,0.15); }
@@ -749,17 +753,58 @@ select.form-input option { background: #111116; }
 textarea.form-input { height: auto; padding: 10px 14px; resize: vertical; min-height: 80px; }
  
 /* ─── RESPONSIVE ─── */
+
+/* Tablet grande */
+@media (max-width: 1024px) {
+  .login-brand { width: 340px; padding: 36px 36px; }
+  .brand-headline { font-size: 54px; }
+  .stats-row { grid-template-columns: repeat(2, 1fr); }
+}
+
+/* Tablet */
 @media (max-width: 900px) {
   .login-brand { display: none; }
+  .login-form-wrap { padding: 48px 32px; }
   .stats-row { grid-template-columns: repeat(2, 1fr); }
   .admin-sidebar { display: none; }
+  .admin-body { flex-direction: column; }
+  /* Mostrar nav horizontal en tablet cuando sidebar está oculta */
+  .admin-topbar { padding: 0 20px; }
 }
-@media (max-width: 600px) {
-  .login-form-wrap { padding: 40px 20px; align-items: flex-start; padding-top: 64px; }
+
+/* Mobile grande */
+@media (max-width: 640px) {
+  .login-form-wrap { padding: 40px 20px; align-items: flex-start; padding-top: 56px; }
+  .login-heading { font-size: 32px; }
+  .login-sub { font-size: 10px; }
+  .stats-row { grid-template-columns: repeat(2, 1fr); gap: 10px; }
+  .admin-main { padding: 20px 14px; }
+  .section-header { flex-wrap: wrap; gap: 10px; }
+  .section-title { font-size: 24px; }
+  .table-wrap { border-radius: var(--r); }
+  .table-toolbar { flex-direction: column; align-items: flex-start; gap: 10px; }
+  .table-search input { width: 100%; }
+  .admin-topbar { height: 48px; padding: 0 14px; }
+  .topbar-sep { display: none; }
+  .topbar-section { display: none; }
+  .user-email { max-width: 120px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  /* Scroll horizontal en tablas */
+  .table-scroll-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+  table { min-width: 520px; }
+}
+
+/* Mobile chico */
+@media (max-width: 400px) {
+  .login-form-wrap { padding: 32px 16px; padding-top: 48px; }
   .login-heading { font-size: 28px; }
-  .stats-row { grid-template-columns: 1fr; }
-  .admin-main { padding: 20px 16px; }
+  .stats-row { grid-template-columns: 1fr 1fr; gap: 8px; }
+  .stat-card { padding: 14px 12px; }
+  .stat-val { font-size: 26px; }
+  .admin-main { padding: 14px 10px; }
+  .modal { padding: 20px 16px; }
+  .modal-title { font-size: 18px; }
 }
+
 </style>
 </head>
 <body>
@@ -920,6 +965,7 @@ textarea.form-input { height: auto; padding: 10px 14px; resize: vertical; min-he
             </div>
             <span class="count-badge" id="cnt-productos">0 registros</span>
           </div>
+          <div class="table-scroll-wrap">
           <table>
             <thead>
               <tr>
@@ -930,6 +976,8 @@ textarea.form-input { height: auto; padding: 10px 14px; resize: vertical; min-he
               <tr><td colspan="6"><div class="empty-state"><div class="empty-icon">▦</div>Sin productos</div></td></tr>
             </tbody>
           </table>
+          </div>
+          </div>
         </div>
       </div>
  
@@ -947,6 +995,7 @@ textarea.form-input { height: auto; padding: 10px 14px; resize: vertical; min-he
             </div>
             <span class="count-badge" id="cnt-clientes">0 registros</span>
           </div>
+          <div class="table-scroll-wrap">
           <table>
             <thead>
               <tr><th>Nombre</th><th>Email</th><th>Teléfono</th><th>Ciudad</th><th>Acciones</th></tr>
@@ -955,6 +1004,8 @@ textarea.form-input { height: auto; padding: 10px 14px; resize: vertical; min-he
               <tr><td colspan="5"><div class="empty-state"><div class="empty-icon">◉</div>Sin clientes</div></td></tr>
             </tbody>
           </table>
+          </div>
+          </div>
         </div>
       </div>
  
@@ -972,6 +1023,7 @@ textarea.form-input { height: auto; padding: 10px 14px; resize: vertical; min-he
             </div>
             <span class="count-badge" id="cnt-ventas">0 registros</span>
           </div>
+          <div class="table-scroll-wrap">
           <table>
             <thead>
               <tr><th>Producto</th><th>Cliente</th><th>Cantidad</th><th>Total</th><th>Estado</th><th>Fecha</th><th>Acciones</th></tr>
@@ -980,6 +1032,8 @@ textarea.form-input { height: auto; padding: 10px 14px; resize: vertical; min-he
               <tr><td colspan="7"><div class="empty-state"><div class="empty-icon">◎</div>Sin ventas</div></td></tr>
             </tbody>
           </table>
+          </div>
+          </div>
         </div>
       </div>
  
@@ -997,6 +1051,7 @@ textarea.form-input { height: auto; padding: 10px 14px; resize: vertical; min-he
             </div>
             <span class="count-badge" id="cnt-gastos">0 registros</span>
           </div>
+          <div class="table-scroll-wrap">
           <table>
             <thead>
               <tr><th>Descripción</th><th>Categoría</th><th>Monto</th><th>Fecha</th><th>Acciones</th></tr>
@@ -1005,6 +1060,7 @@ textarea.form-input { height: auto; padding: 10px 14px; resize: vertical; min-he
               <tr><td colspan="5"><div class="empty-state"><div class="empty-icon">▣</div>Sin gastos</div></td></tr>
             </tbody>
           </table>
+          </div>
         </div>
       </div>
  
@@ -1673,6 +1729,5 @@ document.querySelector('#sec-gastos .btn-new').onclick = () => {
 </script>
 </body>
 </html>
-
 
 
