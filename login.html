@@ -71,7 +71,14 @@ body::after {
 .login-brand {
   width: 420px;
   flex-shrink: 0;
-  background: var(--text);
+
+  /* 🔥 fondo oscuro coherente */
+  background: linear-gradient(
+    160deg,
+    #0b0f14 0%,
+    #111827 100%
+  );
+
   display: flex;
   flex-direction: column;
   justify-content: space-between;
@@ -113,13 +120,20 @@ body::after {
   flex-shrink: 0;
 }
 .brand-name {
-  font-family: var(--serif);
-  font-size: 20px; font-weight: 300;
-  font-style: italic;
-  letter-spacing: -0.2px;
-  color: #f5f0e8;
+  color: var(--text); /* 🔥 blanco real */
 }
 
+.brand-headline {
+  color: var(--text); /* 🔥 visible */
+}
+
+.brand-sub {
+  color: var(--text2); /* gris claro */
+}
+
+.brand-footer {
+  color: var(--text3);
+}
 .brand-body {
   position: relative; z-index: 1;
 }
@@ -162,6 +176,9 @@ body::after {
   width: 100%;
   max-width: 360px;
   animation: fadeUp 0.3s ease;
+
+  /* 🔥 leve glow */
+  box-shadow: 0 0 20px rgba(56, 189, 248, 0.05);
 }
 
 .login-heading {
@@ -209,25 +226,61 @@ body::after {
   color: var(--text3); margin-bottom: 6px;
 }
 .form-input {
-  width: 100%; height: 38px; padding: 0 12px;
-  border: 1px solid var(--border); border-radius: var(--r);
-  background: var(--surface2); color: var(--text);
-  font-family: var(--sans); font-size: 13px; outline: none;
-  transition: border-color 0.14s, background 0.14s;
+  width: 100%;
+  height: 38px;
+  padding: 0 12px;
+
+  border: 1px solid var(--border);
+  border-radius: var(--r);
+
+  background: var(--surface2);
+  color: var(--text);
+
+  font-family: var(--sans);
+  font-size: 13px;
+  outline: none;
+
+  transition: all 0.14s;
+}
+
+.form-input:focus {
+  border-color: var(--orange);
+  background: var(--surface);
+  box-shadow: 0 0 0 3px var(--orange-dim);
 }
 .form-input:focus { border-color: var(--orange); background: var(--surface); box-shadow: 0 0 0 3px var(--orange-dim); }
 .form-input::placeholder { color: var(--text3); }
 .form-input:disabled { opacity: 0.5; cursor: not-allowed; }
 
 .btn-submit {
-  width: 100%; height: 38px; border: none;
-  background: var(--text); color: #fdfcfa;
-  font-family: var(--sans); font-size: 13px; font-weight: 500;
-  border-radius: var(--r); cursor: pointer;
-  transition: background 0.14s, transform 0.1s;
-  display: flex; align-items: center; justify-content: center; gap: 6px;
+  width: 100%;
+  height: 38px;
+  border: none;
+
+  /* 🔥 celeste genstore */
+  background: var(--orange);
+  color: #000;
+
+  font-family: var(--sans);
+  font-size: 13px;
+  font-weight: 500;
+
+  border-radius: var(--r);
+  cursor: pointer;
+  transition: all 0.14s;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+
   margin-top: 20px;
-  letter-spacing: 0.1px;
+}
+
+.btn-submit:hover {
+  background: var(--orange2);
+  box-shadow: 0 0 10px var(--orange-dim);
+  transform: translateY(-1px);
 }
 .btn-submit:hover { background: #2e2b27; transform: translateY(-1px); }
 .btn-submit:active { transform: translateY(0); }
