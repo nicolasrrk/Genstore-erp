@@ -14,30 +14,46 @@
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
 :root {
-  --bg:        #f7f4ef;
-  --surface:   #fdfcfa;
-  --surface2:  #f2efe9;
-  --surface3:  #ece8e1;
-  --border:    #e3dfd7;
-  --border2:   #d4cfc6;
-  --text:      #1c1916;
-  --text2:     #6b6560;
-  --text3:     #a89f96;
-  --accent:    #c8440e;
-  --orange:    #c8440e;
-  --orange2:   #a83608;
-  --orange-dim:rgba(200,68,14,0.08);
-  --green:     #1a6b42;
-  --green-bg:  #eaf4ee;
-  --red:       #a83030;
-  --red-bg:    #faeaea;
-  --amber:     #8a5e00;
-  --amber-bg:  #fdf3e0;
-  --blue:      #1a4a8a;
-  --blue-bg:   #eaf0fa;
+  /* 🖤 Fondo cyber */
+  --bg:        #050608;
+  --surface:   #0b0f14;
+  --surface2:  #111827;
+  --surface3:  #1f2937;
+
+  /* 🧱 Bordes */
+  --border:    #1f2a37;
+  --border2:   #2a3a4f;
+
+  /* ✍️ Texto */
+  --text:      #ffffff;
+  --text2:     #cbd5e1;
+  --text3:     #64748b;
+
+  /* ⚡ Accent (celeste genstore) */
+  --accent:    #38bdf8;
+  --orange:    #38bdf8;
+  --orange2:   #0ea5e9;
+  --orange-dim:rgba(56,189,248,0.15);
+
+  /* 📊 Estados */
+  --green:     #22c55e;
+  --green-bg:  rgba(34,197,94,0.1);
+
+  --red:       #ef4444;
+  --red-bg:    rgba(239,68,68,0.1);
+
+  --amber:     #f59e0b;
+  --amber-bg:  rgba(245,158,11,0.1);
+
+  --blue:      #38bdf8;
+  --blue-bg:   rgba(56,189,248,0.1);
+
+  /* 🔤 Tipografía */
   --sans:      'Geist', sans-serif;
   --serif:     'Fraunces', serif;
   --mono:      'Geist Mono', monospace;
+
+  /* 📐 Radios */
   --r:         6px;
   --r-lg:      10px;
 }
@@ -47,9 +63,7 @@ body {
   background: var(--bg);
   color: var(--text);
   font-family: var(--sans);
-  font-weight: 400;
   line-height: 1.5;
-  -webkit-font-smoothing: antialiased;
 }
 
 /* ── SIDEBAR ─────────────────────────────────────── */
@@ -563,6 +577,77 @@ tbody td { padding: 11px 16px; font-size: 12px; vertical-align: middle; }
 
   /* ── Botón plantilla: solo ícono ── */
   .btn-primary .btn-text { display: none; }
+}
+  /* ✨ Glow cyber sutil global */
+.glow {
+  box-shadow: 0 0 0px transparent;
+  transition: box-shadow 0.2s ease;
+}
+.glow:hover {
+  box-shadow: 0 0 12px var(--orange-dim);
+}
+
+/* 🔥 Botones con identidad SaaS */
+.btn-primary {
+  background: linear-gradient(135deg, var(--orange), var(--orange2));
+  color: #001018;
+  border: none;
+  box-shadow: 0 0 10px rgba(56,189,248,0.15);
+}
+
+.btn-primary:hover {
+  box-shadow: 0 0 18px rgba(56,189,248,0.25);
+  transform: translateY(-1px);
+}
+
+/* 💎 Cards más premium */
+.chart-box,
+.table-box,
+.metric,
+.roi-box,
+.guide-card {
+  background: linear-gradient(180deg, var(--surface), var(--surface2));
+  backdrop-filter: blur(6px);
+}
+
+/* ✨ Hover en cards */
+.chart-box:hover,
+.table-box:hover,
+.metric:hover {
+  border-color: var(--orange);
+  box-shadow: 0 0 12px var(--orange-dim);
+}
+
+/* 🔥 Inputs más modernos */
+input, select {
+  transition: all 0.15s ease;
+}
+
+input:focus, select:focus {
+  border-color: var(--orange);
+  box-shadow: 0 0 0 2px var(--orange-dim);
+  background: var(--surface);
+}
+
+/* ⚡ Sidebar activo más claro */
+.nav-item.active {
+  background: rgba(56,189,248,0.08);
+  color: var(--text);
+}
+
+/* 🎯 Hover más claro */
+.nav-item:hover {
+  background: rgba(255,255,255,0.03);
+}
+
+/* 💡 Scroll más moderno */
+::-webkit-scrollbar-thumb {
+  background: linear-gradient(var(--orange), var(--orange2));
+}
+
+/* 🧠 Texto importante */
+.section-title {
+  text-shadow: 0 0 6px rgba(56,189,248,0.15);
 }
 </style>
 </head>
