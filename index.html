@@ -1504,10 +1504,11 @@ async function agregarVenta() {
 
   DATA.ventas.push(nuevaVenta)
 
-  await saveToSupabase()
+// 🔥 primero renderiza
+renderAll()
 
-  renderAll()
-
+// 🔥 después guarda en background
+saveToSupabase()
   // 🔥 limpiar inputs
   ["v-producto", "v-cantidad", "v-precio"].forEach(id => {
     const el = document.getElementById(id)
