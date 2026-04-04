@@ -8,6 +8,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Geist+Mono:wght@300;400;500&family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,500;1,9..144,300&family=Geist:wght@300;400;500;600&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdn.jsdelivr.net/npm/tsparticles@2/tsparticles.bundle.min.js"></script>
 <style>
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -338,6 +339,7 @@ body::after {
 </style>
 </head>
 <body>
+<div id="particles" style="position:fixed;inset:0;z-index:0;pointer-events:none;"></div>
 
 <div class="login-split">
 
@@ -452,6 +454,48 @@ function translateError(msg) {
   if (msg.includes('Password should be'))         return 'La contraseña debe tener al menos 6 caracteres.'
   return msg
 }
+</script>
+  <script>
+tsParticles.load("particles", {
+  background: { color: { value: "transparent" } },
+  particles: {
+    number: { value: 35, density: { enable: true } },
+    color: { value: "#38bdf8" },
+    opacity: {
+      value: 0.35,
+      random: { enable: true, minimumValue: 0.15 }
+    },
+    size: {
+      value: { min: 4, max: 10 }
+    },
+    shape: {
+      type: "square"
+    },
+    rotate: {
+      value: { min: 0, max: 360 },
+      animation: { enable: true, speed: 3, sync: false }
+    },
+    move: {
+      enable: true,
+      speed: 0.6,
+      direction: "none",
+      random: true,
+      outModes: "out"
+    },
+    stroke: {
+      width: 1,
+      color: "#38bdf8"
+    }
+  },
+  interactivity: {
+    events: {
+      onHover: { enable: true, mode: "repulse" }
+    },
+    modes: {
+      repulse: { distance: 100, duration: 0.4 }
+    }
+  }
+});
 </script>
 </body>
 </html>
