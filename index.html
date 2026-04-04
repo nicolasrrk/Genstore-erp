@@ -8,6 +8,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdn.jsdelivr.net/npm/tsparticles@2/tsparticles.bundle.min.js"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Geist+Mono:wght@300;400;500&family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;1,9..144,300&family=Geist:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
@@ -791,6 +792,7 @@ input:focus, select:focus {
 </style>
 </head>
 <body>
+<div id="particles" style="position:fixed;inset:0;z-index:0;pointer-events:none;"></div>
 <!-- SIDEBAR -->
 <aside class="sidebar">
   <div class="logo-wrap">
@@ -2018,6 +2020,30 @@ document.addEventListener('keydown', e => {
   if (e.key === 'Escape') closeNewSaleModal()
 })
 
+</script>
+  <script>
+tsParticles.load("particles", {
+  background: { color: { value: "transparent" } },
+  particles: {
+    number: { value: 60, density: { enable: true } },
+    color: { value: "#38bdf8" },
+    opacity: { value: 0.15 },
+    size: { value: { min: 1, max: 2.5 } },
+    move: { enable: true, speed: 0.4, direction: "none", random: true },
+    links: {
+      enable: true, distance: 130,
+      color: "#38bdf8", opacity: 0.07, width: 1
+    }
+  },
+  interactivity: {
+    events: {
+      onHover: { enable: true, mode: "grab" }
+    },
+    modes: {
+      grab: { distance: 140, links: { opacity: 0.2 } }
+    }
+  }
+});
 </script>
 </body>
 </html>
