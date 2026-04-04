@@ -2021,26 +2021,44 @@ document.addEventListener('keydown', e => {
 })
 
 </script>
-  <script>
+<script>
 tsParticles.load("particles", {
   background: { color: { value: "transparent" } },
   particles: {
-    number: { value: 60, density: { enable: true } },
+    number: { value: 35, density: { enable: true } },
     color: { value: "#38bdf8" },
-    opacity: { value: 0.15 },
-    size: { value: { min: 1, max: 2.5 } },
-    move: { enable: true, speed: 0.4, direction: "none", random: true },
-    links: {
-      enable: true, distance: 130,
-      color: "#38bdf8", opacity: 0.07, width: 1
+    opacity: {
+      value: 0.35,
+      random: { enable: true, minimumValue: 0.15 }
+    },
+    size: {
+      value: { min: 4, max: 10 }
+    },
+    shape: {
+      type: "square"
+    },
+    rotate: {
+      value: { min: 0, max: 360 },
+      animation: { enable: true, speed: 3, sync: false }
+    },
+    move: {
+      enable: true,
+      speed: 0.6,
+      direction: "none",
+      random: true,
+      outModes: "out"
+    },
+    stroke: {
+      width: 1,
+      color: "#38bdf8"
     }
   },
   interactivity: {
     events: {
-      onHover: { enable: true, mode: "grab" }
+      onHover: { enable: true, mode: "repulse" }
     },
     modes: {
-      grab: { distance: 140, links: { opacity: 0.2 } }
+      repulse: { distance: 100, duration: 0.4 }
     }
   }
 });
