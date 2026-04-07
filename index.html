@@ -2024,13 +2024,13 @@ document.addEventListener('keydown', e => {
 <script>
 tsParticles.load("particles", {
   background: { color: { value: "transparent" } },
+
   particles: {
     number: { value: 45, density: { enable: true } },
-
     color: { value: "#38bdf8" },
 
     opacity: {
-      value: 0.6, // 👈 más visibles
+      value: 0.6,
       random: { enable: true, minimumValue: 0.3 }
     },
 
@@ -2049,10 +2049,9 @@ tsParticles.load("particles", {
       outModes: "out"
     },
 
-    // 👇 EFECTO TELARAÑA
     links: {
       enable: true,
-      distance: 120,      // qué tan lejos se conectan
+      distance: 120,
       color: "#38bdf8",
       opacity: 0.4,
       width: 1
@@ -2061,10 +2060,27 @@ tsParticles.load("particles", {
 
   interactivity: {
     events: {
-      onHover: { enable: true, mode: "repulse" }
+      onHover: {
+        enable: true,
+        mode: ["repulse", "trail"] // 👈 agregamos trail
+      }
     },
     modes: {
-      repulse: { distance: 120, duration: 0.4 }
+      repulse: {
+        distance: 120,
+        duration: 0.4
+      },
+
+      // 👇 EFECTO DESTELLO / RASTRO
+      trail: {
+        delay: 0.05,     // qué tan seguido aparecen
+        quantity: 6,     // cantidad de partículas en el rastro
+        particles: {
+          color: { value: "#ffffff" }, // destello blanco
+          opacity: { value: 0.8 },
+          size: { value: 3 }
+        }
+      }
     }
   }
 });
