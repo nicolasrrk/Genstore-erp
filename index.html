@@ -2026,16 +2026,17 @@ tsParticles.load("particles", {
   background: { color: { value: "transparent" } },
 
   particles: {
-    number: { value: 45, density: { enable: true } },
+    number: { value: 30, density: { enable: true } }, // 👈 menos partículas
+
     color: { value: "#38bdf8" },
 
     opacity: {
-      value: 0.6,
+      value: 0.5,
       random: { enable: true, minimumValue: 0.3 }
     },
 
     size: {
-      value: { min: 2, max: 5 }
+      value: { min: 2, max: 4 } // 👈 más chico = más liviano
     },
 
     shape: {
@@ -2044,16 +2045,16 @@ tsParticles.load("particles", {
 
     move: {
       enable: true,
-      speed: 0.8,
+      speed: 0.5, // 👈 más lento = menos carga
       random: true,
       outModes: "out"
     },
 
     links: {
       enable: true,
-      distance: 120,
+      distance: 100, // 👈 menos conexiones
       color: "#38bdf8",
-      opacity: 0.4,
+      opacity: 0.3,
       width: 1
     }
   },
@@ -2062,23 +2063,23 @@ tsParticles.load("particles", {
     events: {
       onHover: {
         enable: true,
-        mode: ["repulse", "trail"] // 👈 agregamos trail
+        mode: ["repulse", "trail"]
       }
     },
     modes: {
       repulse: {
-        distance: 120,
-        duration: 0.4
+        distance: 80, // 👈 más corto
+        duration: 0.3
       },
 
-      // 👇 EFECTO DESTELLO / RASTRO
+      // 👇 DESTELLO LIVIANO
       trail: {
-        delay: 0.05,     // qué tan seguido aparecen
-        quantity: 6,     // cantidad de partículas en el rastro
+        delay: 0.2,     // 👈 menos frecuencia
+        quantity: 2,    // 👈 MUCHO menos partículas
         particles: {
-          color: { value: "#ffffff" }, // destello blanco
-          opacity: { value: 0.8 },
-          size: { value: 3 }
+          color: { value: "#ffffff" },
+          opacity: { value: 0.4 },
+          size: { value: 2 }
         }
       }
     }
