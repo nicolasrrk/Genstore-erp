@@ -2015,9 +2015,9 @@ async function saveNewSale() {
   btn.innerHTML = '<span style="display:inline-block;width:11px;height:11px;border:1.5px solid rgba(0,0,0,0.3);border-top-color:#000;border-radius:50%;animation:spin 0.6s linear infinite"></span> Guardando…'
 
   DATA.ventas.unshift(venta)  // más reciente primero
-  DATA.ventas.unshift(venta)
+  descontarStock(producto, cantidad)
   await saveToSupabase()
-  await saveToSupabase()
+
 
   // Actualizar UI de estado
   document.getElementById('status-dot').classList.add('live')
