@@ -1886,6 +1886,26 @@ function exportData() {
 /* ══════════════════════════════════════════════════
    MODAL — NUEVA VENTA MANUAL
 ══════════════════════════════════════════════════ */
+function descontarStock(producto, cantidad) {
+  const item = DATA.stock.find(s =>
+    s.producto?.toLowerCase() === producto.toLowerCase()
+  )
+
+  if (!item) {
+    console.warn("⚠️ Producto no encontrado en stock:", producto)
+    return
+  }
+
+  // 🔥 IMPORTANTE: adaptado a tu estructura REAL
+  // Vos usás: inicial / vendido / disponible
+
+  item.vendido = Number(item.vendido || 0) + Number(cantidad)
+
+  // opcional: recalcular disponible si no lo hacés en render
+  if (item.inicial !== undefined) {
+    item.disponible = item.inicial - item.vendido
+  }
+}
 
 function openNewSaleModal() {
   // Prellenar fecha de hoy
@@ -1995,6 +2015,8 @@ async function saveNewSale() {
   btn.innerHTML = '<span style="display:inline-block;width:11px;height:11px;border:1.5px solid rgba(0,0,0,0.3);border-top-color:#000;border-radius:50%;animation:spin 0.6s linear infinite"></span> Guardando…'
 
   DATA.ventas.unshift(venta)  // más reciente primero
+  DATA.ventas.unshift(venta)
+  await saveToSupabase()
   await saveToSupabase()
 
   // Actualizar UI de estado
