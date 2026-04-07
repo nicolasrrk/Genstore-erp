@@ -2025,32 +2025,46 @@ document.addEventListener('keydown', e => {
 tsParticles.load("particles", {
   background: { color: { value: "transparent" } },
   particles: {
-    number: { value: 35, density: { enable: true } },
+    number: { value: 45, density: { enable: true } },
+
     color: { value: "#38bdf8" },
+
     opacity: {
-      value: 0.35,
-      random: { enable: true, minimumValue: 0.15 }
+      value: 0.6, // 👈 más visibles
+      random: { enable: true, minimumValue: 0.3 }
     },
+
     size: {
-      value: { min: 2, max: 6 } // más tipo partículas
+      value: { min: 2, max: 5 }
     },
+
     shape: {
-      type: "circle" // 👈 cambio clave (antes square)
+      type: "circle"
     },
+
     move: {
       enable: true,
-      speed: 0.6,
-      direction: "none",
+      speed: 0.8,
       random: true,
       outModes: "out"
+    },
+
+    // 👇 EFECTO TELARAÑA
+    links: {
+      enable: true,
+      distance: 120,      // qué tan lejos se conectan
+      color: "#38bdf8",
+      opacity: 0.4,
+      width: 1
     }
   },
+
   interactivity: {
     events: {
       onHover: { enable: true, mode: "repulse" }
     },
     modes: {
-      repulse: { distance: 100, duration: 0.4 }
+      repulse: { distance: 120, duration: 0.4 }
     }
   }
 });
