@@ -2032,14 +2032,10 @@ tsParticles.load("particles", {
       random: { enable: true, minimumValue: 0.15 }
     },
     size: {
-      value: { min: 4, max: 10 }
+      value: { min: 2, max: 6 } // más tipo partículas
     },
     shape: {
-      type: "square"
-    },
-    rotate: {
-      value: { min: 0, max: 360 },
-      animation: { enable: true, speed: 3, sync: false }
+      type: "circle" // 👈 cambio clave (antes square)
     },
     move: {
       enable: true,
@@ -2047,10 +2043,6 @@ tsParticles.load("particles", {
       direction: "none",
       random: true,
       outModes: "out"
-    },
-    stroke: {
-      width: 1,
-      color: "#38bdf8"
     }
   },
   interactivity: {
