@@ -769,7 +769,52 @@ input:focus, select:focus {
 .btn-save:hover { background: var(--orange2); transform: translateY(-1px); }
 .btn-save:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
 
-/* Botón "Nueva venta" en el encabezado de sección */
+/* ── CRUD ROW ACTIONS ──────────────────────────── */
+.btn-row {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 26px; height: 26px;
+  border-radius: var(--r);
+  border: 1px solid var(--border);
+  background: transparent;
+  color: var(--text3);
+  cursor: pointer; transition: all 0.12s;
+  font-size: 11px;
+}
+.btn-row:hover { background: var(--surface2); color: var(--text); border-color: var(--border2); }
+.btn-row.del:hover { background: var(--red-bg); color: var(--red); border-color: var(--red); }
+.td-actions { display: flex; gap: 4px; white-space: nowrap; }
+
+/* ── CONFIRM TOAST ─────────────────────────────── */
+.confirm-toast {
+  position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%) translateY(80px);
+  background: var(--surface2); border: 1px solid var(--border2);
+  border-radius: var(--r-lg); padding: 14px 18px;
+  display: flex; align-items: center; gap: 12px;
+  font-size: 12px; color: var(--text2);
+  box-shadow: 0 8px 32px rgba(0,0,0,0.5);
+  transition: transform 0.22s cubic-bezier(.4,0,.2,1);
+  z-index: 500; white-space: nowrap;
+}
+.confirm-toast.show { transform: translateX(-50%) translateY(0); }
+.confirm-toast strong { color: var(--text); }
+.btn-toast-del {
+  height: 28px; padding: 0 12px;
+  border: 1px solid var(--red);
+  border-radius: var(--r);
+  background: var(--red-bg); color: var(--red);
+  font-family: var(--sans); font-size: 12px; font-weight: 500;
+  cursor: pointer; transition: all 0.12s;
+}
+.btn-toast-del:hover { background: var(--red); color: #fff; }
+.btn-toast-cancel {
+  height: 28px; padding: 0 12px;
+  border: 1px solid var(--border);
+  border-radius: var(--r);
+  background: transparent; color: var(--text3);
+  font-family: var(--sans); font-size: 12px;
+  cursor: pointer; transition: all 0.12s;
+}
+.btn-toast-cancel:hover { border-color: var(--border2); color: var(--text); }
 .btn-new-sale {
   height: 32px; padding: 0 14px;
   border: 1px solid var(--orange);
@@ -1001,7 +1046,7 @@ input:focus, select:focus {
             <thead><tr>
               <th>Fecha</th><th>Producto</th><th>Cliente</th><th>Contacto</th>
               <th>Canal</th><th>Cant.</th><th>Precio</th><th>Costo</th>
-              <th>Total</th><th>Ganancia</th><th>Margen</th><th>Estado</th>
+              <th>Total</th><th>Ganancia</th><th>Margen</th><th>Estado</th><th></th>
             </tr></thead>
             <tbody id="vt-body">
               <tr><td colspan="12"><div class="empty"><div class="empty-ico">↗</div><div class="empty-t">Sin ventas</div><div class="empty-s">Importá la hoja VENTAS</div></div></td></tr>
@@ -1706,7 +1751,7 @@ function renderVentas() {
   set('vt-ct', v.length+' registros');
   const sB = {pagado:'bg',enviado:'bb',pendiente:'bn',cancelado:'br'};
   const cB = {instagram:'bb',whatsapp:'bg',referido:'ba',mercadolibre:'ba',presencial:'bn',otro:'bn'};
-  document.getElementById('vt-body').innerHTML = v.map(x=>`<tr>
+  document.getElementById('vt-body').innerHTML = v.map((x,i)=>`<tr>
     <td class="td-mono td-muted">${fd(x.fecha)}</td>
     <td class="td-bold">${x.producto}</td>
     <td>${x.cliente||'—'}</td>
@@ -1719,7 +1764,11 @@ function renderVentas() {
     <td class="td-mono ${x.ganancia>=0?'td-green':'td-red'}">${f$(x.ganancia)}</td>
     <td class="td-mono">${x.margen.toFixed(1)}%</td>
     <td><span class="badge ${sB[x.estado]||'bn'}">${x.estado||'—'}</span></td>
-  </tr>`).join('') || `<tr><td colspan="12">${emptyHTML('↗','Sin ventas','Importá la hoja VENTAS')}</td></tr>`;
+    <td><div class="td-actions">
+      <button class="btn-row" title="Editar" onclick="openEditModal(${i})">✎</button>
+      <button class="btn-row del" title="Eliminar" onclick="confirmDelete(${i})">✕</button>
+    </div></td>
+  </tr>`).join('') || `<tr><td colspan="13">${emptyHTML('↗','Sin ventas','Importá la hoja VENTAS')}</td></tr>`;
   const totV=v.reduce((s,x)=>s+x.total,0), ganV=v.reduce((s,x)=>s+x.ganancia,0);
   const mgV = totV>0?ganV/totV*100:0;
   document.getElementById('vt-foot').innerHTML = `
@@ -1886,6 +1935,7 @@ function exportData() {
 /* ══════════════════════════════════════════════════
    MODAL — NUEVA VENTA MANUAL
 ══════════════════════════════════════════════════ */
+
 function openNewSaleModal() {
   // Prellenar fecha de hoy
   const today = new Date().toISOString().split('T')[0]
@@ -1996,7 +2046,6 @@ async function saveNewSale() {
   DATA.ventas.unshift(venta)  // más reciente primero
   await saveToSupabase()
 
-
   // Actualizar UI de estado
   document.getElementById('status-dot').classList.add('live')
   document.getElementById('status-txt').textContent = 'Guardado ' + new Date().toLocaleTimeString('es-AR', {hour:'2-digit', minute:'2-digit'})
@@ -2017,10 +2066,255 @@ function nvFlash(msg) {
 
 // Cerrar modal con Escape
 document.addEventListener('keydown', e => {
-  if (e.key === 'Escape') closeNewSaleModal()
+  if (e.key === 'Escape') { closeNewSaleModal(); closeEditModal(); cancelDelete(); }
 })
 
+/* ══════════════════════════════════════════════════
+   CRUD — EDITAR VENTA
+══════════════════════════════════════════════════ */
+let _editIdx = null
+
+function openEditModal(idx) {
+  _editIdx = idx
+  const v = DATA.ventas[idx]
+  if (!v) return
+
+  // Poblar datalist
+  const dl = document.getElementById('ev-producto-list')
+  dl.innerHTML = DATA.stock.map(s => `<option value="${s.producto}">`).join('')
+
+  // Rellenar campos
+  const fechaStr = v.fecha ? v.fecha.toISOString().split('T')[0] : ''
+  document.getElementById('ev-fecha').value     = fechaStr
+  document.getElementById('ev-canal').value     = v.canal     || ''
+  document.getElementById('ev-producto').value  = v.producto  || ''
+  document.getElementById('ev-cliente').value   = v.cliente   || ''
+  document.getElementById('ev-contacto').value  = v.contacto  || ''
+  document.getElementById('ev-cantidad').value  = v.cantidad  || 1
+  document.getElementById('ev-precio').value    = v.precio    || ''
+  document.getElementById('ev-costo').value     = v.costo     || ''
+  document.getElementById('ev-estado').value    = v.estado    || 'pagado'
+  document.getElementById('ev-notas').value     = v.notas     || ''
+
+  evCalc()
+  document.getElementById('modal-edit-venta').classList.add('open')
+}
+
+function closeEditModal() {
+  document.getElementById('modal-edit-venta').classList.remove('open')
+  _editIdx = null
+}
+
+function handleEditBackdrop(e) {
+  if (e.target === e.currentTarget) closeEditModal()
+}
+
+function evCalc() {
+  const qty   = +document.getElementById('ev-cantidad').value || 0
+  const price = +document.getElementById('ev-precio').value   || 0
+  const cost  = +document.getElementById('ev-costo').value    || 0
+  const total = qty * price
+  const cTot  = qty * cost
+  const gan   = total - cTot
+  const mrg   = total > 0 ? (gan / total * 100) : 0
+
+  document.getElementById('ev-prev-total').textContent  = total ? f$(total)           : '—'
+  document.getElementById('ev-prev-gan').textContent    = gan   ? f$(gan)              : '—'
+  document.getElementById('ev-prev-costo').textContent  = cTot  ? f$(cTot)            : '—'
+  document.getElementById('ev-prev-margen').textContent = total ? mrg.toFixed(1)+'%'  : '—'
+}
+
+async function saveEditSale() {
+  if (_editIdx === null) return
+  const producto = document.getElementById('ev-producto').value.trim()
+  const precio   = +document.getElementById('ev-precio').value
+  const cantidad = +document.getElementById('ev-cantidad').value || 1
+
+  if (!producto) { evFlash('Ingresá un producto.'); return }
+  if (!precio)   { evFlash('Ingresá el precio unitario.'); return }
+
+  const costo  = +document.getElementById('ev-costo').value || 0
+  const total  = cantidad * precio
+  const cTot   = cantidad * costo
+  const gan    = total - cTot
+  const margen = total > 0 ? gan / total * 100 : 0
+  const fechaRaw = document.getElementById('ev-fecha').value
+  const fecha  = fechaRaw ? new Date(fechaRaw + 'T12:00:00') : new Date()
+
+  DATA.ventas[_editIdx] = {
+    ...DATA.ventas[_editIdx],
+    fecha,
+    producto,
+    cliente:    document.getElementById('ev-cliente').value.trim(),
+    contacto:   document.getElementById('ev-contacto').value.trim(),
+    canal:      document.getElementById('ev-canal').value.toLowerCase(),
+    cantidad,
+    precio,
+    costo,
+    total,
+    costoTotal: cTot,
+    ganancia:   gan,
+    margen:     +margen.toFixed(2),
+    estado:     document.getElementById('ev-estado').value,
+    notas:      document.getElementById('ev-notas').value.trim(),
+  }
+
+  const btn = document.getElementById('ev-save-btn')
+  btn.disabled = true
+  btn.innerHTML = '<span style="display:inline-block;width:11px;height:11px;border:1.5px solid rgba(0,0,0,0.3);border-top-color:#000;border-radius:50%;animation:spin 0.6s linear infinite"></span> Guardando…'
+
+  await saveToSupabase()
+
+  document.getElementById('status-dot').classList.add('live')
+  document.getElementById('status-txt').textContent = 'Guardado ' + new Date().toLocaleTimeString('es-AR', {hour:'2-digit', minute:'2-digit'})
+
+  renderAll()
+  closeEditModal()
+
+  btn.disabled = false
+  btn.innerHTML = '<svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M2 6l3 3 5-5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg> Guardar cambios'
+}
+
+function evFlash(msg) {
+  const preview = document.getElementById('ev-preview')
+  const orig    = preview.innerHTML
+  preview.innerHTML = `<div style="grid-column:1/-1;font-family:var(--mono);font-size:11px;color:var(--red);">⚠ ${msg}</div>`
+  setTimeout(() => { preview.innerHTML = orig; evCalc() }, 2200)
+}
+
+/* ══════════════════════════════════════════════════
+   CRUD — ELIMINAR VENTA
+══════════════════════════════════════════════════ */
+let _deleteIdx = null
+let _deleteTimer = null
+
+function confirmDelete(idx) {
+  _deleteIdx = idx
+  const v = DATA.ventas[idx]
+  document.getElementById('toast-prod-name').textContent = v ? (v.producto || 'esta venta') : 'esta venta'
+
+  const btn = document.getElementById('toast-del-btn')
+  btn.onclick = () => executeDelete()
+
+  const toast = document.getElementById('confirm-toast')
+  toast.classList.add('show')
+
+  // Auto-cancel after 5s
+  clearTimeout(_deleteTimer)
+  _deleteTimer = setTimeout(cancelDelete, 5000)
+}
+
+function cancelDelete() {
+  clearTimeout(_deleteTimer)
+  document.getElementById('confirm-toast').classList.remove('show')
+  _deleteIdx = null
+}
+
+async function executeDelete() {
+  if (_deleteIdx === null) return
+  cancelDelete()
+
+  DATA.ventas.splice(_deleteIdx, 1)
+  await saveToSupabase()
+
+  document.getElementById('status-dot').classList.add('live')
+  document.getElementById('status-txt').textContent = 'Guardado ' + new Date().toLocaleTimeString('es-AR', {hour:'2-digit', minute:'2-digit'})
+
+  renderAll()
+}
+
+
 </script>
+<!-- ══ CONFIRM DELETE TOAST ══════════════════════ -->
+<div class="confirm-toast" id="confirm-toast">
+  <span>¿Eliminar <strong id="toast-prod-name"></strong>?</span>
+  <button class="btn-toast-del" id="toast-del-btn">Eliminar</button>
+  <button class="btn-toast-cancel" onclick="cancelDelete()">Cancelar</button>
+</div>
+
+<!-- ══ MODAL EDITAR VENTA ════════════════════════ -->
+<div class="modal-backdrop" id="modal-edit-venta" onclick="handleEditBackdrop(event)">
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modal-title-ev">
+    <div class="modal-head">
+      <span class="modal-title" id="modal-title-ev">Editar venta</span>
+      <button class="modal-close" onclick="closeEditModal()" title="Cerrar">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="modal-grid">
+        <div>
+          <label class="m-label" for="ev-fecha">Fecha</label>
+          <input class="m-input" type="date" id="ev-fecha">
+        </div>
+        <div>
+          <label class="m-label" for="ev-canal">Canal</label>
+          <select class="m-select" id="ev-canal">
+            <option value="">— Seleccioná —</option>
+            <option value="facebook">Facebook</option>
+            <option value="instagram">Instagram</option>
+            <option value="whatsapp">WhatsApp</option>
+            <option value="mercadolibre">Mercado Libre</option>
+            <option value="presencial">Presencial</option>
+            <option value="otro">Otro</option>
+          </select>
+        </div>
+        <div class="full">
+          <label class="m-label" for="ev-producto">Producto</label>
+          <input class="m-input" type="text" id="ev-producto" placeholder="Nombre del producto" list="ev-producto-list">
+          <datalist id="ev-producto-list"></datalist>
+        </div>
+        <div>
+          <label class="m-label" for="ev-cliente">Cliente</label>
+          <input class="m-input" type="text" id="ev-cliente" placeholder="Nombre o razón social">
+        </div>
+        <div>
+          <label class="m-label" for="ev-contacto">Contacto</label>
+          <input class="m-input" type="text" id="ev-contacto" placeholder="Tel / @usuario">
+        </div>
+        <div>
+          <label class="m-label" for="ev-cantidad">Cantidad</label>
+          <input class="m-input" type="number" id="ev-cantidad" value="1" min="1" oninput="evCalc()">
+        </div>
+        <div>
+          <label class="m-label" for="ev-precio">Precio unitario</label>
+          <input class="m-input" type="number" id="ev-precio" placeholder="0" min="0" oninput="evCalc()">
+        </div>
+        <div>
+          <label class="m-label" for="ev-costo">Costo unitario</label>
+          <input class="m-input" type="number" id="ev-costo" placeholder="0" min="0" oninput="evCalc()">
+        </div>
+        <div>
+          <label class="m-label" for="ev-estado">Estado</label>
+          <select class="m-select" id="ev-estado">
+            <option value="pagado">Pagado</option>
+            <option value="enviado">Enviado</option>
+            <option value="pendiente">Pendiente</option>
+            <option value="cancelado">Cancelado</option>
+          </select>
+        </div>
+        <div>
+          <label class="m-label" for="ev-notas">Notas</label>
+          <input class="m-input" type="text" id="ev-notas" placeholder="Opcional">
+        </div>
+        <div class="full">
+          <div class="m-preview" id="ev-preview">
+            <div class="m-preview-item">Total <span id="ev-prev-total">—</span></div>
+            <div class="m-preview-item highlight">Ganancia <span id="ev-prev-gan">—</span></div>
+            <div class="m-preview-item">Costo total <span id="ev-prev-costo">—</span></div>
+            <div class="m-preview-item">Margen <span id="ev-prev-margen">—</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn-cancel" onclick="closeEditModal()">Cancelar</button>
+      <button class="btn-save" id="ev-save-btn" onclick="saveEditSale()">
+        <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M2 6l3 3 5-5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        Guardar cambios
+      </button>
+    </div>
+  </div>
+</div>
+
 <script>
 tsParticles.load("particles", {
   background: { color: { value: "transparent" } },
@@ -2071,5 +2365,7 @@ tsParticles.load("particles", {
   }
 });
 </script>
+
 </body>
+</html>
 </html>
