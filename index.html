@@ -2044,6 +2044,13 @@ async function saveNewSale() {
   btn.innerHTML = '<span style="display:inline-block;width:11px;height:11px;border:1.5px solid rgba(0,0,0,0.3);border-top-color:#000;border-radius:50%;animation:spin 0.6s linear infinite"></span> Guardando…'
 
   DATA.ventas.unshift(venta)  // más reciente primero
+
+  // Descontar stock del producto vendido
+  const stockItem = DATA.stock.find(s => s.producto.toLowerCase() === producto.toLowerCase())
+  if (stockItem) {
+    stockItem.stockActual = Math.max(0, stockItem.stockActual - cantidad)
+  }
+
   await saveToSupabase()
 
   // Actualizar UI de estado
@@ -2141,6 +2148,11 @@ async function saveEditSale() {
   const fechaRaw = document.getElementById('ev-fecha').value
   const fecha  = fechaRaw ? new Date(fechaRaw + 'T12:00:00') : new Date()
 
+  // Ajustar stock: revertir cantidad anterior y descontar la nueva
+  const ventaAnterior = DATA.ventas[_editIdx]
+  const productoAnterior = ventaAnterior.producto
+  const cantidadAnterior = ventaAnterior.cantidad || 0
+
   DATA.ventas[_editIdx] = {
     ...DATA.ventas[_editIdx],
     fecha,
@@ -2157,6 +2169,16 @@ async function saveEditSale() {
     margen:     +margen.toFixed(2),
     estado:     document.getElementById('ev-estado').value,
     notas:      document.getElementById('ev-notas').value.trim(),
+  }
+
+  // Revertir stock del producto anterior y descontar el nuevo
+  const stockAnterior = DATA.stock.find(s => s.producto.toLowerCase() === productoAnterior.toLowerCase())
+  if (stockAnterior) {
+    stockAnterior.stockActual = Math.max(0, stockAnterior.stockActual + cantidadAnterior)
+  }
+  const stockNuevo = DATA.stock.find(s => s.producto.toLowerCase() === producto.toLowerCase())
+  if (stockNuevo) {
+    stockNuevo.stockActual = Math.max(0, stockNuevo.stockActual - cantidad)
   }
 
   const btn = document.getElementById('ev-save-btn')
@@ -2213,6 +2235,15 @@ function cancelDelete() {
 async function executeDelete() {
   if (_deleteIdx === null) return
   cancelDelete()
+
+  // Devolver stock al eliminar la venta
+  const ventaEliminada = DATA.ventas[_deleteIdx]
+  if (ventaEliminada) {
+    const stockItem = DATA.stock.find(s => s.producto.toLowerCase() === ventaEliminada.producto.toLowerCase())
+    if (stockItem) {
+      stockItem.stockActual = Math.max(0, stockItem.stockActual + (ventaEliminada.cantidad || 0))
+    }
+  }
 
   DATA.ventas.splice(_deleteIdx, 1)
   await saveToSupabase()
@@ -2367,5 +2398,6 @@ tsParticles.load("particles", {
 </script>
 
 </body>
+</html>
 </html>
 </html>
