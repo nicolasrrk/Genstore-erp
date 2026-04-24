@@ -1157,7 +1157,7 @@ input:focus, select:focus {
                  <!-- Aviso para futuras automatizaciones -->
         <div class="full" id="nv-auto-hint" style="display:none;">
           <div style="font-family:var(--mono);font-size:10px;color:var(--orange);padding:8px 10px;background:var(--orange-dim);border-radius:var(--r);border:1px solid rgba(56,189,248,0.2);">
-            ⚡ Producto detectado en stock — el stock se podrá actualizar automáticamente en futuras versiones.
+            ⚡ Producto detectado en stock — el stock se descontará automáticamente al guardar.
           </div>
         </div>
 
@@ -1167,6 +1167,1613 @@ input:focus, select:focus {
       <button class="btn-cancel" onclick="closeNewSaleModal()">Cancelar</button>
       <button class="btn-save" id="nv-save-btn" onclick="saveNewSale()">
         <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M2 6l3 3 5-5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        Guardar venta
+      </button>
+    </div>
+  </div>
+</div>
+    <!-- ═══ STOCK ══════════════════════════════════ -->
+    <div class="page" id="page-stock">
+      <div class="section-hd">
+        <div>
+          <div class="section-title">Stock</div>
+          <div class="section-sub">Inventario y valor en depósito</div>
+        </div>
+        <button class="btn-new-sale" onclick="openNewStockModal()">
+          <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M6 1v10M1 6h10" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+          Nuevo producto
+        </button>
+      </div>
+      <div class="table-box">
+        <div class="table-hd">
+          <span class="table-hd-title">Inventario</span>
+          <span class="table-hd-count" id="sk-ct">0 productos</span>
+        </div>
+        <div class="table-scroll">
+          <table>
+            <thead><tr>
+              <th>Producto</th><th>Categoría</th><th>Inicial</th>
+              <th>Vendido</th><th>Disponible</th><th>Costo unit.</th>
+              <th>Valor stock</th><th>Estado</th><th></th>
+            </tr></thead>
+            <tbody id="sk-body">
+              <tr><td colspan="8"><div class="empty"><div class="empty-ico">▦</div><div class="empty-t">Sin inventario</div><div class="empty-s">Importá la hoja STOCK</div></div></td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="table-foot" id="sk-foot">
+          <span class="foot-item">Valor inventario <span class="g">—</span></span>
+          <span class="foot-item">Unidades totales <span>—</span></span>
+        </div>
+      </div>
+    </div>
+    <!-- ═══ GASTOS ══════════════════════════════════ -->
+    <div class="page" id="page-gastos">
+      <div class="section-hd">
+        <div>
+          <div class="section-title">Gastos</div>
+          <div class="section-sub">Inversiones y egresos del negocio</div>
+        </div>
+        <button class="btn-new-sale" onclick="openNewGastoModal()">
+          <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M6 1v10M1 6h10" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+          Nuevo gasto
+        </button>
+      </div>
+      <div class="table-box">
+        <div class="table-hd">
+          <span class="table-hd-title">Registro de gastos</span>
+          <span class="table-hd-count" id="gs-ct">0 registros</span>
+        </div>
+        <div class="table-scroll">
+          <table>
+            <thead><tr>
+              <th>Fecha</th><th>Concepto</th><th>Categoría</th>
+              <th>Monto</th><th>Tipo</th><th>Notas</th><th></th>
+            </tr></thead>
+            <tbody id="gs-body">
+              <tr><td colspan="6"><div class="empty"><div class="empty-ico">↙</div><div class="empty-t">Sin gastos</div><div class="empty-s">Importá la hoja GASTOS</div></div></td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="table-foot" id="gs-foot">
+          <span class="foot-item">Total gastos <span class="r">—</span></span>
+          <span class="foot-item">Gastos fijos <span>—</span></span>
+          <span class="foot-item">Gastos variables <span>—</span></span>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══ CLIENTES ════════════════════════════════ -->
+    <div class="page" id="page-clientes">
+      <div class="section-hd">
+        <div>
+          <div class="section-title">Clientes</div>
+          <div class="section-sub">Historial y valor por cliente</div>
+        </div>
+      </div>
+      <div class="table-box">
+        <div class="table-hd">
+          <span class="table-hd-title">Base de clientes</span>
+          <span class="table-hd-count" id="cl-ct">0 clientes</span>
+        </div>
+        <div class="table-scroll">
+          <table>
+            <thead><tr>
+              <th>Cliente</th><th>Contacto</th><th>Canal</th>
+              <th>Compras</th><th>Total gastado</th><th>Última compra</th><th>Segmento</th>
+            </tr></thead>
+            <tbody id="cl-body">
+              <tr><td colspan="7"><div class="empty"><div class="empty-ico">◉</div><div class="empty-t">Sin clientes</div><div class="empty-s">Se generan desde las ventas</div></div></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══ IMPORTAR ════════════════════════════════ -->
+    <div class="page" id="page-importar">
+      <div class="section-hd">
+        <div>
+          <div class="section-title">Importar Excel</div>
+          <div class="section-sub">Cargá tu planilla para poblar el sistema</div>
+        </div>
+      </div>
+      <div class="notice notice-info">
+        <span class="notice-icon">i</span>
+        Tu archivo debe tener 3 hojas: <strong>VENTAS</strong>, <strong>STOCK</strong> y <strong>GASTOS</strong>. Descargá la plantilla con el botón "↓ Plantilla" para ver el formato exacto.
+      </div>
+      <div class="upload-zone"
+           onclick="document.getElementById('file-input').click()"
+           ondragover="this.classList.add('drag');event.preventDefault()"
+           ondragleave="this.classList.remove('drag')"
+           ondrop="handleDrop(event)">
+        <div class="upload-icon">↑</div>
+        <div class="upload-title">Arrastrá tu archivo o hacé clic para seleccionarlo</div>
+        <div class="upload-sub">
+          Compatible con .xlsx y .xls<br>
+          El archivo se procesa en tu navegador — no se envía a ningún servidor
+        </div>
+        <input type="file" id="file-input" accept=".xlsx,.xls" onchange="loadFile(this.files[0])">
+      </div>
+      <div id="import-result" style="display:none;margin-top:16px">
+        <div class="notice notice-info" id="import-msg"></div>
+        <div class="import-stats">
+          <div class="import-stat">
+            <div class="import-stat-n td-blue" id="imp-v">0</div>
+            <div class="import-stat-l">Ventas leídas</div>
+          </div>
+          <div class="import-stat">
+            <div class="import-stat-n td-green" id="imp-s">0</div>
+            <div class="import-stat-l">Productos en stock</div>
+          </div>
+          <div class="import-stat">
+            <div class="import-stat-n td-red" id="imp-g">0</div>
+            <div class="import-stat-l">Gastos registrados</div>
+          </div>
+        </div>
+        <button class="btn btn-primary" onclick="goTo('dashboard')">Ver dashboard →</button>
+      </div>
+    </div>
+
+    <!-- ═══ GUÍA ══════════════════════════════════ -->
+    <div class="page" id="page-guia">
+      <div class="section-hd">
+        <div>
+          <div class="section-title">Guía de armado</div>
+          <div class="section-sub">Paso a paso para organizar tu planilla Excel</div>
+        </div>
+      </div>
+      <div class="notice notice-info" style="margin-bottom:20px">
+        <span class="notice-icon">↓</span>
+        Descargá la plantilla con datos de ejemplo haciendo clic en <strong>↓ Plantilla</strong> arriba a la derecha.
+      </div>
+      <div class="guide-grid">
+        <div class="guide-card">
+          <div class="guide-num">01</div>
+          <div>
+            <div class="guide-title">Crear el archivo</div>
+            <div class="guide-desc">Abrí Excel o Google Sheets y creá un archivo nuevo. Necesitás exactamente 3 pestañas con estos nombres en mayúsculas:</div>
+            <span class="code-block">VENTAS &nbsp;·&nbsp; STOCK &nbsp;·&nbsp; GASTOS</span>
+          </div>
+        </div>
+        <div class="guide-card">
+          <div class="guide-num">02</div>
+          <div>
+            <div class="guide-title">Hoja VENTAS</div>
+            <div class="guide-desc">Primera fila con estos encabezados exactos, sin espacios:</div>
+            <span class="code-block">fecha · producto · cliente · contacto · canal · cantidad · precio_unitario · costo_unitario · estado · notas</span>
+          </div>
+        </div>
+        <div class="guide-card">
+          <div class="guide-num">03</div>
+          <div>
+            <div class="guide-title">Hoja STOCK</div>
+            <div class="guide-desc">Un producto por fila. Columnas requeridas:</div>
+            <span class="code-block">producto · categoria · stock_inicial · stock_actual · costo_unitario · precio_venta · proveedor · notas</span>
+          </div>
+        </div>
+        <div class="guide-card">
+          <div class="guide-num">04</div>
+          <div>
+            <div class="guide-title">Hoja GASTOS</div>
+            <div class="guide-desc">Cada gasto o inversión en una fila:</div>
+            <span class="code-block">fecha · concepto · categoria · monto · tipo · notas</span>
+            <div class="guide-desc" style="margin-top:8px">El campo <strong>tipo</strong> acepta: <code style="font-family:var(--mono);font-size:10px">fijo</code> o <code style="font-family:var(--mono);font-size:10px">variable</code></div>
+          </div>
+        </div>
+        <div class="guide-card">
+          <div class="guide-num">05</div>
+          <div>
+            <div class="guide-title">Valores de "canal"</div>
+            <div class="guide-desc">Indicá de dónde vino cada cliente para ver qué canal convierte mejor:</div>
+            <span class="code-block">instagram · whatsapp · referido · mercadolibre · presencial · otro</span>
+          </div>
+        </div>
+        <div class="guide-card">
+          <div class="guide-num">06</div>
+          <div>
+            <div class="guide-title">Valores de "estado"</div>
+            <div class="guide-desc">El estado de cada venta. Usá estos valores exactos:</div>
+            <span class="code-block">pagado · pendiente · cancelado · enviado</span>
+          </div>
+        </div>
+        <div class="guide-card">
+          <div class="guide-num">07</div>
+          <div>
+            <div class="guide-title">Fechas</div>
+            <div class="guide-desc">Cualquier formato que Excel reconozca funciona. Recomendado:</div>
+            <span class="code-block">DD/MM/YYYY → 15/03/2025</span>
+          </div>
+        </div>
+      <!-- tabla ejemplo -->
+      <div class="table-box" style="margin-top:16px">
+        <div class="table-hd">
+          <span class="table-hd-title">Ejemplo de hoja VENTAS</span>
+          <span class="table-hd-count">Así debe verse</span>
+        </div>
+        <div class="table-scroll">
+          <table>
+            <thead><tr>
+              <th>fecha</th><th>producto</th><th>cliente</th><th>contacto</th>
+              <th>canal</th><th>cantidad</th><th>precio_unitario</th>
+              <th>costo_unitario</th><th>estado</th><th>notas</th>
+            </tr></thead>
+            <tbody>
+              <tr>
+                <td class="td-mono td-muted">15/03/2025</td>
+                <td class="td-bold">Termo Stanley 1L</td>
+                <td>María García</td>
+                <td class="td-mono td-muted">+54 911 2345</td>
+                <td><span class="badge bb">instagram</span></td>
+                <td class="td-mono">2</td>
+                <td class="td-mono td-green">$8.500</td>
+                <td class="td-mono td-amber">$5.200</td>
+                <td><span class="badge bg">pagado</span></td>
+                <td class="td-muted">Entrega en mano</td>
+              </tr>
+              <tr>
+                <td class="td-mono td-muted">18/03/2025</td>
+                <td class="td-bold">Mate con bombilla</td>
+                <td>Carlos López</td>
+                <td class="td-mono td-muted">+54 911 6789</td>
+                <td><span class="badge bg">whatsapp</span></td>
+                <td class="td-mono">1</td>
+                <td class="td-mono td-green">$4.200</td>
+                <td class="td-mono td-amber">$2.800</td>
+                <td><span class="badge bb">enviado</span></td>
+                <td class="td-muted">OCA</td>
+              </tr>
+              <tr>
+                <td class="td-mono td-muted">20/03/2025</td>
+                <td class="td-bold">Termo Stanley 750ml</td>
+                <td>Ana Martínez</td>
+                <td class="td-mono td-muted">@ana.mate</td>
+                <td><span class="badge bb">instagram</span></td>
+                <td class="td-mono">1</td>
+                <td class="td-mono td-green">$7.000</td>
+                <td class="td-mono td-amber">$4.500</td>
+                <td><span class="badge bn">pendiente</span></td>
+                <td class="td-muted">Confirma mañana</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div><!-- /content -->
+</div><!-- /main -->
+
+<script>
+/* ══════════════════════════════════════════════════
+   SIDEBAR MÓVIL
+══════════════════════════════════════════════════ */
+function toggleSidebar() {
+  document.querySelector('.sidebar').classList.toggle('open')
+  document.getElementById('sidebar-overlay').classList.toggle('visible')
+}
+function closeSidebar() {
+  document.querySelector('.sidebar').classList.remove('open')
+  document.getElementById('sidebar-overlay').classList.remove('visible')
+}
+
+/* ══════════════════════════════════════════════════
+   SUPABASE — reemplazá con tus datos de proyecto
+══════════════════════════════════════════════════ */
+const SUPABASE_URL = 'https://oynglftyzyzxghvnkwxb.supabase.co'  // ← tu URL
+const SUPABASE_KEY = 'sb_publishable_WhLQuZPnJocu5ej3-pnapw_W8ASFml6'                     // ← tu anon key
+
+const { createClient } = supabase
+const db = createClient(SUPABASE_URL, SUPABASE_KEY)
+
+/* ══════════════════════════════════════════════════
+   AUTH GUARD — redirige al login si no hay sesión
+══════════════════════════════════════════════════ */
+let CURRENT_USER = null
+
+;(async () => {
+  const { data: { session } } = await db.auth.getSession()
+  if (!session) {
+    window.location.href = 'login.html'
+    return
+  }
+  CURRENT_USER = session.user
+  document.getElementById('user-email').textContent = CURRENT_USER.email
+
+  // Cargar datos guardados de este usuario
+  await loadFromSupabase()
+})()
+
+// Escuchar cambios de sesión (ej: token expirado)
+db.auth.onAuthStateChange((event, session) => {
+  if (event === 'SIGNED_OUT' || !session) {
+    window.location.href = 'login.html'
+  }
+})
+
+async function logout() {
+  await db.auth.signOut()
+  window.location.href = 'login.html'
+}
+
+/* ══════════════════════════════════════════════════
+   PERSISTENCIA — guardar y cargar datos en Supabase
+══════════════════════════════════════════════════ */
+
+// Guarda los datos del ERP en la tabla "erp_data" de Supabase
+async function saveToSupabase() {
+  if (!CURRENT_USER) return
+  const payload = {
+    user_id: CURRENT_USER.id,
+    ventas:  DATA.ventas,
+    stock:   DATA.stock,
+    gastos:  DATA.gastos,
+    updated_at: new Date().toISOString()
+  }
+  const { error } = await db
+    .from('erp_data')
+    .upsert(payload, { onConflict: 'user_id' })
+
+  if (error) console.error('Error guardando en Supabase:', error)
+}
+
+// Carga los datos del usuario desde Supabase al iniciar
+async function loadFromSupabase() {
+  if (!CURRENT_USER) return
+  const { data, error } = await db
+    .from('erp_data')
+    .select('ventas, stock, gastos, updated_at')
+    .eq('user_id', CURRENT_USER.id)
+    .single()
+
+  if (error || !data) return // primera vez: sin datos todavía
+
+  // Restaurar fechas (vienen como string desde JSON)
+  DATA.ventas = (data.ventas || []).map(v => ({ ...v, fecha: v.fecha ? new Date(v.fecha) : null }))
+  DATA.stock  = data.stock  || []
+  DATA.gastos = (data.gastos || []).map(g => ({ ...g, fecha: g.fecha ? new Date(g.fecha) : null }))
+
+  if (DATA.ventas.length || DATA.stock.length || DATA.gastos.length) {
+    const t = new Date(data.updated_at)
+    document.getElementById('status-dot').classList.add('live')
+    document.getElementById('status-txt').textContent = 'Guardado ' + t.toLocaleTimeString('es-AR', {hour:'2-digit',minute:'2-digit'})
+    renderAll()
+  }
+}
+
+/* ══════════════════════════════════════════════════
+   STATE
+══════════════════════════════════════════════════ */
+let DATA = { ventas:[], stock:[], gastos:[] };
+let CH = {};
+
+/* ══════════════════════════════════════════════════
+   NAV
+══════════════════════════════════════════════════ */
+const PAGE_TITLES = {
+  dashboard:'Dashboard', ventas:'Ventas', stock:'Stock',
+  gastos:'Gastos', clientes:'Clientes',
+  importar:'Importar Excel', guia:'Guía de armado'
+};
+
+function goTo(id) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  document.getElementById('page-'+id).classList.add('active');
+  const items = document.querySelectorAll('.nav-item');
+  const keys  = ['dashboard','ventas','stock','gastos','clientes','importar','guia'];
+  const idx   = keys.indexOf(id);
+  if (idx >= 0) items[idx].classList.add('active');
+  document.getElementById('topbar-title').textContent = PAGE_TITLES[id] || id;
+  closeSidebar(); // cerrar en móvil al navegar
+}
+
+/* ══════════════════════════════════════════════════
+   FILE
+══════════════════════════════════════════════════ */
+function handleDrop(e) {
+  e.preventDefault();
+  document.querySelector('.upload-zone').classList.remove('drag');
+  if (e.dataTransfer.files[0]) loadFile(e.dataTransfer.files[0]);
+}
+
+function loadFile(file) {
+  if (!file) return;
+  const r = new FileReader();
+  r.onload = async e => {
+    try {
+      const wb = XLSX.read(e.target.result, { type:'binary', cellDates:true });
+      const names = wb.SheetNames.map(s => s.toUpperCase());
+      const get = name => {
+        const i = names.indexOf(name);
+        return i >= 0 ? XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[i]], { defval:'' }) : [];
+      };
+      DATA.ventas = normVentas(get('VENTAS'));
+      DATA.stock  = normStock(get('STOCK'));
+      DATA.gastos = normGastos(get('GASTOS'));
+
+      // Guardar en Supabase automáticamente tras importar
+      await saveToSupabase();
+
+      // status
+      document.getElementById('status-dot').classList.add('live');
+      document.getElementById('status-txt').textContent = 'Guardado ' + new Date().toLocaleTimeString('es-AR', {hour:'2-digit',minute:'2-digit'});
+
+      // import ui
+      document.getElementById('imp-v').textContent = DATA.ventas.length;
+      document.getElementById('imp-s').textContent = DATA.stock.length;
+      document.getElementById('imp-g').textContent = DATA.gastos.length;
+      document.getElementById('import-result').style.display = 'block';
+      document.getElementById('import-msg').textContent = `✓ "${file.name}" importado y guardado en la nube — ${DATA.ventas.length} ventas, ${DATA.stock.length} productos, ${DATA.gastos.length} gastos.`;
+
+      renderAll();
+    } catch(err) {
+      document.getElementById('import-result').style.display = 'block';
+      document.getElementById('import-msg').className = 'notice notice-warn';
+      document.getElementById('import-msg').textContent = '✗ Error: ' + err.message;
+    }
+  };
+  r.readAsBinaryString(file);
+}
+
+/* ══════════════════════════════════════════════════
+   NORMALIZE
+══════════════════════════════════════════════════ */
+function normVentas(rows) {
+  return rows.map(r => {
+    const qty = +r.cantidad || 0;
+    const p   = +r.precio_unitario || 0;
+    const c   = +r.costo_unitario  || 0;
+    const tot = qty * p, cos = qty * c;
+    const gan = tot - cos;
+    return {
+      fecha: pd(r.fecha), producto: r.producto||'', cliente: r.cliente||'',
+      contacto: r.contacto||'', canal: (r.canal||'').toLowerCase(),
+      cantidad: qty, precio: p, costo: c,
+      total: tot, costoTotal: cos, ganancia: gan,
+      margen: tot > 0 ? gan/tot*100 : 0,
+      estado: (r.estado||'').toLowerCase(), notas: r.notas||''
+    };
+  });
+}
+function normStock(rows) {
+  return rows.map(r => ({
+    producto: r.producto||'', categoria: r.categoria||'',
+    stockInicial: +r.stock_inicial||0, stockActual: +r.stock_actual||0,
+    costoUnitario: +r.costo_unitario||0, precioVenta: +r.precio_venta||0,
+    proveedor: r.proveedor||'', notas: r.notas||''
+  }));
+}
+function normGastos(rows) {
+  return rows.map(r => ({
+    fecha: pd(r.fecha), concepto: r.concepto||'',
+    categoria: r.categoria||'', monto: +r.monto||0,
+    tipo: (r.tipo||'').toLowerCase(), notas: r.notas||''
+  }));
+}
+function pd(v) {
+  if (!v) return null;
+  if (v instanceof Date) return v;
+  if (typeof v === 'number') return new Date(Math.round((v-25569)*86400*1000));
+  const s = String(v), pts = s.split('/');
+  if (pts.length===3) return new Date(pts[2], pts[1]-1, pts[0]);
+  return new Date(s);
+}
+
+/* ══════════════════════════════════════════════════
+   FORMAT
+══════════════════════════════════════════════════ */
+const f$ = n => '$' + Math.round(n).toLocaleString('es-AR');
+const fN  = n => Math.round(n).toLocaleString('es-AR');
+const fd  = d => d ? d.toLocaleDateString('es-AR') : '—';
+
+/* ══════════════════════════════════════════════════
+   RENDER ALL
+══════════════════════════════════════════════════ */
+function renderAll() {
+  renderDash();
+  renderVentas();
+  renderStock();
+  renderGastos();
+  renderClientes();
+}
+
+/* ── DASHBOARD ──────────────────────────────────── */
+function renderDash() {
+  const vv = DATA.ventas.filter(v => v.estado !== 'cancelado');
+  const ing = vv.reduce((s,v)=>s+v.total,0);
+  const cV  = vv.reduce((s,v)=>s+v.costoTotal,0);
+  const gT  = DATA.gastos.reduce((s,g)=>s+g.monto,0);
+  const inv = cV + gT;
+  const gan = ing - inv;
+  const roi = inv > 0 ? gan/inv*100 : 0;
+  const mgP = ing > 0 ? gan/ing*100 : 0;
+  const tkt = vv.length > 0 ? ing/vv.length : 0;
+  const uni = vv.reduce((s,v)=>s+v.cantidad,0);
+  const stk = DATA.stock.reduce((s,p)=>s+p.stockActual,0);
+
+  set('m-ingresos', f$(ing));
+  set('m-inversion', f$(inv));
+  set('m-ganancia', f$(gan));
+  set('m-roi', roi.toFixed(1)+'%');
+  set('m-margen', mgP.toFixed(1)+'%');
+  set('m-ticket', f$(tkt));
+  set('m-unidades', fN(uni));
+  set('m-stock', fN(stk));
+  set('m-ing-foot', vv.length + ' ventas');
+  set('m-gan-foot', 'Margen ' + mgP.toFixed(1)+'%');
+
+  if (vv.length) document.getElementById('notice-empty').style.display='none';
+
+  // ROI bars
+  const mx = Math.max(inv, ing, 1);
+  rb('rb-inv', inv/mx*100, f$(inv), '');
+  rb('rb-rec', Math.min(ing,inv)/mx*100, f$(ing), '');
+  rb('rb-gan', Math.max(gan,0)/mx*100, f$(gan), '');
+
+  // charts
+  const byMes = {};
+  vv.forEach(v => {
+    if (!v.fecha) return;
+    const k = v.fecha.toLocaleString('es-AR',{month:'short',year:'2-digit'});
+    byMes[k] = (byMes[k]||0) + v.total;
+  });
+  mkBar('ch-mes', Object.keys(byMes), Object.values(byMes));
+
+  const byP = {};
+  vv.forEach(v => { byP[v.producto] = (byP[v.producto]||0)+v.cantidad; });
+  const sp = Object.entries(byP).sort((a,b)=>b[1]-a[1]).slice(0,7);
+  mkDoughnut('ch-prod', sp.map(x=>x[0]), sp.map(x=>x[1]));
+
+  // top table
+  const pm = {};
+  vv.forEach(v => {
+    if (!pm[v.producto]) pm[v.producto]={ing:0,cos:0,gan:0,uni:0};
+    pm[v.producto].ing+=v.total; pm[v.producto].cos+=v.costoTotal;
+    pm[v.producto].gan+=v.ganancia; pm[v.producto].uni+=v.cantidad;
+  });
+  const pr = Object.entries(pm).sort((a,b)=>b[1].gan-a[1].gan);
+  set('top-ct', pr.length+' productos');
+  document.getElementById('top-body').innerHTML = pr.map(([p,m])=>{
+    const mg = m.ing>0?(m.gan/m.ing*100).toFixed(1):0;
+    const mc = +mg>30?'td-green':+mg>15?'td-amber':'td-red';
+    return `<tr>
+      <td class="td-bold">${p}</td>
+      <td class="td-mono">${m.uni}</td>
+      <td class="td-mono td-green">${f$(m.ing)}</td>
+      <td class="td-mono td-amber">${f$(m.cos)}</td>
+      <td class="td-mono td-green">${f$(m.gan)}</td>
+      <td class="td-mono ${mc}">${mg}%</td>
+    </tr>`;
+  }).join('') || emptyRow(6,'◈','Sin datos');
+}
+
+function rb(id, pct, label, _) {
+  document.getElementById(id).style.width = pct+'%';
+  document.getElementById(id+'-n').textContent = label;
+}
+function set(id, v) { const el=document.getElementById(id); if(el) el.textContent=v; }
+
+/* ── VENTAS ─────────────────────────────────────── */
+function renderVentas() {
+  const v = DATA.ventas;
+  set('vt-ct', v.length+' registros');
+  const sB = {pagado:'bg',enviado:'bb',pendiente:'bn',cancelado:'br'};
+  const cB = {instagram:'bb',whatsapp:'bg',referido:'ba',mercadolibre:'ba',presencial:'bn',otro:'bn'};
+  document.getElementById('vt-body').innerHTML = v.map((x,i)=>`<tr>
+    <td class="td-mono td-muted">${fd(x.fecha)}</td>
+    <td class="td-bold">${x.producto}</td>
+    <td>${x.cliente||'—'}</td>
+    <td class="td-mono td-muted">${x.contacto||'—'}</td>
+    <td><span class="badge ${cB[x.canal]||'bn'}">${x.canal||'—'}</span></td>
+    <td class="td-mono">${x.cantidad}</td>
+    <td class="td-mono td-green">${f$(x.precio)}</td>
+    <td class="td-mono td-amber">${f$(x.costo)}</td>
+    <td class="td-mono td-bold">${f$(x.total)}</td>
+    <td class="td-mono ${x.ganancia>=0?'td-green':'td-red'}">${f$(x.ganancia)}</td>
+    <td class="td-mono">${x.margen.toFixed(1)}%</td>
+    <td><span class="badge ${sB[x.estado]||'bn'}">${x.estado||'—'}</span></td>
+    <td><div class="td-actions">
+      <button class="btn-row" title="Editar" onclick="openEditModal(${i})">✎</button>
+      <button class="btn-row del" title="Eliminar" onclick="confirmDelete(${i})">✕</button>
+    </div></td>
+  </tr>`).join('') || `<tr><td colspan="13">${emptyHTML('↗','Sin ventas','Importá la hoja VENTAS')}</td></tr>`;
+  const totV=v.reduce((s,x)=>s+x.total,0), ganV=v.reduce((s,x)=>s+x.ganancia,0);
+  const mgV = totV>0?ganV/totV*100:0;
+  document.getElementById('vt-foot').innerHTML = `
+    <span class="foot-item">Total <span>${f$(totV)}</span></span>
+    <span class="foot-item">Ganancia <span class="g">${f$(ganV)}</span></span>
+    <span class="foot-item">Margen prom. <span class="a">${mgV.toFixed(1)}%</span></span>
+    <span class="foot-item">Ticket prom. <span>${v.length?f$(totV/v.length):'—'}</span></span>`;
+}
+
+/* ── STOCK ──────────────────────────────────────── */
+function renderStock() {
+  const s = DATA.stock;
+  set('sk-ct', s.length+' productos');
+  const vm = {};
+  DATA.ventas.forEach(v => { vm[v.producto]=(vm[v.producto]||0)+v.cantidad; });
+  document.getElementById('sk-body').innerHTML = s.map((p,i)=>{
+    const vnd=vm[p.producto]||0, dis=p.stockActual;
+    const val=dis*p.costoUnitario;
+    const pct=p.stockInicial>0?dis/p.stockInicial*100:0;
+    const [lbl,bc,fc]=dis<=0?['Agotado','br','var(--red)']:dis<=3?['Crítico','br','var(--red)']:dis<=10?['Bajo','ba','var(--amber)']:['OK','bg','var(--green)'];
+    return `<tr>
+      <td class="td-bold">${p.producto}</td>
+      <td><span class="badge bn">${p.categoria||'—'}</span></td>
+      <td class="td-mono">${p.stockInicial}</td>
+      <td class="td-mono td-amber">${vnd}</td>
+      <td>
+        <div class="td-mono td-bold">${dis}</div>
+        <div class="sbar"><div class="sfill" style="width:${Math.min(pct,100)}%;background:${fc}"></div></div>
+      </td>
+      <td class="td-mono td-amber">${f$(p.costoUnitario)}</td>
+      <td class="td-mono td-green">${f$(val)}</td>
+      <td><span class="badge ${bc}">${lbl}</span></td>
+      <td><div class="td-actions">
+        <button class="btn-row" title="Editar" onclick="openEditStockModal(${i})">✎</button>
+        <button class="btn-row del" title="Eliminar" onclick="confirmDeleteStock(${i})">✕</button>
+      </div></td>
+    </tr>`;
+  }).join('') || `<tr><td colspan="9">${emptyHTML('▦','Sin inventario','Importá la hoja STOCK o agregá un producto')}</td></tr>`;
+  const vT=s.reduce((s,p)=>s+p.stockActual*p.costoUnitario,0), uT=s.reduce((s,p)=>s+p.stockActual,0);
+  document.getElementById('sk-foot').innerHTML=`
+    <span class="foot-item">Valor inventario <span class="g">${f$(vT)}</span></span>
+    <span class="foot-item">Unidades totales <span>${fN(uT)}</span></span>`;
+}
+
+/* ── GASTOS ─────────────────────────────────────── */
+function renderGastos() {
+  const g = DATA.gastos;
+  set('gs-ct', g.length+' registros');
+  document.getElementById('gs-body').innerHTML = g.map((x,i)=>`<tr>
+    <td class="td-mono td-muted">${fd(x.fecha)}</td>
+    <td class="td-bold">${x.concepto}</td>
+    <td><span class="badge bn">${x.categoria||'—'}</span></td>
+    <td class="td-mono td-red">${f$(x.monto)}</td>
+    <td><span class="badge ${x.tipo==='fijo'?'bb':'ba'}">${x.tipo||'—'}</span></td>
+    <td class="td-muted">${x.notas||'—'}</td>
+    <td><div class="td-actions">
+      <button class="btn-row" title="Editar" onclick="openEditGastoModal(${i})">✎</button>
+      <button class="btn-row del" title="Eliminar" onclick="confirmDeleteGasto(${i})">✕</button>
+    </div></td>
+  </tr>`).join('') || `<tr><td colspan="7">${emptyHTML('↙','Sin gastos','Importá la hoja GASTOS o agregá un gasto')}</td></tr>`;
+  const tot=g.reduce((s,x)=>s+x.monto,0);
+  const fij=g.filter(x=>x.tipo==='fijo').reduce((s,x)=>s+x.monto,0);
+  const vari=g.filter(x=>x.tipo==='variable').reduce((s,x)=>s+x.monto,0);
+  document.getElementById('gs-foot').innerHTML=`
+    <span class="foot-item">Total <span class="r">${f$(tot)}</span></span>
+    <span class="foot-item">Fijos <span>${f$(fij)}</span></span>
+    <span class="foot-item">Variables <span>${f$(vari)}</span></span>`;
+}
+
+/* ── CLIENTES ───────────────────────────────────── */
+function renderClientes() {
+  const mp = {};
+  DATA.ventas.forEach(v=>{
+    const k=v.cliente||'Sin nombre';
+    if(!mp[k]) mp[k]={nombre:k,contacto:v.contacto,canal:v.canal,n:0,tot:0,ult:null};
+    mp[k].n++; mp[k].tot+=v.total;
+    if(!mp[k].ult||(v.fecha&&v.fecha>mp[k].ult)) mp[k].ult=v.fecha;
+  });
+  const cl=Object.values(mp).sort((a,b)=>b.tot-a.tot);
+  set('cl-ct', cl.length+' clientes');
+  const mx=Math.max(...cl.map(c=>c.tot),1);
+  const cB={instagram:'bb',whatsapp:'bg',referido:'ba',mercadolibre:'ba',presencial:'bn',otro:'bn'};
+  document.getElementById('cl-body').innerHTML=cl.map(c=>{
+    const seg=c.tot>mx*0.6?['VIP','bg']:c.tot>mx*0.3?['Regular','ba']:['Nuevo','bn'];
+    return `<tr>
+      <td class="td-bold">${c.nombre}</td>
+      <td class="td-mono td-muted">${c.contacto||'—'}</td>
+      <td><span class="badge ${cB[c.canal]||'bn'}">${c.canal||'—'}</span></td>
+      <td class="td-mono">${c.n}</td>
+      <td class="td-mono td-green">${f$(c.tot)}</td>
+      <td class="td-mono td-muted">${fd(c.ult)}</td>
+      <td><span class="badge ${seg[1]}">${seg[0]}</span></td>
+    </tr>`;
+  }).join('')||`<tr><td colspan="7">${emptyHTML('◉','Sin clientes','Se generan desde las ventas')}</td></tr>`;
+}
+
+/* ══════════════════════════════════════════════════
+   CHARTS
+══════════════════════════════════════════════════ */
+const PALETTE = ['#c8440e','#1a6b42','#1a4a8a','#8a5e00','#6a1a8a','#1a6a8a','#8a1a4a'];
+
+function mkBar(id, labels, data) {
+  const ctx = document.getElementById(id);
+  if (!ctx) return;
+  if (CH[id]) CH[id].destroy();
+  CH[id] = new Chart(ctx, {
+    type: 'bar',
+    data: { labels, datasets: [{ data, backgroundColor: 'rgba(200,68,14,0.1)', borderColor: '#c8440e', borderWidth: 1.5, borderRadius: 3 }] },
+    options: {
+      responsive:true, maintainAspectRatio:false,
+      plugins:{ legend:{display:false} },
+      scales:{
+        x:{ grid:{color:'#ece8e1'}, ticks:{color:'#a89f96',font:{family:"'Geist Mono'",size:9}} },
+        y:{ grid:{color:'#ece8e1'}, ticks:{color:'#a89f96',font:{family:"'Geist Mono'",size:9},callback:v=>'$'+(v/1000).toFixed(0)+'k'} }
+      }
+    }
+  });
+}
+function mkDoughnut(id, labels, data) {
+  const ctx = document.getElementById(id);
+  if (!ctx) return;
+  if (CH[id]) CH[id].destroy();
+  CH[id] = new Chart(ctx, {
+    type: 'doughnut',
+    data: { labels, datasets: [{ data, backgroundColor:PALETTE.map(c=>c+'cc'), borderColor:'#fdfcfa', borderWidth:2 }] },
+    options: {
+      responsive:true, maintainAspectRatio:false,
+      plugins:{
+        legend:{position:'bottom',labels:{color:'#6b6560',font:{family:"'Geist Mono'",size:9},padding:6,boxWidth:8}}
+      }
+    }
+  });
+}
+
+/* ══════════════════════════════════════════════════
+   HELPERS
+══════════════════════════════════════════════════ */
+function emptyHTML(ico, title, sub) {
+  return `<div class="empty"><div class="empty-ico">${ico}</div><div class="empty-t">${title}</div><div class="empty-s">${sub}</div></div>`;
+}
+function emptyRow(cols, ico, title) {
+  return `<tr><td colspan="${cols}">${emptyHTML(ico,title,'')}</td></tr>`;
+}
+
+/* ══════════════════════════════════════════════════
+   EXPORT TEMPLATE
+══════════════════════════════════════════════════ */
+function exportData() {
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet([
+    ['fecha','producto','cliente','contacto','canal','cantidad','precio_unitario','costo_unitario','estado','notas'],
+    ['15/03/2025','Termo Stanley 1L','María García','+54 911 2345','instagram',2,8500,5200,'pagado','Entrega en mano'],
+    ['18/03/2025','Mate con bombilla','Carlos López','+54 911 6789','whatsapp',1,4200,2800,'enviado','OCA'],
+    ['20/03/2025','Termo Stanley 750ml','Ana Martínez','@ana.mate','instagram',1,7000,4500,'pendiente','Confirma mañana'],
+  ]), 'VENTAS');
+  XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet([
+    ['producto','categoria','stock_inicial','stock_actual','costo_unitario','precio_venta','proveedor','notas'],
+    ['Termo Stanley 1L','Termos',20,18,5200,8500,'Proveedor ABC',''],
+    ['Termo Stanley 750ml','Termos',15,14,4500,7000,'Proveedor ABC',''],
+    ['Mate con bombilla','Mates',10,9,2800,4200,'Distribuidora XYZ',''],
+  ]), 'STOCK');
+  XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet([
+    ['fecha','concepto','categoria','monto','tipo','notas'],
+    ['01/03/2025','Compra de stock inicial','Mercadería',150000,'variable','30 termos'],
+    ['05/03/2025','Envío OCA','Logística',800,'variable',''],
+    ['10/03/2025','Instagram Ads','Marketing',5000,'variable','Campaña marzo'],
+  ]), 'GASTOS');
+  XLSX.writeFile(wb, 'genstore-plantilla.xlsx');
+}
+
+
+/* ══════════════════════════════════════════════════
+   MODAL — NUEVA VENTA MANUAL
+══════════════════════════════════════════════════ */
+
+function openNewSaleModal() {
+  // Prellenar fecha de hoy
+  const today = new Date().toISOString().split('T')[0]
+  document.getElementById('nv-fecha').value = today
+
+  // Poblar datalist con productos del stock
+  const dl = document.getElementById('nv-producto-list')
+  dl.innerHTML = DATA.stock.map(s => `<option value="${s.producto}">`).join('')
+
+  nvCalc()
+  document.getElementById('modal-nueva-venta').classList.add('open')
+  setTimeout(() => document.getElementById('nv-producto').focus(), 180)
+}
+
+function closeNewSaleModal() {
+  document.getElementById('modal-nueva-venta').classList.remove('open')
+  // Resetear formulario
+  ;['nv-producto','nv-cliente','nv-contacto','nv-notas'].forEach(id =>
+    document.getElementById(id).value = ''
+  )
+  document.getElementById('nv-cantidad').value = 1
+  document.getElementById('nv-precio').value = ''
+  document.getElementById('nv-costo').value = ''
+  document.getElementById('nv-canal').value = ''
+  document.getElementById('nv-estado').value = 'pagado'
+  document.getElementById('nv-auto-hint').style.display = 'none'
+  nvCalc()
+}
+
+function handleModalBackdrop(e) {
+  if (e.target === e.currentTarget) closeNewSaleModal()
+}
+
+// Autocompletado de precio/costo desde stock al escribir producto
+function nvAutoFill() {
+  const nombre = document.getElementById('nv-producto').value.trim().toLowerCase()
+  const match  = DATA.stock.find(s => s.producto.toLowerCase() === nombre)
+  const hint   = document.getElementById('nv-auto-hint')
+
+  if (match) {
+    if (!document.getElementById('nv-precio').value)
+      document.getElementById('nv-precio').value = match.precioVenta || ''
+    if (!document.getElementById('nv-costo').value)
+      document.getElementById('nv-costo').value  = match.costoUnitario || ''
+    hint.style.display = 'block'
+  } else {
+    hint.style.display = 'none'
+  }
+  nvCalc()
+}
+
+// Recalcular preview en tiempo real
+function nvCalc() {
+  const qty   = +document.getElementById('nv-cantidad').value || 0
+  const price = +document.getElementById('nv-precio').value   || 0
+  const cost  = +document.getElementById('nv-costo').value    || 0
+  const total = qty * price
+  const cTot  = qty * cost
+  const gan   = total - cTot
+  const mrg   = total > 0 ? (gan / total * 100) : 0
+
+  document.getElementById('nv-prev-total').textContent  = total  ? f$(total)          : '—'
+  document.getElementById('nv-prev-gan').textContent    = gan    ? f$(gan)             : '—'
+  document.getElementById('nv-prev-costo').textContent  = cTot   ? f$(cTot)           : '—'
+  document.getElementById('nv-prev-margen').textContent = total  ? mrg.toFixed(1)+'%' : '—'
+}
+
+async function saveNewSale() {
+  const producto = document.getElementById('nv-producto').value.trim()
+  const precio   = +document.getElementById('nv-precio').value
+  const cantidad = +document.getElementById('nv-cantidad').value || 1
+
+  if (!producto)        { nvFlash('Ingresá un producto.');          return }
+  if (!precio)          { nvFlash('Ingresá el precio unitario.');   return }
+
+  const costo   = +document.getElementById('nv-costo').value   || 0
+  const total   = cantidad * precio
+  const cTot    = cantidad * costo
+  const gan     = total - cTot
+  const margen  = total > 0 ? gan / total * 100 : 0
+  const fechaRaw = document.getElementById('nv-fecha').value
+  const fecha   = fechaRaw ? new Date(fechaRaw + 'T12:00:00') : new Date()
+
+  const venta = {
+    fecha,
+    producto,
+    cliente:    document.getElementById('nv-cliente').value.trim(),
+    contacto:   document.getElementById('nv-contacto').value.trim(),
+    canal:      document.getElementById('nv-canal').value.toLowerCase(),
+    cantidad,
+    precio,
+    costo,
+    total,
+    costoTotal: cTot,
+    ganancia:   gan,
+    margen:     +margen.toFixed(2),
+    estado:     document.getElementById('nv-estado').value,
+    notas:      document.getElementById('nv-notas').value.trim(),
+    // 🔧 Campo reservado para automatizaciones futuras
+    fuente:     'manual',
+  }
+
+  // Deshabilitar botón mientras guarda
+  const btn = document.getElementById('nv-save-btn')
+  btn.disabled = true
+  btn.innerHTML = '<span style="display:inline-block;width:11px;height:11px;border:1.5px solid rgba(0,0,0,0.3);border-top-color:#000;border-radius:50%;animation:spin 0.6s linear infinite"></span> Guardando…'
+
+  DATA.ventas.unshift(venta)  // más reciente primero
+
+  // Descontar stock del producto vendido
+  const stockItem = DATA.stock.find(s => s.producto.toLowerCase() === producto.toLowerCase())
+  if (stockItem) {
+    stockItem.stockActual = Math.max(0, stockItem.stockActual - cantidad)
+  }
+
+  await saveToSupabase()
+
+  // Actualizar UI de estado
+  document.getElementById('status-dot').classList.add('live')
+  document.getElementById('status-txt').textContent = 'Guardado ' + new Date().toLocaleTimeString('es-AR', {hour:'2-digit', minute:'2-digit'})
+
+  renderAll()
+  closeNewSaleModal()
+
+  btn.disabled = false
+  btn.innerHTML = '<svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M2 6l3 3 5-5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg> Guardar venta'
+}
+
+function nvFlash(msg) {
+  const preview = document.getElementById('nv-preview')
+  const orig    = preview.innerHTML
+  preview.innerHTML = `<div style="grid-column:1/-1;font-family:var(--mono);font-size:11px;color:var(--red);">⚠ ${msg}</div>`
+  setTimeout(() => { preview.innerHTML = orig; nvCalc() }, 2200)
+}
+
+// Cerrar modal con Escape
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') { closeNewSaleModal(); closeEditModal(); cancelDelete(); }
+})
+
+/* ══════════════════════════════════════════════════
+   CRUD — EDITAR VENTA
+══════════════════════════════════════════════════ */
+let _editIdx = null
+
+function openEditModal(idx) {
+  _editIdx = idx
+  const v = DATA.ventas[idx]
+  if (!v) return
+
+  // Poblar datalist
+  const dl = document.getElementById('ev-producto-list')
+  dl.innerHTML = DATA.stock.map(s => `<option value="${s.producto}">`).join('')
+
+  // Rellenar campos
+  const fechaStr = v.fecha ? v.fecha.toISOString().split('T')[0] : ''
+  document.getElementById('ev-fecha').value     = fechaStr
+  document.getElementById('ev-canal').value     = v.canal     || ''
+  document.getElementById('ev-producto').value  = v.producto  || ''
+  document.getElementById('ev-cliente').value   = v.cliente   || ''
+  document.getElementById('ev-contacto').value  = v.contacto  || ''
+  document.getElementById('ev-cantidad').value  = v.cantidad  || 1
+  document.getElementById('ev-precio').value    = v.precio    || ''
+  document.getElementById('ev-costo').value     = v.costo     || ''
+  document.getElementById('ev-estado').value    = v.estado    || 'pagado'
+  document.getElementById('ev-notas').value     = v.notas     || ''
+
+  evCalc()
+  document.getElementById('modal-edit-venta').classList.add('open')
+}
+
+function closeEditModal() {
+  document.getElementById('modal-edit-venta').classList.remove('open')
+  _editIdx = null
+}
+
+function handleEditBackdrop(e) {
+  if (e.target === e.currentTarget) closeEditModal()
+}
+
+function evCalc() {
+  const qty   = +document.getElementById('ev-cantidad').value || 0
+  const price = +document.getElementById('ev-precio').value   || 0
+  const cost  = +document.getElementById('ev-costo').value    || 0
+  const total = qty * price
+  const cTot  = qty * cost
+  const gan   = total - cTot
+  const mrg   = total > 0 ? (gan / total * 100) : 0
+
+  document.getElementById('ev-prev-total').textContent  = total ? f$(total)           : '—'
+  document.getElementById('ev-prev-gan').textContent    = gan   ? f$(gan)              : '—'
+  document.getElementById('ev-prev-costo').textContent  = cTot  ? f$(cTot)            : '—'
+  document.getElementById('ev-prev-margen').textContent = total ? mrg.toFixed(1)+'%'  : '—'
+}
+
+async function saveEditSale() {
+  if (_editIdx === null) return
+  const producto = document.getElementById('ev-producto').value.trim()
+  const precio   = +document.getElementById('ev-precio').value
+  const cantidad = +document.getElementById('ev-cantidad').value || 1
+
+  if (!producto) { evFlash('Ingresá un producto.'); return }
+  if (!precio)   { evFlash('Ingresá el precio unitario.'); return }
+
+  const costo  = +document.getElementById('ev-costo').value || 0
+  const total  = cantidad * precio
+  const cTot   = cantidad * costo
+  const gan    = total - cTot
+  const margen = total > 0 ? gan / total * 100 : 0
+  const fechaRaw = document.getElementById('ev-fecha').value
+  const fecha  = fechaRaw ? new Date(fechaRaw + 'T12:00:00') : new Date()
+
+  // Ajustar stock: revertir cantidad anterior y descontar la nueva
+  const ventaAnterior = DATA.ventas[_editIdx]
+  const productoAnterior = ventaAnterior.producto
+  const cantidadAnterior = ventaAnterior.cantidad || 0
+
+  DATA.ventas[_editIdx] = {
+    ...DATA.ventas[_editIdx],
+    fecha,
+    producto,
+    cliente:    document.getElementById('ev-cliente').value.trim(),
+    contacto:   document.getElementById('ev-contacto').value.trim(),
+    canal:      document.getElementById('ev-canal').value.toLowerCase(),
+    cantidad,
+    precio,
+    costo,
+    total,
+    costoTotal: cTot,
+    ganancia:   gan,
+    margen:     +margen.toFixed(2),
+    estado:     document.getElementById('ev-estado').value,
+    notas:      document.getElementById('ev-notas').value.trim(),
+  }
+
+  // Revertir stock del producto anterior y descontar el nuevo
+  const stockAnterior = DATA.stock.find(s => s.producto.toLowerCase() === productoAnterior.toLowerCase())
+  if (stockAnterior) {
+    stockAnterior.stockActual = Math.max(0, stockAnterior.stockActual + cantidadAnterior)
+  }
+  const stockNuevo = DATA.stock.find(s => s.producto.toLowerCase() === producto.toLowerCase())
+  if (stockNuevo) {
+    stockNuevo.stockActual = Math.max(0, stockNuevo.stockActual - cantidad)
+  }
+
+  const btn = document.getElementById('ev-save-btn')
+  btn.disabled = true
+  btn.innerHTML = '<span style="display:inline-block;width:11px;height:11px;border:1.5px solid rgba(0,0,0,0.3);border-top-color:#000;border-radius:50%;animation:spin 0.6s linear infinite"></span> Guardando…'
+
+  await saveToSupabase()
+
+  document.getElementById('status-dot').classList.add('live')
+  document.getElementById('status-txt').textContent = 'Guardado ' + new Date().toLocaleTimeString('es-AR', {hour:'2-digit', minute:'2-digit'})
+
+  renderAll()
+  closeEditModal()
+
+  btn.disabled = false
+  btn.innerHTML = '<svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M2 6l3 3 5-5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg> Guardar cambios'
+}
+
+function evFlash(msg) {
+  const preview = document.getElementById('ev-preview')
+  const orig    = preview.innerHTML
+  preview.innerHTML = `<div style="grid-column:1/-1;font-family:var(--mono);font-size:11px;color:var(--red);">⚠ ${msg}</div>`
+  setTimeout(() => { preview.innerHTML = orig; evCalc() }, 2200)
+}
+
+/* ══════════════════════════════════════════════════
+   CRUD STOCK — NUEVO / EDITAR / ELIMINAR
+══════════════════════════════════════════════════ */
+let _editStockIdx = null
+
+function openNewStockModal() {
+  _editStockIdx = null
+  document.getElementById('sk-modal-title').textContent = 'Nuevo producto'
+  document.getElementById('sk-save-btn').textContent = 'Guardar producto'
+  ;['sk-producto','sk-categoria','sk-proveedor','sk-notas'].forEach(id => document.getElementById(id).value = '')
+  document.getElementById('sk-stock-inicial').value = 0
+  document.getElementById('sk-stock-actual').value  = 0
+  document.getElementById('sk-costo').value         = 0
+  document.getElementById('sk-precio').value        = 0
+  document.getElementById('modal-stock').classList.add('open')
+  setTimeout(() => document.getElementById('sk-producto').focus(), 180)
+}
+
+function openEditStockModal(idx) {
+  _editStockIdx = idx
+  const p = DATA.stock[idx]
+  if (!p) return
+  document.getElementById('sk-modal-title').textContent = 'Editar producto'
+  document.getElementById('sk-save-btn').textContent = 'Guardar cambios'
+  document.getElementById('sk-producto').value       = p.producto       || ''
+  document.getElementById('sk-categoria').value      = p.categoria      || ''
+  document.getElementById('sk-stock-inicial').value  = p.stockInicial   || 0
+  document.getElementById('sk-stock-actual').value   = p.stockActual    || 0
+  document.getElementById('sk-costo').value          = p.costoUnitario  || 0
+  document.getElementById('sk-precio').value         = p.precioVenta    || 0
+  document.getElementById('sk-proveedor').value      = p.proveedor      || ''
+  document.getElementById('sk-notas').value          = p.notas          || ''
+  document.getElementById('modal-stock').classList.add('open')
+}
+
+function closeStockModal() {
+  document.getElementById('modal-stock').classList.remove('open')
+  _editStockIdx = null
+}
+
+function handleStockBackdrop(e) {
+  if (e.target === e.currentTarget) closeStockModal()
+}
+
+async function saveStock() {
+  const producto = document.getElementById('sk-producto').value.trim()
+  if (!producto) { skFlash('Ingresá el nombre del producto.'); return }
+
+  const item = {
+    producto,
+    categoria:     document.getElementById('sk-categoria').value.trim(),
+    stockInicial:  +document.getElementById('sk-stock-inicial').value || 0,
+    stockActual:   +document.getElementById('sk-stock-actual').value  || 0,
+    costoUnitario: +document.getElementById('sk-costo').value         || 0,
+    precioVenta:   +document.getElementById('sk-precio').value        || 0,
+    proveedor:     document.getElementById('sk-proveedor').value.trim(),
+    notas:         document.getElementById('sk-notas').value.trim(),
+  }
+
+  const btn = document.getElementById('sk-save-btn')
+  btn.disabled = true
+
+  if (_editStockIdx !== null) {
+    DATA.stock[_editStockIdx] = item
+  } else {
+    DATA.stock.push(item)
+  }
+
+  await saveToSupabase()
+  document.getElementById('status-dot').classList.add('live')
+  document.getElementById('status-txt').textContent = 'Guardado ' + new Date().toLocaleTimeString('es-AR', {hour:'2-digit', minute:'2-digit'})
+  renderAll()
+  closeStockModal()
+  btn.disabled = false
+}
+
+function skFlash(msg) {
+  const el = document.getElementById('sk-flash')
+  el.textContent = '⚠ ' + msg
+  el.style.display = 'block'
+  setTimeout(() => { el.style.display = 'none' }, 2200)
+}
+
+// Eliminar stock
+let _deleteStockIdx = null
+let _deleteStockTimer = null
+
+function confirmDeleteStock(idx) {
+  _deleteStockIdx = idx
+  const p = DATA.stock[idx]
+  document.getElementById('toast-stock-name').textContent = p ? (p.producto || 'este producto') : 'este producto'
+  const toast = document.getElementById('confirm-toast-stock')
+  toast.classList.add('show')
+  clearTimeout(_deleteStockTimer)
+  _deleteStockTimer = setTimeout(cancelDeleteStock, 5000)
+}
+
+function cancelDeleteStock() {
+  clearTimeout(_deleteStockTimer)
+  document.getElementById('confirm-toast-stock').classList.remove('show')
+  _deleteStockIdx = null
+}
+
+async function executeDeleteStock() {
+  if (_deleteStockIdx === null) return
+  cancelDeleteStock()
+  DATA.stock.splice(_deleteStockIdx, 1)
+  await saveToSupabase()
+  document.getElementById('status-dot').classList.add('live')
+  document.getElementById('status-txt').textContent = 'Guardado ' + new Date().toLocaleTimeString('es-AR', {hour:'2-digit', minute:'2-digit'})
+  renderAll()
+}
+
+/* ══════════════════════════════════════════════════
+   CRUD GASTOS — NUEVO / EDITAR / ELIMINAR
+══════════════════════════════════════════════════ */
+let _editGastoIdx = null
+
+function openNewGastoModal() {
+  _editGastoIdx = null
+  document.getElementById('gs-modal-title').textContent = 'Nuevo gasto'
+  document.getElementById('gs-save-btn').textContent = 'Guardar gasto'
+  const today = new Date().toISOString().split('T')[0]
+  document.getElementById('gs-fecha').value    = today
+  document.getElementById('gs-concepto').value = ''
+  document.getElementById('gs-categoria').value= ''
+  document.getElementById('gs-monto').value    = ''
+  document.getElementById('gs-tipo').value     = 'variable'
+  document.getElementById('gs-notas').value    = ''
+  document.getElementById('modal-gasto').classList.add('open')
+  setTimeout(() => document.getElementById('gs-concepto').focus(), 180)
+}
+
+function openEditGastoModal(idx) {
+  _editGastoIdx = idx
+  const g = DATA.gastos[idx]
+  if (!g) return
+  document.getElementById('gs-modal-title').textContent = 'Editar gasto'
+  document.getElementById('gs-save-btn').textContent = 'Guardar cambios'
+  const fechaStr = g.fecha ? (g.fecha instanceof Date ? g.fecha.toISOString().split('T')[0] : String(g.fecha).split('T')[0]) : ''
+  document.getElementById('gs-fecha').value    = fechaStr
+  document.getElementById('gs-concepto').value = g.concepto  || ''
+  document.getElementById('gs-categoria').value= g.categoria || ''
+  document.getElementById('gs-monto').value    = g.monto     || ''
+  document.getElementById('gs-tipo').value     = g.tipo      || 'variable'
+  document.getElementById('gs-notas').value    = g.notas     || ''
+  document.getElementById('modal-gasto').classList.add('open')
+}
+
+function closeGastoModal() {
+  document.getElementById('modal-gasto').classList.remove('open')
+  _editGastoIdx = null
+}
+
+function handleGastoBackdrop(e) {
+  if (e.target === e.currentTarget) closeGastoModal()
+}
+
+async function saveGasto() {
+  const concepto = document.getElementById('gs-concepto').value.trim()
+  const monto    = +document.getElementById('gs-monto').value
+  if (!concepto) { gsFlash('Ingresá el concepto del gasto.'); return }
+  if (!monto)    { gsFlash('Ingresá el monto.'); return }
+
+  const fechaRaw = document.getElementById('gs-fecha').value
+  const fecha    = fechaRaw ? new Date(fechaRaw + 'T12:00:00') : new Date()
+
+  const item = {
+    fecha,
+    concepto,
+    categoria: document.getElementById('gs-categoria').value.trim(),
+    monto,
+    tipo:      document.getElementById('gs-tipo').value,
+    notas:     document.getElementById('gs-notas').value.trim(),
+  }
+
+  const btn = document.getElementById('gs-save-btn')
+  btn.disabled = true
+
+  if (_editGastoIdx !== null) {
+    DATA.gastos[_editGastoIdx] = item
+  } else {
+    DATA.gastos.unshift(item)
+  }
+
+  await saveToSupabase()
+  document.getElementById('status-dot').classList.add('live')
+  document.getElementById('status-txt').textContent = 'Guardado ' + new Date().toLocaleTimeString('es-AR', {hour:'2-digit', minute:'2-digit'})
+  renderAll()
+  closeGastoModal()
+  btn.disabled = false
+}
+
+function gsFlash(msg) {
+  const el = document.getElementById('gs-flash')
+  el.textContent = '⚠ ' + msg
+  el.style.display = 'block'
+  setTimeout(() => { el.style.display = 'none' }, 2200)
+}
+
+// Eliminar gasto
+let _deleteGastoIdx = null
+let _deleteGastoTimer = null
+
+function confirmDeleteGasto(idx) {
+  _deleteGastoIdx = idx
+  const g = DATA.gastos[idx]
+  document.getElementById('toast-gasto-name').textContent = g ? (g.concepto || 'este gasto') : 'este gasto'
+  const toast = document.getElementById('confirm-toast-gasto')
+  toast.classList.add('show')
+  clearTimeout(_deleteGastoTimer)
+  _deleteGastoTimer = setTimeout(cancelDeleteGasto, 5000)
+}
+
+function cancelDeleteGasto() {
+  clearTimeout(_deleteGastoTimer)
+  document.getElementById('confirm-toast-gasto').classList.remove('show')
+  _deleteGastoIdx = null
+}
+
+async function executeDeleteGasto() {
+  if (_deleteGastoIdx === null) return
+  cancelDeleteGasto()
+  DATA.gastos.splice(_deleteGastoIdx, 1)
+  await saveToSupabase()
+  document.getElementById('status-dot').classList.add('live')
+  document.getElementById('status-txt').textContent = 'Guardado ' + new Date().toLocaleTimeString('es-AR', {hour:'2-digit', minute:'2-digit'})
+  renderAll()
+}
+
+// Extender Escape para cerrar todos los modales
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') {
+    closeStockModal()
+    closeGastoModal()
+    cancelDeleteStock()
+    cancelDeleteGasto()
+  }
+})
+
+/* ══════════════════════════════════════════════════
+   CRUD — ELIMINAR VENTA
+══════════════════════════════════════════════════ */
+let _deleteIdx = null
+let _deleteTimer = null
+
+function confirmDelete(idx) {
+  _deleteIdx = idx
+  const v = DATA.ventas[idx]
+  document.getElementById('toast-prod-name').textContent = v ? (v.producto || 'esta venta') : 'esta venta'
+
+  const btn = document.getElementById('toast-del-btn')
+  btn.onclick = () => executeDelete()
+
+  const toast = document.getElementById('confirm-toast')
+  toast.classList.add('show')
+
+  // Auto-cancel after 5s
+  clearTimeout(_deleteTimer)
+  _deleteTimer = setTimeout(cancelDelete, 5000)
+}
+
+function cancelDelete() {
+  clearTimeout(_deleteTimer)
+  document.getElementById('confirm-toast').classList.remove('show')
+  _deleteIdx = null
+}
+
+async function executeDelete() {
+  if (_deleteIdx === null) return
+  cancelDelete()
+
+  // Devolver stock al eliminar la venta
+  const ventaEliminada = DATA.ventas[_deleteIdx]
+  if (ventaEliminada) {
+    const stockItem = DATA.stock.find(s => s.producto.toLowerCase() === ventaEliminada.producto.toLowerCase())
+    if (stockItem) {
+      stockItem.stockActual = Math.max(0, stockItem.stockActual + (ventaEliminada.cantidad || 0))
+    }
+  }
+
+  DATA.ventas.splice(_deleteIdx, 1)
+  await saveToSupabase()
+
+  document.getElementById('status-dot').classList.add('live')
+  document.getElementById('status-txt').textContent = 'Guardado ' + new Date().toLocaleTimeString('es-AR', {hour:'2-digit', minute:'2-digit'})
+
+  renderAll()
+}
+
+
+</script>
+<!-- ══ CONFIRM DELETE TOAST ══════════════════════ -->
+<div class="confirm-toast" id="confirm-toast">
+  <span>¿Eliminar <strong id="toast-prod-name"></strong>?</span>
+  <button class="btn-toast-del" id="toast-del-btn">Eliminar</button>
+  <button class="btn-toast-cancel" onclick="cancelDelete()">Cancelar</button>
+</div>
+
+<!-- ══ MODAL EDITAR VENTA ════════════════════════ -->
+<div class="modal-backdrop" id="modal-edit-venta" onclick="handleEditBackdrop(event)">
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modal-title-ev">
+    <div class="modal-head">
+      <span class="modal-title" id="modal-title-ev">Editar venta</span>
+      <button class="modal-close" onclick="closeEditModal()" title="Cerrar">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="modal-grid">
+        <div>
+          <label class="m-label" for="ev-fecha">Fecha</label>
+          <input class="m-input" type="date" id="ev-fecha">
+        </div>
+        <div>
+          <label class="m-label" for="ev-canal">Canal</label>
+          <select class="m-select" id="ev-canal">
+            <option value="">— Seleccioná —</option>
+            <option value="facebook">Facebook</option>
+            <option value="instagram">Instagram</option>
+            <option value="whatsapp">WhatsApp</option>
+            <option value="mercadolibre">Mercado Libre</option>
+            <option value="presencial">Presencial</option>
+            <option value="otro">Otro</option>
+          </select>
+        </div>
+        <div class="full">
+          <label class="m-label" for="ev-producto">Producto</label>
+          <input class="m-input" type="text" id="ev-producto" placeholder="Nombre del producto" list="ev-producto-list">
+          <datalist id="ev-producto-list"></datalist>
+        </div>
+        <div>
+          <label class="m-label" for="ev-cliente">Cliente</label>
+          <input class="m-input" type="text" id="ev-cliente" placeholder="Nombre o razón social">
+        </div>
+        <div>
+          <label class="m-label" for="ev-contacto">Contacto</label>
+          <input class="m-input" type="text" id="ev-contacto" placeholder="Tel / @usuario">
+        </div>
+        <div>
+          <label class="m-label" for="ev-cantidad">Cantidad</label>
+          <input class="m-input" type="number" id="ev-cantidad" value="1" min="1" oninput="evCalc()">
+        </div>
+        <div>
+          <label class="m-label" for="ev-precio">Precio unitario</label>
+          <input class="m-input" type="number" id="ev-precio" placeholder="0" min="0" oninput="evCalc()">
+        </div>
+        <div>
+          <label class="m-label" for="ev-costo">Costo unitario</label>
+          <input class="m-input" type="number" id="ev-costo" placeholder="0" min="0" oninput="evCalc()">
+        </div>
+        <div>
+          <label class="m-label" for="ev-estado">Estado</label>
+          <select class="m-select" id="ev-estado">
+            <option value="pagado">Pagado</option>
+            <option value="enviado">Enviado</option>
+            <option value="pendiente">Pendiente</option>
+            <option value="cancelado">Cancelado</option>
+          </select>
+        </div>
+        <div>
+          <label class="m-label" for="ev-notas">Notas</label>
+          <input class="m-input" type="text" id="ev-notas" placeholder="Opcional">
+        </div>
+        <div class="full">
+          <div class="m-preview" id="ev-preview">
+            <div class="m-preview-item">Total <span id="ev-prev-total">—</span></div>
+            <div class="m-preview-item highlight">Ganancia <span id="ev-prev-gan">—</span></div>
+            <div class="m-preview-item">Costo total <span id="ev-prev-costo">—</span></div>
+            <div class="m-preview-item">Margen <span id="ev-prev-margen">—</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn-cancel" onclick="closeEditModal()">Cancelar</button>
+      <button class="btn-save" id="ev-save-btn" onclick="saveEditSale()">
+        <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M2 6l3 3 5-5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        Guardar cambios
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ CONFIRM DELETE TOAST — STOCK ══════════════ -->
+<div class="confirm-toast" id="confirm-toast-stock">
+  <span>¿Eliminar <strong id="toast-stock-name"></strong>?</span>
+  <button class="btn-toast-del" onclick="executeDeleteStock()">Eliminar</button>
+  <button class="btn-toast-cancel" onclick="cancelDeleteStock()">Cancelar</button>
+</div>
+
+<!-- ══ CONFIRM DELETE TOAST — GASTO ══════════════ -->
+<div class="confirm-toast" id="confirm-toast-gasto">
+  <span>¿Eliminar <strong id="toast-gasto-name"></strong>?</span>
+  <button class="btn-toast-del" onclick="executeDeleteGasto()">Eliminar</button>
+  <button class="btn-toast-cancel" onclick="cancelDeleteGasto()">Cancelar</button>
+</div>
+
+<!-- ══ MODAL STOCK ════════════════════════════════ -->
+<div class="modal-backdrop" id="modal-stock" onclick="handleStockBackdrop(event)">
+  <div class="modal" role="dialog" aria-modal="true">
+    <div class="modal-head">
+      <span class="modal-title" id="sk-modal-title">Nuevo producto</span>
+      <button class="modal-close" onclick="closeStockModal()" title="Cerrar">✕</button>
+    </div>
+    <div class="modal-body">
+      <div id="sk-flash" style="display:none;font-family:var(--mono);font-size:11px;color:var(--red);margin-bottom:12px;padding:8px 10px;background:var(--red-bg);border-radius:var(--r);border:1px solid var(--red);"></div>
+      <div class="modal-grid">
+        <div class="full">
+          <label class="m-label" for="sk-producto">Producto *</label>
+          <input class="m-input" type="text" id="sk-producto" placeholder="Nombre del producto">
+        </div>
+        <div>
+          <label class="m-label" for="sk-categoria">Categoría</label>
+          <input class="m-input" type="text" id="sk-categoria" placeholder="Ej: Termos, Mates…">
+        </div>
+        <div>
+          <label class="m-label" for="sk-proveedor">Proveedor</label>
+          <input class="m-input" type="text" id="sk-proveedor" placeholder="Nombre del proveedor">
+        </div>
+        <div>
+          <label class="m-label" for="sk-stock-inicial">Stock inicial</label>
+          <input class="m-input" type="number" id="sk-stock-inicial" value="0" min="0">
+        </div>
+        <div>
+          <label class="m-label" for="sk-stock-actual">Stock actual</label>
+          <input class="m-input" type="number" id="sk-stock-actual" value="0" min="0">
+        </div>
+        <div>
+          <label class="m-label" for="sk-costo">Costo unitario</label>
+          <input class="m-input" type="number" id="sk-costo" value="0" min="0" placeholder="0">
+        </div>
+        <div>
+          <label class="m-label" for="sk-precio">Precio de venta</label>
+          <input class="m-input" type="number" id="sk-precio" value="0" min="0" placeholder="0">
+        </div>
+        <div class="full">
+          <label class="m-label" for="sk-notas">Notas</label>
+          <input class="m-input" type="text" id="sk-notas" placeholder="Opcional">
+        </div>
+      </div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn-cancel" onclick="closeStockModal()">Cancelar</button>
+      <button class="btn-save" id="sk-save-btn" onclick="saveStock()">
+        <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M2 6l3 3 5-5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        Guardar producto
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ MODAL GASTO ════════════════════════════════ -->
+<div class="modal-backdrop" id="modal-gasto" onclick="handleGastoBackdrop(event)">
+  <div class="modal" role="dialog" aria-modal="true">
+    <div class="modal-head">
+      <span class="modal-title" id="gs-modal-title">Nuevo gasto</span>
+      <button class="modal-close" onclick="closeGastoModal()" title="Cerrar">✕</button>
+    </div>
+    <div class="modal-body">
+      <div id="gs-flash" style="display:none;font-family:var(--mono);font-size:11px;color:var(--red);margin-bottom:12px;padding:8px 10px;background:var(--red-bg);border-radius:var(--r);border:1px solid var(--red);"></div>
+      <div class="modal-grid">
+        <div>
+          <label class="m-label" for="gs-fecha">Fecha</label>
+          <input class="m-input" type="date" id="gs-fecha">
+        </div>
+        <div>
+          <label class="m-label" for="gs-tipo">Tipo</label>
+          <select class="m-select" id="gs-tipo">
+            <option value="variable">Variable</option>
+            <option value="fijo">Fijo</option>
+          </select>
+        </div>
+        <div class="full">
+          <label class="m-label" for="gs-concepto">Concepto *</label>
+          <input class="m-input" type="text" id="gs-concepto" placeholder="Ej: Compra de stock, Envío…">
+        </div>
+        <div>
+          <label class="m-label" for="gs-categoria">Categoría</label>
+          <input class="m-input" type="text" id="gs-categoria" placeholder="Ej: Logística, Marketing…">
+        </div>
+        <div>
+          <label class="m-label" for="gs-monto">Monto *</label>
+          <input class="m-input" type="number" id="gs-monto" placeholder="0" min="0">
+        </div>
+        <div class="full">
+          <label class="m-label" for="gs-notas">Notas</label>
+          <input class="m-input" type="text" id="gs-notas" placeholder="Opcional">
+        </div>
+      </div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn-cancel" onclick="closeGastoModal()">Cancelar</button>
+      <button class="btn-save" id="gs-save-btn" onclick="saveGasto()">
+        <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M2 6l3 3 5-5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        Guardar gasto
+      </button>
+    </div>
+  </div>
+</div>
+
+<script>
+tsParticles.load("particles", {
+  background: { color: { value: "transparent" } },
+
+  particles: {
+    number: { value: 80, density: { enable: true } }, // 👈 más partículas
+
+    color: { value: "#38bdf8" },
+
+    opacity: {
+      value: 0.5,
+      random: { enable: true, minimumValue: 0.3 }
+    },
+
+    size: {
+      value: { min: 2, max: 4 }
+    },
+
+    shape: {
+      type: "circle"
+    },
+
+    move: {
+      enable: true,
+      speed: 0.5,
+      random: true,
+      outModes: "out"
+    },
+
+    links: {
+      enable: true,
+      distance: 100,
+      color: "#38bdf8",
+      opacity: 0.3,
+      width: 1
+    }
+  },
+  
+  interactivity: {
+    events: {
+      onHover: {
+        enable: false
+      },
+      onClick: {
+        enable: false
+      }
+    }
+  }
+});
+</script>
+
+</body>
+</html>
+</html>
+</html>="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M2 6l3 3 5-5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
         Guardar venta
       </button>
     </div>
