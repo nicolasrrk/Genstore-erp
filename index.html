@@ -2149,7 +2149,9 @@ function loadFile(file) {
         const i = names.indexOf(name);
         return i >= 0 ? XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[i]], { defval:'' }) : [];
       };
-      DATA.ventas = normVentas(get('VENTAS'));
+      const manuales = DATA.ventas.filter(v => v.fuente === 'manual');
+      const importadas = normVentas(get('VENTAS'));
+      DATA.ventas = [...manuales, ...importadas];
       DATA.stock  = normStock(get('STOCK'));
       DATA.gastos = normGastos(get('GASTOS'));
 
@@ -2165,7 +2167,8 @@ function loadFile(file) {
       document.getElementById('imp-s').textContent = DATA.stock.length;
       document.getElementById('imp-g').textContent = DATA.gastos.length;
       document.getElementById('import-result').style.display = 'block';
-      document.getElementById('import-msg').textContent = `✓ "${file.name}" importado y guardado en la nube — ${DATA.ventas.length} ventas, ${DATA.stock.length} productos, ${DATA.gastos.length} gastos.`;
+      const msgManuales = manuales.length ? ` + ${manuales.length} manual${manuales.length > 1 ? 'es' : ''} conservada${manuales.length > 1 ? 's' : ''}` : '';
+      document.getElementById('import-msg').textContent = `✓ "${file.name}" importado y guardado en la nube — ${importadas.length} ventas importadas${msgManuales}, ${DATA.stock.length} productos, ${DATA.gastos.length} gastos.`;
 
       renderAll();
     } catch(err) {
@@ -2659,25 +2662,44 @@ function emptyRow(cols, ico, title) {
 ══════════════════════════════════════════════════ */
 function exportData() {
   const wb = XLSX.utils.book_new();
-  XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet([
-    ['fecha','producto','cliente','contacto','canal','cantidad','precio_unitario','costo_unitario','estado','notas'],
-    ['15/03/2025','Termo Stanley 1L','María García','+54 911 2345','instagram',2,8500,5200,'pagado','Entrega en mano'],
-    ['18/03/2025','Mate con bombilla','Carlos López','+54 911 6789','whatsapp',1,4200,2800,'enviado','OCA'],
-    ['20/03/2025','Termo Stanley 750ml','Ana Martínez','@ana.mate','instagram',1,7000,4500,'pendiente','Confirma mañana'],
-  ]), 'VENTAS');
-  XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet([
-    ['producto','categoria','stock_inicial','stock_actual','costo_unitario','precio_venta','proveedor','notas'],
-    ['Termo Stanley 1L','Termos',20,18,5200,8500,'Proveedor ABC',''],
-    ['Termo Stanley 750ml','Termos',15,14,4500,7000,'Proveedor ABC',''],
-    ['Mate con bombilla','Mates',10,9,2800,4200,'Distribuidora XYZ',''],
-  ]), 'STOCK');
-  XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet([
-    ['fecha','concepto','categoria','monto','tipo','notas'],
-    ['01/03/2025','Compra de stock inicial','Mercadería',150000,'variable','30 termos'],
-    ['05/03/2025','Envío OCA','Logística',800,'variable',''],
-    ['10/03/2025','Instagram Ads','Marketing',5000,'variable','Campaña marzo'],
-  ]), 'GASTOS');
-  XLSX.writeFile(wb, 'genstore-plantilla.xlsx');
+  const hasData = DATA.ventas.length || DATA.stock.length || DATA.gastos.length;
+
+  if (hasData) {
+    XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet([
+      ['fecha','producto','cliente','contacto','canal','cantidad','precio_unitario','costo_unitario','estado','notas'],
+      ...DATA.ventas.map(v => [fd(v.fecha), v.producto, v.cliente, v.contacto, v.canal, v.cantidad, v.precio, v.costo, v.estado, v.notas])
+    ]), 'VENTAS');
+    XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet([
+      ['producto','categoria','stock_inicial','stock_actual','costo_unitario','precio_venta','proveedor','notas'],
+      ...DATA.stock.map(s => [s.producto, s.categoria, s.stockInicial, s.stockActual, s.costoUnitario, s.precioVenta, s.proveedor, s.notas])
+    ]), 'STOCK');
+    XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet([
+      ['fecha','concepto','categoria','monto','tipo','notas'],
+      ...DATA.gastos.map(g => [fd(g.fecha), g.concepto, g.categoria, g.monto, g.tipo, g.notas])
+    ]), 'GASTOS');
+    const hoy = new Date().toLocaleDateString('es-AR').replace(/\//g, '-');
+    XLSX.writeFile(wb, `genstore-datos-${hoy}.xlsx`);
+  } else {
+    XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet([
+      ['fecha','producto','cliente','contacto','canal','cantidad','precio_unitario','costo_unitario','estado','notas'],
+      ['15/03/2025','Termo Stanley 1L','María García','+54 911 2345','instagram',2,8500,5200,'pagado','Entrega en mano'],
+      ['18/03/2025','Mate con bombilla','Carlos López','+54 911 6789','whatsapp',1,4200,2800,'enviado','OCA'],
+      ['20/03/2025','Termo Stanley 750ml','Ana Martínez','@ana.mate','instagram',1,7000,4500,'pendiente','Confirma mañana'],
+    ]), 'VENTAS');
+    XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet([
+      ['producto','categoria','stock_inicial','stock_actual','costo_unitario','precio_venta','proveedor','notas'],
+      ['Termo Stanley 1L','Termos',20,18,5200,8500,'Proveedor ABC',''],
+      ['Termo Stanley 750ml','Termos',15,14,4500,7000,'Proveedor ABC',''],
+      ['Mate con bombilla','Mates',10,9,2800,4200,'Distribuidora XYZ',''],
+    ]), 'STOCK');
+    XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet([
+      ['fecha','concepto','categoria','monto','tipo','notas'],
+      ['01/03/2025','Compra de stock inicial','Mercadería',150000,'variable','30 termos'],
+      ['05/03/2025','Envío OCA','Logística',800,'variable',''],
+      ['10/03/2025','Instagram Ads','Marketing',5000,'variable','Campaña marzo'],
+    ]), 'GASTOS');
+    XLSX.writeFile(wb, 'genstore-plantilla.xlsx');
+  }
 }
 
 
@@ -3743,6 +3765,9 @@ tsParticles.load("particles", {
   }
 });
 </script>
+
+</body>
+</html>
 
 </body>
 </html>
