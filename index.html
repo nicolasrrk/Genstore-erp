@@ -1286,6 +1286,153 @@ tbody td { padding: 12px 16px; font-size: 12px; color: #e2e8f0; }
   .search-input { width: 100%; }
   .section-hd-right { width: 100%; justify-content: space-between; }
 }
+
+/* ── DASHBOARD — sección labels ──────────────────── */
+.dash-section-label {
+  font-family: var(--mono);
+  font-size: 9px;
+  font-weight: 500;
+  letter-spacing: 1.2px;
+  text-transform: uppercase;
+  color: #475569;
+  margin-bottom: 12px;
+  margin-top: 4px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.dash-section-label::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: rgba(255,255,255,0.05);
+}
+
+/* ── KPI ROW — métricas secundarias ─────────────── */
+.kpi-row {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+}
+.kpi-card {
+  flex: 1;
+  min-width: 130px;
+  background: linear-gradient(180deg, rgba(17,24,39,0.55), rgba(11,15,20,0.75));
+  border: 1px solid rgba(255,255,255,0.05);
+  border-radius: 10px;
+  padding: 12px 16px;
+  position: relative;
+  transition: border-color 0.18s, box-shadow 0.18s;
+}
+.kpi-card::before {
+  content: '';
+  position: absolute; inset: 0 0 auto 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(56,189,248,0.18), transparent);
+  border-radius: 10px 10px 0 0;
+  pointer-events: none;
+}
+.kpi-card:hover {
+  border-color: rgba(56,189,248,0.18);
+  box-shadow: 0 4px 16px -8px rgba(56,189,248,0.12);
+}
+.kpi-label {
+  font-family: var(--mono);
+  font-size: 9px;
+  letter-spacing: 0.8px;
+  text-transform: uppercase;
+  color: #64748b;
+  margin-bottom: 5px;
+}
+.kpi-val {
+  font-family: var(--serif);
+  font-size: 19px;
+  font-weight: 300;
+  font-style: italic;
+  background: linear-gradient(180deg, #ffffff 0%, #94a3b8 110%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.kpi-val.alert-red {
+  background: linear-gradient(180deg,#fca5a5,#ef4444);
+  -webkit-background-clip:text; background-clip:text; -webkit-text-fill-color:transparent;
+}
+.kpi-sub {
+  font-family: var(--mono);
+  font-size: 9px;
+  color: #475569;
+  margin-top: 3px;
+}
+
+/* ── CAPITAL BOX ─────────────────────────────────── */
+.capital-box {
+  background: linear-gradient(135deg, rgba(17,24,39,0.7), rgba(11,15,20,0.9));
+  border: 1px solid rgba(56,189,248,0.12);
+  border-radius: 12px;
+  padding: 20px 24px;
+  margin-bottom: 20px;
+  position: relative;
+  overflow: hidden;
+}
+.capital-box::before {
+  content: '';
+  position: absolute; inset: 0 0 auto 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(56,189,248,0.4), transparent);
+  border-radius: 12px 12px 0 0;
+}
+.capital-inner {
+  display: grid;
+  grid-template-columns: repeat(3,1fr);
+  gap: 20px;
+}
+.capital-item { }
+.capital-item-label {
+  font-family: var(--mono);
+  font-size: 9px;
+  letter-spacing: 0.9px;
+  text-transform: uppercase;
+  color: #64748b;
+  margin-bottom: 6px;
+}
+.capital-item-val {
+  font-family: var(--serif);
+  font-size: 22px;
+  font-weight: 300;
+  font-style: italic;
+}
+.capital-item-val.pos { background: linear-gradient(180deg,#86efac,#22c55e); -webkit-background-clip:text; background-clip:text; -webkit-text-fill-color:transparent; }
+.capital-item-val.neu { background: linear-gradient(180deg,#bae6fd,#38bdf8); -webkit-background-clip:text; background-clip:text; -webkit-text-fill-color:transparent; }
+.capital-item-val.neutral { background: linear-gradient(180deg, #ffffff, #94a3b8); -webkit-background-clip:text; background-clip:text; -webkit-text-fill-color:transparent; }
+.capital-item-val.neg { background: linear-gradient(180deg,#fca5a5,#ef4444); -webkit-background-clip:text; background-clip:text; -webkit-text-fill-color:transparent; }
+.capital-item-sub {
+  font-family: var(--mono);
+  font-size: 9px;
+  color: #475569;
+  margin-top: 4px;
+}
+.capital-divider {
+  width: 1px;
+  background: rgba(255,255,255,0.05);
+  align-self: stretch;
+  display: none;
+}
+
+@media (max-width: 768px) {
+  .kpi-row { gap: 8px; }
+  .kpi-card { min-width: calc(50% - 4px); flex: none; }
+  .kpi-val { font-size: 17px; }
+  .capital-inner { grid-template-columns: 1fr 1fr; }
+  .capital-item-val { font-size: 18px; }
+}
+@media (max-width: 480px) {
+  .capital-inner { grid-template-columns: 1fr; gap: 14px; }
+}
 </style>
 </head>
 <body>
@@ -1382,75 +1529,142 @@ tbody td { padding: 12px 16px; font-size: 12px; color: #e2e8f0; }
         Sin datos. Andá a <strong>Importar Excel</strong> o descargá la plantilla de ejemplo con el botón de arriba.
       </div>
 
-      <!-- Fila 1: financiero -->
-      <div class="metrics-row">
+      <!-- ── Fila 1: Estado de Resultados ─────────── -->
+      <div class="dash-section-label">Estado de resultados</div>
+      <div class="metrics-row" style="margin-bottom:10px">
         <div class="metric">
-          <div class="metric-label">Ingresos</div>
-          <div class="metric-val pos" id="m-ingresos">—</div>
-          <div class="metric-foot" id="m-ing-foot">0 ventas</div>
+          <div class="metric-label">Ventas totales</div>
+          <div class="metric-val pos" id="m-ventas">—</div>
+          <div class="metric-foot" id="m-ventas-foot">0 operaciones</div>
         </div>
         <div class="metric">
-          <div class="metric-label">Inversión</div>
-          <div class="metric-val neg" id="m-inversion">—</div>
-          <div class="metric-foot">Costo + gastos</div>
+          <div class="metric-label">Costo merc. vendida</div>
+          <div class="metric-val neg" id="m-cogs">—</div>
+          <div class="metric-foot" id="m-cogs-foot">COGS</div>
+        </div>
+        <div class="metric">
+          <div class="metric-label">Ganancia bruta</div>
+          <div class="metric-val" id="m-gan-bruta">—</div>
+          <div class="metric-foot" id="m-gan-bruta-foot">Ventas − COGS</div>
+        </div>
+        <div class="metric">
+          <div class="metric-label">Margen bruto</div>
+          <div class="metric-val neu" id="m-margen-bruto">—</div>
+          <div class="metric-foot">Ganancia bruta / ventas</div>
+        </div>
+      </div>
+
+      <!-- ── Fila 2: Resultado neto ────────────────── -->
+      <div class="metrics-row" style="margin-bottom:20px">
+        <div class="metric">
+          <div class="metric-label">Gastos operativos</div>
+          <div class="metric-val neg" id="m-gastos-op">—</div>
+          <div class="metric-foot" id="m-gastos-op-foot">Envíos · publicidad · otros</div>
         </div>
         <div class="metric">
           <div class="metric-label">Ganancia neta</div>
-          <div class="metric-val neu" id="m-ganancia">—</div>
-          <div class="metric-foot" id="m-gan-foot">Ingresos − inversión</div>
+          <div class="metric-val" id="m-ganancia">—</div>
+          <div class="metric-foot" id="m-gan-foot">G. bruta − gastos operativos</div>
+        </div>
+        <div class="metric">
+          <div class="metric-label">Margen neto</div>
+          <div class="metric-val" id="m-margen">—</div>
+          <div class="metric-foot">Ganancia neta / ventas</div>
         </div>
         <div class="metric">
           <div class="metric-label">ROI</div>
-          <div class="metric-val amb" id="m-roi">—</div>
-          <div class="metric-foot">Retorno s/ inversión</div>
+          <div class="metric-val" id="m-roi">—</div>
+          <div class="metric-foot">G. neta / (COGS + gastos)</div>
         </div>
       </div>
 
-      <!-- Fila 2: operacional -->
-      <div class="metrics-row-2">
-        <div class="metric">
-          <div class="metric-label">Margen efectivo</div>
-          <div class="metric-val" id="m-margen">—</div>
-          <div class="metric-foot">Ganancia / ingresos</div>
-        </div>
-        <div class="metric">
-          <div class="metric-label">Ticket promedio</div>
-          <div class="metric-val" id="m-ticket">—</div>
-          <div class="metric-foot">Por operación</div>
-        </div>
-        <div class="metric">
-          <div class="metric-label">Unidades vendidas</div>
-          <div class="metric-val" id="m-unidades">—</div>
-          <div class="metric-foot">Total productos</div>
-        </div>
-        <div class="metric">
-          <div class="metric-label">Stock disponible</div>
-          <div class="metric-val" id="m-stock">—</div>
-          <div class="metric-foot">Unidades en inventario</div>
+      <!-- ── Capital del negocio ───────────────────── -->
+      <div class="dash-section-label">Capital del negocio</div>
+      <div class="capital-box">
+        <div class="capital-inner">
+          <div class="capital-item">
+            <div class="capital-item-label">Caja disponible</div>
+            <div class="capital-item-val neutral" id="m-caja">—</div>
+            <div class="capital-item-sub" id="m-caja-sub">Ingresos − compras − gastos</div>
+          </div>
+          <div class="capital-item">
+            <div class="capital-item-label">Valor inventario</div>
+            <div class="capital-item-val neu" id="m-inventario">—</div>
+            <div class="capital-item-sub" id="m-inventario-sub">Stock disponible × costo</div>
+          </div>
+          <div class="capital-item">
+            <div class="capital-item-label">Capital total</div>
+            <div class="capital-item-val pos" id="m-capital">—</div>
+            <div class="capital-item-sub">Caja + inventario</div>
+          </div>
         </div>
       </div>
 
-      <!-- ROI visual -->
+      <!-- ── KPIs secundarios ──────────────────────── -->
+      <div class="kpi-row">
+        <div class="kpi-card">
+          <div class="kpi-label">Unidades vendidas</div>
+          <div class="kpi-val" id="kpi-unidades">—</div>
+          <div class="kpi-sub" id="kpi-unidades-sub">en el período</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-label">Ticket promedio</div>
+          <div class="kpi-val" id="m-ticket">—</div>
+          <div class="kpi-sub">por operación</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-label">Ventas / día</div>
+          <div class="kpi-val" id="kpi-vpd">—</div>
+          <div class="kpi-sub" id="kpi-vpd-sub">días con ventas</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-label">Producto top</div>
+          <div class="kpi-val" id="kpi-top-prod" style="font-size:15px">—</div>
+          <div class="kpi-sub" id="kpi-top-prod-sub">por ingresos</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-label">Stock disponible</div>
+          <div class="kpi-val" id="m-stock">—</div>
+          <div class="kpi-sub" id="kpi-stock-sub">unidades en inventario</div>
+        </div>
+        <div class="kpi-card" id="kpi-alertas-card" style="display:none">
+          <div class="kpi-label">Alertas de stock</div>
+          <div class="kpi-val alert-red" id="kpi-alertas">—</div>
+          <div class="kpi-sub" id="kpi-alertas-sub">productos críticos</div>
+        </div>
+      </div>
+
+      <!-- ── Estructura financiera visual ─────────── -->
       <div class="roi-box">
-        <div class="roi-label">Recupero de inversión</div>
+        <div class="roi-label">Estructura financiera — desglose</div>
         <div class="roi-row">
-          <div class="roi-key">Invertido</div>
-          <div class="roi-track"><div class="roi-fill" id="rb-inv" style="width:100%;background:var(--surface3)"></div></div>
-          <div class="roi-num td-red" id="rb-inv-n">—</div>
+          <div class="roi-key">Ventas</div>
+          <div class="roi-track"><div class="roi-fill" id="rb-ventas" style="width:100%"></div></div>
+          <div class="roi-num td-green" id="rb-ventas-n">—</div>
         </div>
         <div class="roi-row">
-          <div class="roi-key">Recuperado</div>
-          <div class="roi-track"><div class="roi-fill" id="rb-rec" style="width:0%;background:var(--green)"></div></div>
-          <div class="roi-num td-green" id="rb-rec-n">—</div>
+          <div class="roi-key">COGS</div>
+          <div class="roi-track"><div class="roi-fill" id="rb-cogs" style="width:0%"></div></div>
+          <div class="roi-num td-amber" id="rb-cogs-n">—</div>
         </div>
         <div class="roi-row">
-          <div class="roi-key">Ganancia</div>
-          <div class="roi-track"><div class="roi-fill" id="rb-gan" style="width:0%;background:var(--blue)"></div></div>
-          <div class="roi-num td-blue" id="rb-gan-n">—</div>
+          <div class="roi-key">Gastos op.</div>
+          <div class="roi-track"><div class="roi-fill" id="rb-gop" style="width:0%"></div></div>
+          <div class="roi-num td-red" id="rb-gop-n">—</div>
+        </div>
+        <div class="roi-row">
+          <div class="roi-key">G. bruta</div>
+          <div class="roi-track"><div class="roi-fill" id="rb-rec" style="width:0%"></div></div>
+          <div class="roi-num td-blue" id="rb-rec-n">—</div>
+        </div>
+        <div class="roi-row">
+          <div class="roi-key">G. neta</div>
+          <div class="roi-track"><div class="roi-fill" id="rb-gan" style="width:0%"></div></div>
+          <div class="roi-num" id="rb-gan-n">—</div>
         </div>
       </div>
 
-      <!-- Charts -->
+      <!-- ── Charts ────────────────────────────────── -->
       <div class="charts-row">
         <div class="chart-box">
           <div class="chart-label">Ingresos por mes</div>
@@ -1462,20 +1676,20 @@ tbody td { padding: 12px 16px; font-size: 12px; color: #e2e8f0; }
         </div>
       </div>
 
-      <!-- Top productos -->
+      <!-- ── Ranking por ganancia ───────────────────── -->
       <div class="table-box">
         <div class="table-hd">
-          <span class="table-hd-title">Ranking por ganancia</span>
+          <span class="table-hd-title">Ranking por ganancia bruta</span>
           <span class="table-hd-count" id="top-ct">—</span>
         </div>
         <div class="table-scroll">
           <table>
             <thead><tr>
-              <th>Producto</th><th>Unidades</th><th>Ingresos</th>
-              <th>Costo</th><th>Ganancia</th><th>Margen</th>
+              <th>#</th><th>Producto</th><th>Unidades</th>
+              <th>Ventas</th><th>COGS</th><th>G. bruta</th><th>Margen</th>
             </tr></thead>
             <tbody id="top-body">
-              <tr><td colspan="6"><div class="empty"><div class="empty-ico">◈</div><div class="empty-t">Sin datos</div><div class="empty-s">Importá tu planilla</div></div></td></tr>
+              <tr><td colspan="7"><div class="empty"><div class="empty-ico">◈</div><div class="empty-t">Sin datos</div><div class="empty-s">Importá tu planilla</div></div></td></tr>
             </tbody>
           </table>
         </div>
@@ -1961,6 +2175,7 @@ tbody td { padding: 12px 16px; font-size: 12px; color: #e2e8f0; }
         </div>
       </div>
     </div>
+    </div><!-- /page-guia -->
   </div><!-- /content -->
 </div><!-- /main -->
 
@@ -2251,50 +2466,178 @@ function renderAll() {
 }
 
 /* ── DASHBOARD ──────────────────────────────────── */
+
+// Palabras clave para identificar compras de stock/mercadería
+// Estos NO son gastos operativos — son activos de inventario
+const STOCK_KW = ['mercadería','mercaderia','stock','compra stock','compras stock',
+  'inventario','reposición','reposicion','compra de stock','compra mercaderia',
+  'compra de mercadería','compra de mercaderia','reposicion stock'];
+
+const isStockPurchase = g => {
+  const cat = (g.categoria||'').toLowerCase();
+  const con = (g.concepto||'').toLowerCase();
+  return STOCK_KW.some(k => cat.includes(k) || con.includes(k));
+};
+
 function renderDash() {
-  const vv  = filterByPeriod(DATA.ventas.filter(v => v.estado !== 'cancelado'));
-  const gg  = filterByPeriod(DATA.gastos); // gastos también filtrados por período
-  const ing = vv.reduce((s,v)=>s+v.total,0);
-  const cV  = vv.reduce((s,v)=>s+v.costoTotal,0);
-  const gT  = gg.reduce((s,g)=>s+g.monto,0);
-  const inv = cV + gT;
-  const gan = ing - inv;
-  // ROI: si no hay inversión, mostrar "—" en lugar de "0.0%"
-  const roiTxt = inv > 0 ? (gan/inv*100).toFixed(1)+'%' : '—';
-  const mgP    = ing > 0 ? gan/ing*100 : 0;
-  const mgPTxt = ing > 0 ? mgP.toFixed(1)+'%' : '—';
-  const tkt    = vv.length > 0 ? ing/vv.length : 0;
-  const uni    = vv.reduce((s,v)=>s+v.cantidad,0);
-  const stk    = DATA.stock.reduce((s,p)=>s+p.stockActual,0);
+  const vv = filterByPeriod(DATA.ventas.filter(v => v.estado !== 'cancelado'));
+  const gg = filterByPeriod(DATA.gastos);
 
-  set('m-ingresos', ing>0?f$(ing):'—');
-  set('m-inversion', inv>0?f$(inv):'—');
-  set('m-ganancia', (ing>0||inv>0)?f$(gan):'—');
-  set('m-roi', roiTxt);
-  set('m-margen', mgPTxt);
-  set('m-ticket', vv.length>0?f$(tkt):'—');
-  set('m-unidades', uni>0?fN(uni):'—');
-  set('m-stock', DATA.stock.length>0?fN(stk):'—');
-  set('m-ing-foot', vv.length + (vv.length===1?' venta':' ventas'));
-  // Bajo "Ganancia neta" mostramos relación con la inversión, no el margen (que ya tiene su propia tarjeta)
-  set('m-gan-foot', inv>0 ? (gan>=0?'+':'')+(gan/inv*100).toFixed(1)+'% sobre inversión' : 'Sin inversión registrada');
+  // ── P&L: Estado de Resultados ────────────────────────────
+  const ventasTotales = vv.reduce((s,v) => s + v.total, 0);
+  const cogs          = vv.reduce((s,v) => s + v.costoTotal, 0);  // Costo de Mercadería Vendida
+  const gananciaBruta = ventasTotales - cogs;
+  const margenBruto   = ventasTotales > 0 ? gananciaBruta/ventasTotales*100 : 0;
 
-  if (vv.length) document.getElementById('notice-empty').style.display='none';
+  // ── Gastos operativos (excluye compras de stock — esas son activos, no gastos) ──
+  const gastosOp      = gg.filter(g => !isStockPurchase(g));
+  const totalGastosOp = gastosOp.reduce((s,g) => s + g.monto, 0);
+  const gananciaNeta  = gananciaBruta - totalGastosOp;
+  const margenNeto    = ventasTotales > 0 ? gananciaNeta/ventasTotales*100 : 0;
 
-  // ROI bars
-  const mx = Math.max(inv, ing, 1);
-  rb('rb-inv', inv/mx*100, f$(inv), '');
-  rb('rb-rec', Math.min(ing,inv)/mx*100, f$(ing), '');
-  rb('rb-gan', Math.max(gan,0)/mx*100, f$(gan), '');
+  // ── ROI real: ganancia neta / (COGS + gastos operativos) ─
+  const totalInvertido = cogs + totalGastosOp;
+  const roi = totalInvertido > 0 ? gananciaNeta/totalInvertido*100 : 0;
 
-  // charts — ordenar meses cronológicamente
+  // ── Capital del negocio ───────────────────────────────────
+  // Caja = todos los ingresos cobrados - todas las compras de stock - todos los gastos operativos
+  // (usamos el dataset completo, no filtrado por período, para reflejar la caja real)
+  const todasLasVentas   = DATA.ventas.filter(v => v.estado !== 'cancelado');
+  const ingresosTotal    = todasLasVentas.reduce((s,v) => s + v.total, 0);
+  const comprasStockTotal= DATA.gastos.filter(isStockPurchase).reduce((s,g) => s + g.monto, 0);
+  const gastosOpTotal    = DATA.gastos.filter(g => !isStockPurchase(g)).reduce((s,g) => s + g.monto, 0);
+  const caja             = ingresosTotal - comprasStockTotal - gastosOpTotal;
+  const valorInventario  = DATA.stock.reduce((s,p) => s + p.stockActual * p.costoUnitario, 0);
+  const capitalTotal     = caja + valorInventario;
+
+  // ── KPIs operacionales ────────────────────────────────────
+  const unidades   = vv.reduce((s,v) => s + v.cantidad, 0);
+  const ticket     = vv.length > 0 ? ventasTotales/vv.length : 0;
+  const stockDisp  = DATA.stock.reduce((s,p) => s + p.stockActual, 0);
+  const agotados   = DATA.stock.filter(p => p.stockActual <= 0).length;
+  const criticos   = DATA.stock.filter(p => p.stockActual > 0 && p.stockActual <= 3).length;
+  const bajos      = DATA.stock.filter(p => p.stockActual > 3 && p.stockActual <= 5).length;
+  const diasConVentas = new Set(vv.filter(v=>v.fecha).map(v=>v.fecha.toDateString())).size;
+  const vpd        = diasConVentas > 0 ? (vv.length/diasConVentas).toFixed(1) : null;
+
+  // Producto top por ingresos
+  const byProdIng = {};
+  vv.forEach(v => { byProdIng[v.producto] = (byProdIng[v.producto]||0) + v.total; });
+  const topProd = Object.entries(byProdIng).sort((a,b)=>b[1]-a[1])[0];
+
+  // ── Actualizar DOM — Fila 1 P&L ──────────────────────────
+  set('m-ventas',         ventasTotales > 0 ? f$(ventasTotales) : '—');
+  set('m-ventas-foot',    vv.length + (vv.length===1?' venta':' ventas'));
+  set('m-cogs',           cogs > 0 ? f$(cogs) : '—');
+  set('m-cogs-foot',      cogs > 0 ? fN(unidades)+' unidades vendidas' : 'COGS');
+  set('m-gan-bruta',      ventasTotales > 0 || cogs > 0 ? f$(gananciaBruta) : '—');
+  set('m-gan-bruta-foot', ventasTotales > 0 ? margenBruto.toFixed(1)+'% de las ventas' : 'Ventas − COGS');
+  set('m-margen-bruto',   ventasTotales > 0 ? margenBruto.toFixed(1)+'%' : '—');
+
+  // Color dinámico ganancia bruta
+  const ganBrutaEl = document.getElementById('m-gan-bruta');
+  if (ganBrutaEl) ganBrutaEl.className = 'metric-val' + (gananciaBruta > 0 ? ' pos' : gananciaBruta < 0 ? ' neg' : '');
+
+  // Color margen bruto
+  const mbEl = document.getElementById('m-margen-bruto');
+  if (mbEl) mbEl.className = 'metric-val' + (margenBruto > 30 ? ' pos' : margenBruto > 10 ? ' neu' : ' neg');
+
+  // ── Actualizar DOM — Fila 2 Neto ─────────────────────────
+  set('m-gastos-op',      totalGastosOp > 0 ? f$(totalGastosOp) : '—');
+  set('m-gastos-op-foot', gastosOp.length + (gastosOp.length===1?' gasto operativo':' gastos operativos'));
+  set('m-ganancia',       ventasTotales > 0 || totalGastosOp > 0 ? f$(gananciaNeta) : '—');
+  set('m-gan-foot',       ventasTotales > 0
+    ? (gananciaNeta >= 0 ? '+' : '') + margenNeto.toFixed(1) + '% sobre ventas'
+    : 'G. bruta − gastos operativos');
+  set('m-margen',         ventasTotales > 0 ? margenNeto.toFixed(1)+'%' : '—');
+  set('m-roi',            totalInvertido > 0 ? roi.toFixed(1)+'%' : '—');
+
+  // Colores dinámicos Fila 2
+  const ganNetaEl = document.getElementById('m-ganancia');
+  if (ganNetaEl) ganNetaEl.className = 'metric-val' + (gananciaNeta > 0 ? ' pos' : gananciaNeta < 0 ? ' neg' : ' neu');
+  const margenEl = document.getElementById('m-margen');
+  if (margenEl) margenEl.className = 'metric-val' + (margenNeto > 15 ? ' pos' : margenNeto > 0 ? ' neu' : ' neg');
+  const roiEl = document.getElementById('m-roi');
+  if (roiEl) roiEl.className = 'metric-val' + (roi > 20 ? ' pos' : roi > 0 ? ' amb' : ' neg');
+
+  // ── Actualizar DOM — Capital del negocio ─────────────────
+  const cajaEl = document.getElementById('m-caja');
+  if (cajaEl) {
+    cajaEl.textContent = f$(caja);
+    cajaEl.className = 'capital-item-val' + (caja > 0 ? ' pos' : caja < 0 ? ' neg' : ' neutral');
+  }
+  set('m-caja-sub', `Ingresos cobrados − compras stock (${f$(comprasStockTotal)}) − gastos (${f$(gastosOpTotal)})`);
+  set('m-inventario',   valorInventario > 0 ? f$(valorInventario) : '—');
+  set('m-inventario-sub', DATA.stock.filter(p=>p.stockActual>0).length + ' productos con stock');
+  const capEl = document.getElementById('m-capital');
+  if (capEl) {
+    capEl.textContent = f$(capitalTotal);
+    capEl.className = 'capital-item-val' + (capitalTotal > 0 ? ' pos' : capitalTotal < 0 ? ' neg' : ' neutral');
+  }
+
+  // ── KPIs secundarios ─────────────────────────────────────
+  set('kpi-unidades',     unidades > 0 ? fN(unidades) : '—');
+  set('kpi-unidades-sub', unidades > 0 ? 'unidades vendidas' : 'en el período');
+  set('m-ticket',         vv.length > 0 ? f$(ticket) : '—');
+  set('kpi-vpd',          vpd ? vpd : '—');
+  set('kpi-vpd-sub',      diasConVentas > 0 ? diasConVentas+' días con ventas' : 'días con ventas');
+  set('m-stock',          DATA.stock.length > 0 ? fN(stockDisp) : '—');
+  set('kpi-stock-sub',    DATA.stock.length > 0 ? DATA.stock.length+' productos en inventario' : 'unidades en inventario');
+
+  if (topProd) {
+    const nombre = topProd[0];
+    document.getElementById('kpi-top-prod').textContent = nombre.length > 22 ? nombre.slice(0,21)+'…' : nombre;
+    set('kpi-top-prod-sub', f$(topProd[1]) + ' en ventas');
+  } else {
+    set('kpi-top-prod', '—');
+    set('kpi-top-prod-sub', 'por ingresos');
+  }
+
+  // Alertas de stock
+  const alertCard = document.getElementById('kpi-alertas-card');
+  if (alertCard) {
+    const alertTotal = agotados + criticos;
+    if (alertTotal > 0) {
+      alertCard.style.display = '';
+      set('kpi-alertas', alertTotal);
+      const parts = [];
+      if (agotados > 0) parts.push(agotados+' agotado'+(agotados>1?'s':''));
+      if (criticos > 0) parts.push(criticos+' crítico'+(criticos>1?'s':''));
+      if (bajos > 0)    parts.push(bajos+' bajo'+(bajos>1?'s':''));
+      set('kpi-alertas-sub', parts.join(' · '));
+    } else {
+      alertCard.style.display = 'none';
+    }
+  }
+
+  if (vv.length) document.getElementById('notice-empty').style.display = 'none';
+
+  // ── ROI bars — estructura financiera ─────────────────────
+  const mx = Math.max(ventasTotales, 1);
+  const setBar = (id, pct, color, label, labelClass) => {
+    const el = document.getElementById(id);
+    const elN = document.getElementById(id+'-n');
+    if (el) { el.style.width = Math.max(0,Math.min(100,pct))+'%'; el.style.background = color; }
+    if (elN) { elN.textContent = label; if (labelClass) elN.className = 'roi-num ' + labelClass; }
+  };
+  setBar('rb-ventas', 100, 'linear-gradient(90deg,#22c55e,#86efac)', ventasTotales > 0 ? f$(ventasTotales) : '—', 'td-green');
+  setBar('rb-cogs',   cogs/mx*100, 'linear-gradient(90deg,#f59e0b,#fcd34d)', cogs > 0 ? f$(cogs) : '—', 'td-amber');
+  setBar('rb-gop',    totalGastosOp/mx*100, 'linear-gradient(90deg,#ef4444,#fca5a5)', totalGastosOp > 0 ? f$(totalGastosOp) : '—', 'td-red');
+  setBar('rb-rec',    Math.max(gananciaBruta,0)/mx*100, 'linear-gradient(90deg,#38bdf8,#6366f1)', ventasTotales > 0 ? f$(gananciaBruta) : '—', 'td-blue');
+  setBar('rb-gan',    Math.max(gananciaNeta,0)/mx*100,
+    gananciaNeta >= 0 ? 'linear-gradient(90deg,#22c55e,#4ade80)' : 'linear-gradient(90deg,#ef4444,#fca5a5)',
+    ventasTotales > 0 ? f$(gananciaNeta) : '—',
+    gananciaNeta >= 0 ? 'td-green' : 'td-red');
+
+  // ── Charts ────────────────────────────────────────────────
   const byMes = {};
   vv.forEach(v => {
     if (!v.fecha) return;
     const sortKey = v.fecha.getFullYear()*12 + v.fecha.getMonth();
     const label   = v.fecha.toLocaleString('es-AR',{month:'short',year:'2-digit'});
-    if (!byMes[sortKey]) byMes[sortKey] = { label, total: 0 };
-    byMes[sortKey].total += v.total;
+    if (!byMes[sortKey]) byMes[sortKey] = { label, total: 0, ganancia: 0 };
+    byMes[sortKey].total    += v.total;
+    byMes[sortKey].ganancia += v.ganancia;
   });
   const meses = Object.keys(byMes).sort((a,b)=>+a-+b).map(k=>byMes[k]);
   mkBar('ch-mes', meses.map(m=>m.label), meses.map(m=>m.total));
@@ -2304,33 +2647,32 @@ function renderDash() {
   const sp = Object.entries(byP).sort((a,b)=>b[1]-a[1]).slice(0,7);
   mkDoughnut('ch-prod', sp.map(x=>x[0]), sp.map(x=>x[1]));
 
-  // top table
+  // ── Ranking productos ─────────────────────────────────────
   const pm = {};
   vv.forEach(v => {
-    if (!pm[v.producto]) pm[v.producto]={ing:0,cos:0,gan:0,uni:0};
-    pm[v.producto].ing+=v.total; pm[v.producto].cos+=v.costoTotal;
-    pm[v.producto].gan+=v.ganancia; pm[v.producto].uni+=v.cantidad;
+    if (!pm[v.producto]) pm[v.producto] = {ing:0, cos:0, gan:0, uni:0};
+    pm[v.producto].ing += v.total;
+    pm[v.producto].cos += v.costoTotal;
+    pm[v.producto].gan += v.ganancia;
+    pm[v.producto].uni += v.cantidad;
   });
-  const pr = Object.entries(pm).sort((a,b)=>b[1].gan-a[1].gan);
+  const pr = Object.entries(pm).sort((a,b) => b[1].gan - a[1].gan);
   set('top-ct', pr.length+' productos');
-  document.getElementById('top-body').innerHTML = pr.map(([p,m])=>{
-    const mg = m.ing>0?(m.gan/m.ing*100).toFixed(1):0;
-    const mc = +mg>30?'td-green':+mg>15?'td-amber':'td-red';
+  document.getElementById('top-body').innerHTML = pr.map(([p,m], i) => {
+    const mg = m.ing > 0 ? (m.gan/m.ing*100).toFixed(1) : 0;
+    const mc = +mg > 30 ? 'td-green' : +mg > 15 ? 'td-amber' : 'td-red';
     return `<tr>
+      <td class="td-mono td-muted">${i+1}</td>
       <td class="td-bold">${p}</td>
       <td class="td-mono">${m.uni}</td>
       <td class="td-mono td-green">${f$(m.ing)}</td>
       <td class="td-mono td-amber">${f$(m.cos)}</td>
-      <td class="td-mono td-green">${f$(m.gan)}</td>
+      <td class="td-mono ${m.gan>=0?'td-green':'td-red'}">${f$(m.gan)}</td>
       <td class="td-mono ${mc}">${mg}%</td>
     </tr>`;
-  }).join('') || emptyRow(6,'◈','Sin datos');
+  }).join('') || emptyRow(7,'◈','Sin datos');
 }
 
-function rb(id, pct, label, _) {
-  document.getElementById(id).style.width = pct+'%';
-  document.getElementById(id+'-n').textContent = label;
-}
 function set(id, v) { const el=document.getElementById(id); if(el) el.textContent=v; }
 
 /* ── VENTAS ─────────────────────────────────────── */
@@ -3765,9 +4107,6 @@ tsParticles.load("particles", {
   }
 });
 </script>
-
-</body>
-</html>
 
 </body>
 </html>
