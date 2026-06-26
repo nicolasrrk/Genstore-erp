@@ -2500,9 +2500,9 @@ function renderDash() {
   const roi = totalInvertido > 0 ? gananciaNeta/totalInvertido*100 : 0;
 
   // ── Capital del negocio ───────────────────────────────────
-  // Caja = todos los ingresos cobrados - todas las compras de stock - todos los gastos operativos
+  // Caja = todos los ingresos COBRADOS (solo estado=pagado) - compras de stock - gastos operativos
   // (usamos el dataset completo, no filtrado por período, para reflejar la caja real)
-  const todasLasVentas   = DATA.ventas.filter(v => v.estado !== 'cancelado');
+  const todasLasVentas   = DATA.ventas.filter(v => v.estado === 'pagado');
   const ingresosTotal    = todasLasVentas.reduce((s,v) => s + v.total, 0);
   const comprasStockTotal= DATA.gastos.filter(isStockPurchase).reduce((s,g) => s + g.monto, 0);
   const gastosOpTotal    = DATA.gastos.filter(g => !isStockPurchase(g)).reduce((s,g) => s + g.monto, 0);
@@ -2745,7 +2745,7 @@ function renderStock() {
     const vnd=vm[p.producto]||0, dis=p.stockActual;
     const val=dis*p.costoUnitario;
     const pct=p.stockInicial>0?dis/p.stockInicial*100:0;
-    const [lbl,bc,fc]=dis<=0?['Agotado','br','var(--red)']:dis<=3?['Crítico','br','var(--red)']:dis<=10?['Bajo','ba','var(--amber)']:['OK','bg','var(--green)'];
+    const [lbl,bc,fc]=dis<=0?['Agotado','br','var(--red)']:dis<=3?['Crítico','br','var(--red)']:dis<=5?['Bajo','ba','var(--amber)']:['OK','bg','var(--green)'];
     return `<tr>
       <td class="td-bold">${p.producto}</td>
       <td><span class="badge bn">${p.categoria||'—'}</span></td>
