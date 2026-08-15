@@ -6,7 +6,6 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Genstore — ERP</title>
 <link rel="icon" type="image/png" href="/favin.png">
-<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="https://cdn.jsdelivr.net/npm/tsparticles@2/tsparticles.bundle.min.js"></script>
@@ -2406,6 +2405,25 @@ function goTo(id) {
 }
 
 /* ══════════════════════════════════════════════════
+   CARGA DIFERIDA DE XLSX (solo se pide cuando hace falta:
+   importar o exportar Excel). Ahorra ~700KB en el arranque
+   para quien nunca usa esas funciones.
+══════════════════════════════════════════════════ */
+let _xlsxPromise = null;
+function loadXLSXLib() {
+  if (window.XLSX) return Promise.resolve();
+  if (_xlsxPromise) return _xlsxPromise;
+  _xlsxPromise = new Promise((resolve, reject) => {
+    const s = document.createElement('script');
+    s.src = 'https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js';
+    s.onload = resolve;
+    s.onerror = () => { _xlsxPromise = null; reject(new Error('No se pudo cargar el módulo de Excel. Revisá tu conexión.')); };
+    document.head.appendChild(s);
+  });
+  return _xlsxPromise;
+}
+
+/* ══════════════════════════════════════════════════
    FILE
 ══════════════════════════════════════════════════ */
 function handleDrop(e) {
@@ -2414,8 +2432,16 @@ function handleDrop(e) {
   if (e.dataTransfer.files[0]) loadFile(e.dataTransfer.files[0]);
 }
 
-function loadFile(file) {
+async function loadFile(file) {
   if (!file) return;
+  try {
+    await loadXLSXLib();
+  } catch (err) {
+    document.getElementById('import-result').style.display = 'block';
+    document.getElementById('import-msg').className = 'notice notice-warn';
+    document.getElementById('import-msg').textContent = '✗ Error: ' + err.message;
+    return;
+  }
   const r = new FileReader();
   r.onload = async e => {
     try {
@@ -3063,7 +3089,8 @@ function emptyRow(cols, ico, title) {
 /* ══════════════════════════════════════════════════
    EXPORT TEMPLATE
 ══════════════════════════════════════════════════ */
-function exportData() {
+async function exportData() {
+  await loadXLSXLib();
   const wb = XLSX.utils.book_new();
   const hasData = DATA.ventas.length || DATA.stock.length || DATA.gastos.length;
 
