@@ -1519,6 +1519,14 @@ tbody td { padding: 12px 16px; font-size: 12px; color: #e2e8f0; }
         </div>
       </div>
 
+      <!-- ── Reposición urgente (productos con rotación que se agotaron) ── -->
+      <div class="notice notice-warn" id="urgencia-box" style="display:none;flex-direction:column;align-items:stretch;gap:10px;margin-bottom:20px">
+        <div style="display:flex;align-items:center;gap:8px;font-weight:500">
+          <span class="notice-icon">🔥</span> Productos a reponer con urgencia
+        </div>
+        <div id="urgencia-list" style="font-family:var(--mono);font-size:11px;line-height:1.6"></div>
+      </div>
+
       <!-- ── Estructura financiera visual ─────────── -->
       <div class="roi-box">
         <div class="roi-label">Estructura financiera — desglose</div>
@@ -1662,10 +1670,11 @@ tbody td { padding: 12px 16px; font-size: 12px; color: #e2e8f0; }
           <datalist id="nv-producto-list"></datalist>
         </div>
 
-        <!-- Cliente -->
+        <!-- Cliente (autocomplete desde clientes) -->
         <div>
           <label class="m-label" for="nv-cliente">Cliente</label>
-          <input class="m-input" type="text" id="nv-cliente" placeholder="Nombre o razón social">
+          <input class="m-input" type="text" id="nv-cliente" placeholder="Nombre o razón social" list="nv-cliente-list">
+          <datalist id="nv-cliente-list"></datalist>
         </div>
 
         <!-- Contacto -->
@@ -2259,6 +2268,26 @@ function filterByPeriod(ventas) {
 /* Normaliza un string para comparar clientes (case + espacios) */
 const normName = s => (s||'').trim().toLowerCase().replace(/\s+/g,' ');
 
+// Si el nombre tipeado en una venta no matchea ningún cliente existente,
+// confirma con el usuario antes de dar de alta un cliente nuevo (evita que
+// un typo genere un cliente fantasma sin que nadie lo note).
+function maybeCreateCliente(nombre, contacto, canal, fecha) {
+  const n = (nombre||'').trim();
+  if (!n) return;
+  const key = normName(n);
+  const existe = (DATA.clientes||[]).some(c => normName(c.nombre) === key);
+  if (existe) return;
+  if (confirm(`No encontré a "${n}" en tu lista de clientes.\n\n¿Crear cliente nuevo?`)) {
+    DATA.clientes.push({
+      nombre: n,
+      contacto: (contacto||'').trim(),
+      canal: (canal||'').toLowerCase(),
+      notas: '',
+      creado: fecha || new Date(),
+    });
+  }
+}
+
 /* ══════════════════════════════════════════════════
    NAV
 ══════════════════════════════════════════════════ */
@@ -2485,6 +2514,19 @@ function renderDash() {
   const agotados   = DATA.stock.filter(p => p.stockActual <= 0).length;
   const criticos   = DATA.stock.filter(p => p.stockActual > 0 && p.stockActual <= 3).length;
   const bajos      = DATA.stock.filter(p => p.stockActual > 3 && p.stockActual <= 5).length;
+
+  // Productos con rotación reciente (≥2 ventas en 30 días) que se quedaron sin
+  // stock (≤1 unidad) — venta perdida en tiempo real, no solo "stock agotado".
+  // Ventana fija de 30 días, independiente del filtro de período del dashboard.
+  const hace30d = new Date(Date.now() - 30*86400000);
+  const ventas30dPorProducto = {};
+  DATA.ventas.filter(v => v.estado !== 'cancelado' && v.fecha && v.fecha >= hace30d)
+    .forEach(v => { ventas30dPorProducto[v.producto] = (ventas30dPorProducto[v.producto]||0) + v.cantidad; });
+  const reposicionUrgente = DATA.stock
+    .map((p, idx) => ({ ...p, _idx: idx, ventas30d: ventas30dPorProducto[p.producto]||0 }))
+    .filter(p => p.stockActual <= 1 && p.ventas30d >= 2)
+    .sort((a,b) => b.ventas30d - a.ventas30d);
+
   const diasConVentas = new Set(vv.filter(v=>v.fecha).map(v=>v.fecha.toDateString())).size;
   const vpd        = diasConVentas > 0 ? (vv.length/diasConVentas).toFixed(1) : null;
 
@@ -2575,6 +2617,22 @@ function renderDash() {
       set('kpi-alertas-sub', parts.join(' · '));
     } else {
       alertCard.style.display = 'none';
+    }
+  }
+
+  // Reposición urgente — distinta de "Alertas de stock": esto es rotación
+  // reciente + sin stock, no solo nivel bajo.
+  const urgBox = document.getElementById('urgencia-box');
+  if (urgBox) {
+    if (reposicionUrgente.length > 0) {
+      urgBox.style.display = 'flex';
+      document.getElementById('urgencia-list').innerHTML = reposicionUrgente.map(p => `
+        <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;padding:3px 0">
+          <span>${p.producto} — ${p.stockActual} disponible${p.stockActual===1?'':'s'} · ${p.ventas30d} venta${p.ventas30d===1?'':'s'} en 30 días</span>
+          <button class="btn-row" style="flex-shrink:0" title="Reponer" onclick="openEditStockModal(${p._idx})">Reponer →</button>
+        </div>`).join('');
+    } else {
+      urgBox.style.display = 'none';
     }
   }
 
@@ -2770,7 +2828,7 @@ function renderGastos() {
   set('gs-ct', g.length + (q ? ` de ${DATA.gastos.length}` : '') + ' registros');
   document.getElementById('gs-body').innerHTML = g.map((x)=>`<tr>
     <td class="td-mono td-muted">${fd(x.fecha)}</td>
-    <td class="td-bold">${x.concepto}</td>
+    <td class="td-bold">${x.concepto}${x.revisar?` <span class="badge ba" style="cursor:pointer" title="Tiene una diferencia sin confirmar — ver notas. Click para marcar como resuelto" onclick="resolverGasto(${x._idx})">⚠ A confirmar</span>`:''}</td>
     <td><span class="badge bn">${x.categoria||'—'}</span></td>
     <td class="td-mono td-red">${f$(x.monto)}</td>
     <td><span class="badge ${x.tipo==='fijo'?'bb':'ba'}">${x.tipo||'—'}</span></td>
@@ -3043,6 +3101,10 @@ function openNewSaleModal() {
   const dl = document.getElementById('nv-producto-list')
   dl.innerHTML = DATA.stock.map(s => `<option value="${s.producto}">`).join('')
 
+  // Poblar datalist con clientes existentes
+  const dlc = document.getElementById('nv-cliente-list')
+  dlc.innerHTML = (DATA.clientes||[]).map(c => `<option value="${c.nombre}">`).join('')
+
   nvCalc()
   document.getElementById('modal-nueva-venta').classList.add('open')
   setTimeout(() => document.getElementById('nv-producto').focus(), 180)
@@ -3141,6 +3203,8 @@ async function saveNewSale() {
     fuente:     'manual',
   }
 
+  maybeCreateCliente(venta.cliente, venta.contacto, venta.canal, fecha)
+
   // Deshabilitar botón mientras guarda
   const btn = document.getElementById('nv-save-btn')
   btn.disabled = true
@@ -3192,6 +3256,8 @@ function openEditModal(idx) {
   // Poblar datalist
   const dl = document.getElementById('ev-producto-list')
   dl.innerHTML = DATA.stock.map(s => `<option value="${s.producto}">`).join('')
+  const dlc = document.getElementById('ev-cliente-list')
+  dlc.innerHTML = (DATA.clientes||[]).map(c => `<option value="${c.nombre}">`).join('')
 
   // Rellenar campos
   const fechaStr = v.fecha ? v.fecha.toISOString().split('T')[0] : ''
@@ -3282,6 +3348,8 @@ async function saveEditSale() {
     estado:     document.getElementById('ev-estado').value,
     notas:      document.getElementById('ev-notas').value.trim(),
   }
+
+  maybeCreateCliente(DATA.ventas[_editIdx].cliente, DATA.ventas[_editIdx].contacto, DATA.ventas[_editIdx].canal, fecha)
 
   // Solo ajustar stock si la venta original fue creada manualmente por el ERP
   // Las ventas importadas desde Excel ya tienen el stock_actual reflejado en la planilla
@@ -3484,13 +3552,25 @@ async function saveGasto() {
   const fechaRaw = document.getElementById('gs-fecha').value
   const fecha    = fechaRaw ? new Date(fechaRaw + 'T12:00:00') : new Date()
 
+  const categoria = document.getElementById('gs-categoria').value.trim()
+
+  // Si estamos editando un gasto marcado "a confirmar", ese flag se mantiene
+  // hasta que se resuelva explícitamente — no se pierde por editar cualquier
+  // otro campo del mismo gasto.
+  const gastoPrevio = _editGastoIdx !== null ? DATA.gastos[_editGastoIdx] : null
+
   const item = {
     fecha,
     concepto,
-    categoria: document.getElementById('gs-categoria').value.trim(),
+    categoria,
     monto,
     tipo:      document.getElementById('gs-tipo').value,
     notas:     document.getElementById('gs-notas').value.trim(),
+    // Metadato informativo: refleja la misma clasificación que ya usa
+    // isStockPurchase() para separar compras de stock de gastos operativos.
+    // No reemplaza esa lógica — solo la deja visible/consultable en el dato.
+    tipoContable: isStockPurchase({categoria, concepto}) ? 'inversion_inventario' : 'gasto_operativo',
+    ...(gastoPrevio?.revisar ? { revisar: true } : {}),
   }
 
   const btn = document.getElementById('gs-save-btn')
@@ -3508,6 +3588,17 @@ async function saveGasto() {
   renderAll()
   closeGastoModal()
   btn.disabled = false
+}
+
+// Marca un gasto "a confirmar" como resuelto (click en el badge de la fila)
+async function resolverGasto(idx) {
+  const g = DATA.gastos[idx]
+  if (!g || !g.revisar) return
+  delete g.revisar
+  await saveToSupabase()
+  document.getElementById('status-dot').classList.add('live')
+  document.getElementById('status-txt').textContent = 'Guardado ' + new Date().toLocaleTimeString('es-AR', {hour:'2-digit', minute:'2-digit'})
+  renderAll()
 }
 
 function gsFlash(msg) {
@@ -3812,7 +3903,8 @@ document.addEventListener('keydown', e => {
         </div>
         <div>
           <label class="m-label" for="ev-cliente">Cliente</label>
-          <input class="m-input" type="text" id="ev-cliente" placeholder="Nombre o razón social">
+          <input class="m-input" type="text" id="ev-cliente" placeholder="Nombre o razón social" list="ev-cliente-list">
+          <datalist id="ev-cliente-list"></datalist>
         </div>
         <div>
           <label class="m-label" for="ev-contacto">Contacto</label>
