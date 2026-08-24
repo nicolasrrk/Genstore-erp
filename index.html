@@ -3640,6 +3640,15 @@ async function saveGasto() {
     if (vencRaw) item.fechaVencimiento = new Date(vencRaw + 'T12:00:00')
   } else {
     item.estadoPago = 'pagado'
+    // Si el gasto ya tenía abonos parciales registrados (se estaba pagando
+    // "a crédito" y ahora se marca como saldado desde el modal en vez de con
+    // "Registrar pago"), conservamos ese historial para trazabilidad — no
+    // hay que perder el rastro de qué se abonó y cuándo solo por cerrar la deuda.
+    if (Array.isArray(gastoPrevio?.abonos) && gastoPrevio.abonos.length) {
+      item.abonos       = gastoPrevio.abonos
+      item.montoAbonado = gastoPrevio.montoAbonado || monto
+      item.montoPendiente = 0
+    }
   }
 
   // ── Proveedor / N° de comprobante (solo compras de stock) ────
