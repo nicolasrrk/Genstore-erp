@@ -1837,7 +1837,7 @@ tbody td { padding: 12px 16px; font-size: 12px; color: #e2e8f0; }
               <th>Monto</th><th>Tipo</th><th>Notas</th><th></th>
             </tr></thead>
             <tbody id="gs-body">
-              <tr><td colspan="6"><div class="empty"><div class="empty-ico">↙</div><div class="empty-t">Sin gastos</div><div class="empty-s">Importá la hoja GASTOS</div></div></td></tr>
+              <tr><td colspan="7"><div class="empty"><div class="empty-ico">↙</div><div class="empty-t">Sin gastos</div><div class="empty-s">Importá la hoja GASTOS</div></div></td></tr>
             </tbody>
           </table>
         </div>
@@ -2212,7 +2212,15 @@ async function loadFromSupabase() {
   // Restaurar fechas (vienen como string desde JSON)
   DATA.ventas   = (data.ventas || []).map(v => ({ ...v, fecha: v.fecha ? new Date(v.fecha) : null }))
   DATA.stock    = data.stock  || []
-  DATA.gastos   = (data.gastos || []).map(g => ({ ...g, fecha: g.fecha ? new Date(g.fecha) : null }))
+  DATA.gastos   = (data.gastos || []).map(g => {
+    // Default en memoria: los gastos históricos guardados antes de esta
+    // feature no tienen estadoPago — se comportan como "pagado" sin
+    // necesidad de reescribirlos en Supabase.
+    const out = { ...g, fecha: g.fecha ? new Date(g.fecha) : null, estadoPago: g.estadoPago || 'pagado' }
+    if (g.fechaVencimiento) out.fechaVencimiento = new Date(g.fechaVencimiento)
+    if (Array.isArray(g.abonos)) out.abonos = g.abonos.map(a => ({ ...a, fecha: a.fecha ? new Date(a.fecha) : null }))
+    return out
+  })
   DATA.clientes = (data.clientes || []).map(c => ({ ...c, creado: c.creado ? new Date(c.creado) : null }))
 
   if (DATA.ventas.length || DATA.stock.length || DATA.gastos.length || DATA.clientes.length) {
@@ -2425,7 +2433,10 @@ function normGastos(rows) {
   return rows.map(r => ({
     fecha: pd(r.fecha), concepto: nrm(r.concepto),
     categoria: nrm(r.categoria), monto: +r.monto||0,
-    tipo: nrm(r.tipo).toLowerCase(), notas: nrm(r.notas)
+    tipo: nrm(r.tipo).toLowerCase(), notas: nrm(r.notas),
+    // Los gastos importados de Excel no traen estado de pago — default "pagado"
+    // (la hoja GASTOS no distingue pagado/a crédito, así que no hay nada que perder).
+    estadoPago: 'pagado'
   }));
 }
 function pd(v) {
@@ -2501,8 +2512,12 @@ function renderDash() {
   // (usamos el dataset completo, no filtrado por período, para reflejar la caja real)
   const todasLasVentas   = DATA.ventas.filter(v => v.estado === 'pagado');
   const ingresosTotal    = todasLasVentas.reduce((s,v) => s + v.total, 0);
-  const comprasStockTotal= DATA.gastos.filter(isStockPurchase).reduce((s,g) => s + g.monto, 0);
-  const gastosOpTotal    = DATA.gastos.filter(g => !isStockPurchase(g)).reduce((s,g) => s + g.monto, 0);
+  // Solo los gastos efectivamente pagados salen de la caja — un gasto "a
+  // crédito" pendiente todavía no movió un peso real (default 'pagado' para
+  // los registros históricos que no tienen el campo).
+  const gastosPagados    = DATA.gastos.filter(g => (g.estadoPago || 'pagado') === 'pagado');
+  const comprasStockTotal= gastosPagados.filter(isStockPurchase).reduce((s,g) => s + g.monto, 0);
+  const gastosOpTotal    = gastosPagados.filter(g => !isStockPurchase(g)).reduce((s,g) => s + g.monto, 0);
   const caja             = ingresosTotal - comprasStockTotal - gastosOpTotal;
   const valorInventario  = DATA.stock.reduce((s,p) => s + p.stockActual * p.costoUnitario, 0);
   const capitalTotal     = caja + valorInventario;
@@ -2831,9 +2846,10 @@ function renderGastos() {
     <td class="td-bold">${x.concepto}${x.revisar?` <span class="badge ba" style="cursor:pointer" title="Tiene una diferencia sin confirmar — ver notas. Click para marcar como resuelto" onclick="resolverGasto(${x._idx})">⚠ A confirmar</span>`:''}</td>
     <td><span class="badge bn">${x.categoria||'—'}</span></td>
     <td class="td-mono td-red">${f$(x.monto)}</td>
-    <td><span class="badge ${x.tipo==='fijo'?'bb':'ba'}">${x.tipo||'—'}</span></td>
+    <td><span class="badge ${x.tipo==='fijo'?'bb':'ba'}">${x.tipo||'—'}</span>${x.estadoPago==='pendiente'?` <span class="badge ba" title="Abonado ${f$(x.montoAbonado||0)} de ${f$(x.monto)} — pendiente ${f$(x.montoPendiente||0)}">Pendiente</span>`:''}</td>
     <td class="td-muted">${x.notas||'—'}</td>
     <td><div class="td-actions">
+      ${x.estadoPago==='pendiente'?`<button class="btn-row" title="Registrar pago" onclick="openAbonarModal(${x._idx})">$</button>`:''}
       <button class="btn-row" title="Editar" onclick="openEditGastoModal(${x._idx})">✎</button>
       <button class="btn-row del" title="Eliminar" onclick="confirmDeleteGasto(${x._idx})">✕</button>
     </div></td>
@@ -3503,6 +3519,27 @@ async function executeDeleteStock() {
 ══════════════════════════════════════════════════ */
 let _editGastoIdx = null
 
+// Determina si el gasto corresponde a una compra de stock/mercadería para
+// mostrar los campos opcionales de proveedor y N° de comprobante en el modal.
+// Criterio simple e independiente de isStockPurchase() (que clasifica el
+// P&L) — acá alcanza con categoría "Stock" o la palabra "compra" en el concepto.
+const isGastoStockRelated = (categoria, concepto) =>
+  (categoria||'').trim().toLowerCase() === 'stock' || (concepto||'').toLowerCase().includes('compra')
+
+// Muestra/oculta monto abonado + fecha de vencimiento según "¿Pagado o a crédito?"
+function toggleGastoCreditoFields() {
+  const show = document.getElementById('gs-estado-pago').value === 'pendiente'
+  document.querySelectorAll('.gs-credito-field').forEach(el => el.style.display = show ? 'block' : 'none')
+}
+
+// Muestra/oculta proveedor + N° de comprobante según categoría/concepto
+function toggleGastoStockFields() {
+  const categoria = document.getElementById('gs-categoria').value
+  const concepto  = document.getElementById('gs-concepto').value
+  const show = isGastoStockRelated(categoria, concepto)
+  document.querySelectorAll('.gs-stock-field').forEach(el => el.style.display = show ? 'block' : 'none')
+}
+
 function openNewGastoModal() {
   _editGastoIdx = null
   document.getElementById('gs-modal-title').textContent = 'Nuevo gasto'
@@ -3513,7 +3550,14 @@ function openNewGastoModal() {
   document.getElementById('gs-categoria').value= ''
   document.getElementById('gs-monto').value    = ''
   document.getElementById('gs-tipo').value     = 'variable'
+  document.getElementById('gs-estado-pago').value = 'pagado'
+  document.getElementById('gs-monto-abonado').value = '0'
+  document.getElementById('gs-fecha-vencimiento').value = ''
+  document.getElementById('gs-proveedor').value = ''
+  document.getElementById('gs-numero-comprobante').value = ''
   document.getElementById('gs-notas').value    = ''
+  toggleGastoCreditoFields()
+  toggleGastoStockFields()
   document.getElementById('modal-gasto').classList.add('open')
   setTimeout(() => document.getElementById('gs-concepto').focus(), 180)
 }
@@ -3530,7 +3574,15 @@ function openEditGastoModal(idx) {
   document.getElementById('gs-categoria').value= g.categoria || ''
   document.getElementById('gs-monto').value    = g.monto     || ''
   document.getElementById('gs-tipo').value     = g.tipo      || 'variable'
+  document.getElementById('gs-estado-pago').value = g.estadoPago === 'pendiente' ? 'pendiente' : 'pagado'
+  document.getElementById('gs-monto-abonado').value = g.montoAbonado || 0
+  const vencStr = g.fechaVencimiento ? (g.fechaVencimiento instanceof Date ? g.fechaVencimiento.toISOString().split('T')[0] : String(g.fechaVencimiento).split('T')[0]) : ''
+  document.getElementById('gs-fecha-vencimiento').value = vencStr
+  document.getElementById('gs-proveedor').value = g.proveedor || ''
+  document.getElementById('gs-numero-comprobante').value = g.numeroComprobante || ''
   document.getElementById('gs-notas').value    = g.notas     || ''
+  toggleGastoCreditoFields()
+  toggleGastoStockFields()
   document.getElementById('modal-gasto').classList.add('open')
 }
 
@@ -3573,6 +3625,40 @@ async function saveGasto() {
     ...(gastoPrevio?.revisar ? { revisar: true } : {}),
   }
 
+  // ── Estado de pago (pagado / a crédito) ──────────────────────
+  const estadoPagoSel = document.getElementById('gs-estado-pago').value
+  if (estadoPagoSel === 'pendiente') {
+    const montoAbonado   = Math.max(0, +document.getElementById('gs-monto-abonado').value || 0)
+    const montoPendiente = Math.max(0, monto - montoAbonado)
+    // Si con lo abonado ya no queda nada pendiente, no tiene sentido guardarlo
+    // como "a crédito" — pasa a pagado directamente.
+    item.estadoPago    = montoPendiente > 0 ? 'pendiente' : 'pagado'
+    item.montoAbonado   = montoAbonado
+    item.montoPendiente = montoPendiente
+    if (Array.isArray(gastoPrevio?.abonos)) item.abonos = gastoPrevio.abonos
+    const vencRaw = document.getElementById('gs-fecha-vencimiento').value
+    if (vencRaw) item.fechaVencimiento = new Date(vencRaw + 'T12:00:00')
+  } else {
+    item.estadoPago = 'pagado'
+    // Si el gasto ya tenía abonos parciales registrados (se estaba pagando
+    // "a crédito" y ahora se marca como saldado desde el modal en vez de con
+    // "Registrar pago"), conservamos ese historial para trazabilidad — no
+    // hay que perder el rastro de qué se abonó y cuándo solo por cerrar la deuda.
+    if (Array.isArray(gastoPrevio?.abonos) && gastoPrevio.abonos.length) {
+      item.abonos       = gastoPrevio.abonos
+      item.montoAbonado = gastoPrevio.montoAbonado || monto
+      item.montoPendiente = 0
+    }
+  }
+
+  // ── Proveedor / N° de comprobante (solo compras de stock) ────
+  if (isGastoStockRelated(categoria, concepto)) {
+    const proveedor = document.getElementById('gs-proveedor').value.trim()
+    const numeroComprobante = document.getElementById('gs-numero-comprobante').value.trim()
+    if (proveedor) item.proveedor = proveedor
+    if (numeroComprobante) item.numeroComprobante = numeroComprobante
+  }
+
   const btn = document.getElementById('gs-save-btn')
   btn.disabled = true
 
@@ -3606,6 +3692,65 @@ function gsFlash(msg) {
   el.textContent = '⚠ ' + msg
   el.style.display = 'block'
   setTimeout(() => { el.style.display = 'none' }, 2200)
+}
+
+// ══ Registrar pago (abonar) de un gasto "a crédito" ══
+let _abonarGastoIdx = null
+
+function openAbonarModal(idx) {
+  _abonarGastoIdx = idx
+  const g = DATA.gastos[idx]
+  if (!g) return
+  document.getElementById('ab-gasto-info').textContent =
+    `${g.concepto || 'Gasto'} — abonado ${f$(g.montoAbonado||0)} de ${f$(g.monto)} · pendiente ${f$(g.montoPendiente||0)}`
+  document.getElementById('ab-monto').value = ''
+  document.getElementById('modal-abonar').classList.add('open')
+  setTimeout(() => document.getElementById('ab-monto').focus(), 180)
+}
+
+function closeAbonarModal() {
+  document.getElementById('modal-abonar').classList.remove('open')
+  _abonarGastoIdx = null
+}
+
+function handleAbonarBackdrop(e) {
+  if (e.target === e.currentTarget) closeAbonarModal()
+}
+
+function abFlash(msg) {
+  const el = document.getElementById('ab-flash')
+  el.textContent = '⚠ ' + msg
+  el.style.display = 'block'
+  setTimeout(() => { el.style.display = 'none' }, 2200)
+}
+
+async function saveAbono() {
+  if (_abonarGastoIdx === null) return
+  const g = DATA.gastos[_abonarGastoIdx]
+  if (!g) return
+  const monto = +document.getElementById('ab-monto').value
+  const pendienteActual = g.montoPendiente || 0
+  if (!monto || monto <= 0) { abFlash('Ingresá un monto mayor a 0.'); return }
+  if (monto > pendienteActual) { abFlash(`El monto no puede superar lo pendiente (${f$(pendienteActual)}).`); return }
+
+  const btn = document.getElementById('ab-save-btn')
+  btn.disabled = true
+
+  g.montoAbonado   = (g.montoAbonado || 0) + monto
+  g.montoPendiente = Math.max(0, g.monto - g.montoAbonado)
+  if (!Array.isArray(g.abonos)) g.abonos = []
+  g.abonos.push({ fecha: new Date(), monto })
+  if (g.montoPendiente <= 0) {
+    g.estadoPago    = 'pagado'
+    g.montoPendiente = 0
+  }
+
+  await saveToSupabase()
+  document.getElementById('status-dot').classList.add('live')
+  document.getElementById('status-txt').textContent = 'Guardado ' + new Date().toLocaleTimeString('es-AR', {hour:'2-digit', minute:'2-digit'})
+  renderAll()
+  closeAbonarModal()
+  btn.disabled = false
 }
 
 // Eliminar gasto
@@ -3643,6 +3788,7 @@ document.addEventListener('keydown', e => {
   if (e.key === 'Escape') {
     closeStockModal()
     closeGastoModal()
+    closeAbonarModal()
     cancelDeleteStock()
     cancelDeleteGasto()
   }
@@ -4038,23 +4184,46 @@ document.addEventListener('keydown', e => {
           <input class="m-input" type="date" id="gs-fecha">
         </div>
         <div>
+          <label class="m-label" for="gs-estado-pago">¿Pagado o a crédito?</label>
+          <select class="m-select" id="gs-estado-pago" onchange="toggleGastoCreditoFields()">
+            <option value="pagado">Pagado</option>
+            <option value="pendiente">A crédito (pendiente)</option>
+          </select>
+        </div>
+        <div>
           <label class="m-label" for="gs-tipo">Tipo</label>
           <select class="m-select" id="gs-tipo">
             <option value="variable">Variable</option>
             <option value="fijo">Fijo</option>
           </select>
         </div>
-        <div class="full">
-          <label class="m-label" for="gs-concepto">Concepto *</label>
-          <input class="m-input" type="text" id="gs-concepto" placeholder="Ej: Compra de stock, Envío…">
-        </div>
         <div>
           <label class="m-label" for="gs-categoria">Categoría</label>
-          <input class="m-input" type="text" id="gs-categoria" placeholder="Ej: Logística, Marketing…">
+          <input class="m-input" type="text" id="gs-categoria" placeholder="Ej: Logística, Marketing, Stock…" oninput="toggleGastoStockFields()">
+        </div>
+        <div class="full">
+          <label class="m-label" for="gs-concepto">Concepto *</label>
+          <input class="m-input" type="text" id="gs-concepto" placeholder="Ej: Compra de stock, Envío…" oninput="toggleGastoStockFields()">
         </div>
         <div>
           <label class="m-label" for="gs-monto">Monto *</label>
           <input class="m-input" type="number" id="gs-monto" placeholder="0" min="0">
+        </div>
+        <div class="gs-credito-field" id="gs-credito-abonado-wrap" style="display:none">
+          <label class="m-label" for="gs-monto-abonado">Monto abonado</label>
+          <input class="m-input" type="number" id="gs-monto-abonado" placeholder="0" min="0" value="0">
+        </div>
+        <div class="gs-credito-field" id="gs-credito-venc-wrap" style="display:none">
+          <label class="m-label" for="gs-fecha-vencimiento">Fecha de vencimiento</label>
+          <input class="m-input" type="date" id="gs-fecha-vencimiento">
+        </div>
+        <div class="gs-stock-field" id="gs-proveedor-wrap" style="display:none">
+          <label class="m-label" for="gs-proveedor">Proveedor</label>
+          <input class="m-input" type="text" id="gs-proveedor" placeholder="Opcional">
+        </div>
+        <div class="gs-stock-field" id="gs-comprobante-wrap" style="display:none">
+          <label class="m-label" for="gs-numero-comprobante">N° de comprobante</label>
+          <input class="m-input" type="text" id="gs-numero-comprobante" placeholder="Opcional">
         </div>
         <div class="full">
           <label class="m-label" for="gs-notas">Notas</label>
@@ -4067,6 +4236,33 @@ document.addEventListener('keydown', e => {
       <button class="btn-save" id="gs-save-btn" onclick="saveGasto()">
         <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M2 6l3 3 5-5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
         Guardar gasto
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ MODAL ABONAR GASTO ═════════════════════════ -->
+<div class="modal-backdrop" id="modal-abonar" onclick="handleAbonarBackdrop(event)">
+  <div class="modal" role="dialog" aria-modal="true" style="max-width:380px">
+    <div class="modal-head">
+      <span class="modal-title">Registrar pago</span>
+      <button class="modal-close" onclick="closeAbonarModal()" title="Cerrar">✕</button>
+    </div>
+    <div class="modal-body">
+      <div id="ab-flash" style="display:none;font-family:var(--mono);font-size:11px;color:var(--red);margin-bottom:12px;padding:8px 10px;background:var(--red-bg);border-radius:var(--r);border:1px solid var(--red);"></div>
+      <div id="ab-gasto-info" style="font-family:var(--mono);font-size:11px;color:var(--text3);margin-bottom:14px;"></div>
+      <div class="modal-grid">
+        <div class="full">
+          <label class="m-label" for="ab-monto">Monto a abonar *</label>
+          <input class="m-input" type="number" id="ab-monto" placeholder="0" min="0">
+        </div>
+      </div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn-cancel" onclick="closeAbonarModal()">Cancelar</button>
+      <button class="btn-save" id="ab-save-btn" onclick="saveAbono()">
+        <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M2 6l3 3 5-5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        Registrar pago
       </button>
     </div>
   </div>
