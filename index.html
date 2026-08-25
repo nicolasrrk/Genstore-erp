@@ -2151,6 +2151,23 @@ const db = createClient(SUPABASE_URL, SUPABASE_KEY)
 ══════════════════════════════════════════════════ */
 let CURRENT_USER = null
 
+// Última versión de los datos que sabemos que está en Supabase (updated_at).
+// Se usa en saveToSupabase() para detectar si otra pestaña/dispositivo
+// guardó algo más nuevo antes de pisarlo con lo que tenemos en memoria acá.
+let SERVER_UPDATED_AT = null
+
+// true recién cuando terminó el intento de carga inicial (loadFromSupabase),
+// haya encontrado datos, error, o nada. Mientras esto sea false no se debe
+// poder guardar — guardar antes de saber qué hay en el servidor es la misma
+// clase de bug que la del updated_at (pisar datos reales con memoria vacía).
+let DATA_LOADED = false
+
+// true si la carga inicial falló por un error real (no "todavía no hay
+// datos"). Mientras esto sea true, bloqueamos el guardado — seguir
+// trabajando con DATA vacío/parcial y guardar igual sería sobrescribir lo
+// que sí existe en el servidor sin haberlo visto nunca.
+let LOAD_FAILED = false
+
 ;(async () => {
   const { data: { session } } = await db.auth.getSession()
   if (!session) {
@@ -2181,8 +2198,51 @@ async function logout() {
 ══════════════════════════════════════════════════ */
 
 // Guarda los datos del ERP en la tabla "erp_data" de Supabase
+//
+// IMPORTANTE — protección contra guardados en conflicto:
+// Esta app no sincroniza en tiempo real entre pestañas/dispositivos, solo
+// carga los datos una vez al abrir. Si guardáramos siempre el objeto
+// completo (stock/ventas/gastos/clientes) tal como está en memoria acá,
+// una pestaña vieja (celular sin recargar, otra compu) pisaría en silencio
+// cualquier cambio guardado desde otro lado mientras tanto — así es como se
+// perdieron productos de stock sin que nadie los "eliminara".
+//
+// Por eso, antes de guardar comparamos el updated_at que tenemos en memoria
+// contra el que hay ahora mismo en el servidor. Si no coinciden, alguien
+// guardó algo más nuevo — en vez de pisarlo, avisamos y recargamos la
+// página con esa versión más reciente. Se pierde el cambio puntual que se
+// estaba por guardar, pero nunca el resto de los datos.
+// Devuelve true si guardó de verdad, false si no guardó nada (conflicto,
+// carga inicial todavía no terminada, o error). Todos los que llaman a esta
+// función deben chequear el resultado antes de mostrar "Guardado" o cerrar
+// un modal como si el guardado hubiera ocurrido.
 async function saveToSupabase() {
-  if (!CURRENT_USER) return
+  if (!CURRENT_USER) return false
+
+  if (!DATA_LOADED) {
+    alert('Todavía se están cargando tus datos — esperá un segundo y volvé a intentar. Guardar ahora podría pisar información real con datos vacíos.')
+    return false
+  }
+
+  if (LOAD_FAILED) {
+    alert('No se pudieron cargar tus datos al abrir la página (hubo un error de conexión). Por seguridad, no se puede guardar así — recargá la página y volvé a intentar.')
+    return false
+  }
+
+  if (SERVER_UPDATED_AT) {
+    const { data: actual, error: checkError } = await db
+      .from('erp_data')
+      .select('updated_at')
+      .eq('user_id', CURRENT_USER.id)
+      .single()
+
+    if (!checkError && actual && actual.updated_at && actual.updated_at !== SERVER_UPDATED_AT) {
+      alert('Estos datos se actualizaron desde otro dispositivo o pestaña mientras tenías esta abierta.\n\nPara no perder esos cambios, la página se va a recargar con la versión más reciente. Lo que estabas por guardar ahora no se guardó — repetilo después de que recargue.')
+      location.reload()
+      return false
+    }
+  }
+
   const payload = {
     user_id:  CURRENT_USER.id,
     ventas:   DATA.ventas,
@@ -2195,19 +2255,38 @@ async function saveToSupabase() {
     .from('erp_data')
     .upsert(payload, { onConflict: 'user_id' })
 
-  if (error) console.error('Error guardando en Supabase:', error)
+  if (error) { console.error('Error guardando en Supabase:', error); alert('No se pudo guardar — revisá tu conexión e intentá de nuevo.'); return false }
+  SERVER_UPDATED_AT = payload.updated_at
+  return true
 }
 
 // Carga los datos del usuario desde Supabase al iniciar
 async function loadFromSupabase() {
-  if (!CURRENT_USER) return
+  if (!CURRENT_USER) { DATA_LOADED = true; return }
   const { data, error } = await db
     .from('erp_data')
     .select('ventas, stock, gastos, clientes, updated_at')
     .eq('user_id', CURRENT_USER.id)
     .single()
 
+  // PGRST116 = "no encontró filas" — es el caso normal de un usuario nuevo
+  // sin datos todavía, no un error real. Cualquier OTRO error (de red, de
+  // permisos, etc.) sí es real: si lo tratamos igual que "usuario nuevo" y
+  // seguimos con DATA vacío, un guardado posterior pisaría datos reales que
+  // sí existen en el servidor pero que no pudimos leer. LOAD_FAILED bloquea
+  // el guardado hasta que se resuelva.
+  if (error && error.code !== 'PGRST116') {
+    LOAD_FAILED = true
+    DATA_LOADED = true
+    document.getElementById('status-txt').textContent = '⚠ No se pudieron cargar tus datos — recargá la página'
+    return
+  }
+
+  DATA_LOADED = true
+
   if (error || !data) return // primera vez: sin datos todavía
+
+  SERVER_UPDATED_AT = data.updated_at
 
   // Restaurar fechas (vienen como string desde JSON)
   DATA.ventas   = (data.ventas || []).map(v => ({ ...v, fecha: v.fecha ? new Date(v.fecha) : null }))
@@ -2364,14 +2443,56 @@ async function loadFile(file) {
         const i = names.indexOf(name);
         return i >= 0 ? XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[i]], { defval:'' }) : [];
       };
+      const nuevoStock  = normStock(get('STOCK'));
+      const nuevoGastos = normGastos(get('GASTOS'));
+
+      // Importar reemplaza TODO el Stock y TODOS los Gastos actuales por lo
+      // que traiga el archivo (a diferencia de Ventas, que preserva las
+      // cargadas a mano). Si el archivo tiene menos productos/gastos que los
+      // que ya hay guardados, confirmamos antes — si no, un archivo viejo o
+      // parcial borra en silencio todo lo que no esté en esa hoja.
+      if (nuevoStock.length < DATA.stock.length || nuevoGastos.length < DATA.gastos.length) {
+        const avisoStock  = nuevoStock.length  < DATA.stock.length  ? `Stock: ${DATA.stock.length} → ${nuevoStock.length} productos\n`  : '';
+        const avisoGastos = nuevoGastos.length < DATA.gastos.length ? `Gastos: ${DATA.gastos.length} → ${nuevoGastos.length} registros\n` : '';
+        const continuar = confirm(
+          `Este archivo tiene MENOS productos/gastos de los que ya tenés guardados:\n\n${avisoStock}${avisoGastos}\n` +
+          `Importar va a reemplazar todo lo actual por lo que trae el archivo — lo que no esté en la hoja se pierde.\n\n` +
+          `¿Confirmás que este es el archivo correcto y querés continuar?`
+        );
+        if (!continuar) {
+          document.getElementById('file-input').value = '';
+          return;
+        }
+      }
+
+      // Guardamos lo que había antes por si el guardado falla y hay que
+      // revertir — si no, un guardado posterior no relacionado (editar una
+      // venta, resolver un gasto) empujaría en silencio esta importación que
+      // el usuario nunca llegó a confirmar que se guardó.
+      const ventasPrevias  = DATA.ventas
+      const stockPrevio    = DATA.stock
+      const gastosPrevios  = DATA.gastos
+
       const manuales = DATA.ventas.filter(v => v.fuente === 'manual');
       const importadas = normVentas(get('VENTAS'));
       DATA.ventas = [...manuales, ...importadas];
-      DATA.stock  = normStock(get('STOCK'));
-      DATA.gastos = normGastos(get('GASTOS'));
+      DATA.stock  = nuevoStock;
+      DATA.gastos = nuevoGastos;
 
       // Guardar en Supabase automáticamente tras importar
-      await saveToSupabase();
+      const guardado = await saveToSupabase();
+      if (!guardado) {
+        // Revertir en memoria — si saveToSupabase() ya disparó un reload por
+        // conflicto esto no llega a importar, pero cubre los otros casos
+        // (todavía cargando, carga previa fallida, error de red).
+        DATA.ventas = ventasPrevias
+        DATA.stock  = stockPrevio
+        DATA.gastos = gastosPrevios
+        document.getElementById('import-result').style.display = 'block';
+        document.getElementById('import-msg').className = 'notice notice-warn';
+        document.getElementById('import-msg').textContent = '✗ No se guardó la importación (ver el aviso de arriba) — volvé a intentar.';
+        return;
+      }
 
       // status
       document.getElementById('status-dot').classList.add('live');
@@ -2382,6 +2503,7 @@ async function loadFile(file) {
       document.getElementById('imp-s').textContent = DATA.stock.length;
       document.getElementById('imp-g').textContent = DATA.gastos.length;
       document.getElementById('import-result').style.display = 'block';
+      document.getElementById('import-msg').className = 'notice notice-info';
       const msgManuales = manuales.length ? ` + ${manuales.length} manual${manuales.length > 1 ? 'es' : ''} conservada${manuales.length > 1 ? 's' : ''}` : '';
       document.getElementById('import-msg').textContent = `✓ "${file.name}" importado y guardado en la nube — ${importadas.length} ventas importadas${msgManuales}, ${DATA.stock.length} productos, ${DATA.gastos.length} gastos.`;
 
@@ -3234,7 +3356,12 @@ async function saveNewSale() {
     stockItem.stockActual = Math.max(0, stockItem.stockActual - cantidad)
   }
 
-  await saveToSupabase()
+  const guardado = await saveToSupabase()
+  if (!guardado) {
+    btn.disabled = false
+    btn.innerHTML = '<svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M2 6l3 3 5-5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg> Guardar venta'
+    return
+  }
 
   // Actualizar UI de estado
   document.getElementById('status-dot').classList.add('live')
@@ -3382,7 +3509,12 @@ async function saveEditSale() {
   btn.disabled = true
   btn.innerHTML = '<span style="display:inline-block;width:11px;height:11px;border:1.5px solid rgba(0,0,0,0.3);border-top-color:#000;border-radius:50%;animation:spin 0.6s linear infinite"></span> Guardando…'
 
-  await saveToSupabase()
+  const guardado = await saveToSupabase()
+  if (!guardado) {
+    btn.disabled = false
+    btn.innerHTML = '<svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M2 6l3 3 5-5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg> Guardar cambios'
+    return
+  }
 
   document.getElementById('status-dot').classList.add('live')
   document.getElementById('status-txt').textContent = 'Guardado ' + new Date().toLocaleTimeString('es-AR', {hour:'2-digit', minute:'2-digit'})
@@ -3469,7 +3601,8 @@ async function saveStock() {
     DATA.stock.push(item)
   }
 
-  await saveToSupabase()
+  const guardado = await saveToSupabase()
+  if (!guardado) { btn.disabled = false; return }
   document.getElementById('status-dot').classList.add('live')
   document.getElementById('status-txt').textContent = 'Guardado ' + new Date().toLocaleTimeString('es-AR', {hour:'2-digit', minute:'2-digit'})
   renderAll()
@@ -3508,7 +3641,8 @@ async function executeDeleteStock() {
   if (_deleteStockIdx === null) return
   cancelDeleteStock()
   DATA.stock.splice(_deleteStockIdx, 1)
-  await saveToSupabase()
+  const guardado = await saveToSupabase()
+  if (!guardado) return
   document.getElementById('status-dot').classList.add('live')
   document.getElementById('status-txt').textContent = 'Guardado ' + new Date().toLocaleTimeString('es-AR', {hour:'2-digit', minute:'2-digit'})
   renderAll()
@@ -3668,7 +3802,8 @@ async function saveGasto() {
     DATA.gastos.unshift(item)
   }
 
-  await saveToSupabase()
+  const guardado = await saveToSupabase()
+  if (!guardado) { btn.disabled = false; return }
   document.getElementById('status-dot').classList.add('live')
   document.getElementById('status-txt').textContent = 'Guardado ' + new Date().toLocaleTimeString('es-AR', {hour:'2-digit', minute:'2-digit'})
   renderAll()
@@ -3681,7 +3816,8 @@ async function resolverGasto(idx) {
   const g = DATA.gastos[idx]
   if (!g || !g.revisar) return
   delete g.revisar
-  await saveToSupabase()
+  const guardado = await saveToSupabase()
+  if (!guardado) return
   document.getElementById('status-dot').classList.add('live')
   document.getElementById('status-txt').textContent = 'Guardado ' + new Date().toLocaleTimeString('es-AR', {hour:'2-digit', minute:'2-digit'})
   renderAll()
@@ -3745,7 +3881,8 @@ async function saveAbono() {
     g.montoPendiente = 0
   }
 
-  await saveToSupabase()
+  const guardado = await saveToSupabase()
+  if (!guardado) { btn.disabled = false; return }
   document.getElementById('status-dot').classList.add('live')
   document.getElementById('status-txt').textContent = 'Guardado ' + new Date().toLocaleTimeString('es-AR', {hour:'2-digit', minute:'2-digit'})
   renderAll()
@@ -3777,7 +3914,8 @@ async function executeDeleteGasto() {
   if (_deleteGastoIdx === null) return
   cancelDeleteGasto()
   DATA.gastos.splice(_deleteGastoIdx, 1)
-  await saveToSupabase()
+  const guardado = await saveToSupabase()
+  if (!guardado) return
   document.getElementById('status-dot').classList.add('live')
   document.getElementById('status-txt').textContent = 'Guardado ' + new Date().toLocaleTimeString('es-AR', {hour:'2-digit', minute:'2-digit'})
   renderAll()
@@ -3836,7 +3974,8 @@ async function executeDelete() {
   }
 
   DATA.ventas.splice(_deleteIdx, 1)
-  await saveToSupabase()
+  const guardado = await saveToSupabase()
+  if (!guardado) return
 
   document.getElementById('status-dot').classList.add('live')
   document.getElementById('status-txt').textContent = 'Guardado ' + new Date().toLocaleTimeString('es-AR', {hour:'2-digit', minute:'2-digit'})
@@ -3954,7 +4093,8 @@ async function saveCliente() {
     DATA.clientes.unshift(item)
   }
 
-  await saveToSupabase()
+  const guardado = await saveToSupabase()
+  if (!guardado) { btn.disabled = false; return }
   document.getElementById('status-dot').classList.add('live')
   document.getElementById('status-txt').textContent = 'Guardado ' + new Date().toLocaleTimeString('es-AR', {hour:'2-digit', minute:'2-digit'})
   renderAll()
@@ -3992,7 +4132,8 @@ async function executeDeleteCliente() {
   if (_deleteClienteIdx === null) return
   cancelDeleteCliente()
   DATA.clientes.splice(_deleteClienteIdx, 1)
-  await saveToSupabase()
+  const guardado = await saveToSupabase()
+  if (!guardado) return
   document.getElementById('status-dot').classList.add('live')
   document.getElementById('status-txt').textContent = 'Guardado ' + new Date().toLocaleTimeString('es-AR', {hour:'2-digit', minute:'2-digit'})
   renderAll()
