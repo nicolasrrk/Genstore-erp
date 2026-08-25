@@ -2168,6 +2168,15 @@ let DATA_LOADED = false
 // que sí existe en el servidor sin haberlo visto nunca.
 let LOAD_FAILED = false
 
+// true mientras hay un guardado en curso. Las funciones que mutan DATA
+// (crear/editar/borrar venta, stock, gasto, cliente) chequean esto ANTES de
+// tocar DATA — si ya hay un guardado en vuelo, no mutan nada y avisan.
+// Sin esto, dos acciones casi simultáneas (ej. doble click en "Eliminar" de
+// dos filas distintas) podían mutar DATA con índices que el primer guardado
+// todavía no había re-renderizado, borrando o editando el registro
+// equivocado. saveToSupabase() es la única que la prende/apaga.
+let SAVE_IN_PROGRESS = false
+
 ;(async () => {
   const { data: { session } } = await db.auth.getSession()
   if (!session) {
@@ -2219,44 +2228,83 @@ async function logout() {
 async function saveToSupabase() {
   if (!CURRENT_USER) return false
 
-  if (!DATA_LOADED) {
-    alert('Todavía se están cargando tus datos — esperá un segundo y volvé a intentar. Guardar ahora podría pisar información real con datos vacíos.')
+  // Autochequeo de reentrancia: la mayoría de quienes llaman a esta función
+  // ya chequean bloqueadoPorGuardadoEnCurso() antes de mutar DATA, pero
+  // loadFile() (importar Excel) puede pasar ese chequeo y recién mutar/
+  // llamar acá varios "await" después (carga de la librería XLSX, lectura
+  // del archivo) — en el medio, otro guardado pudo haber arrancado. Sin
+  // este chequeo, dos guardados quedarían en vuelo al mismo tiempo.
+  if (SAVE_IN_PROGRESS) {
+    console.warn('saveToSupabase() llamado mientras otro guardado ya estaba en curso — se ignora este intento.')
     return false
   }
 
-  if (LOAD_FAILED) {
-    alert('No se pudieron cargar tus datos al abrir la página (hubo un error de conexión). Por seguridad, no se puede guardar así — recargá la página y volvé a intentar.')
-    return false
-  }
-
-  if (SERVER_UPDATED_AT) {
-    const { data: actual, error: checkError } = await db
-      .from('erp_data')
-      .select('updated_at')
-      .eq('user_id', CURRENT_USER.id)
-      .single()
-
-    if (!checkError && actual && actual.updated_at && actual.updated_at !== SERVER_UPDATED_AT) {
-      alert('Estos datos se actualizaron desde otro dispositivo o pestaña mientras tenías esta abierta.\n\nPara no perder esos cambios, la página se va a recargar con la versión más reciente. Lo que estabas por guardar ahora no se guardó — repetilo después de que recargue.')
-      location.reload()
+  // Prendido durante toda la función (incluida la parte async) para que
+  // ninguna otra función de guardado empiece a mutar DATA mientras esta
+  // sigue en vuelo. Se apaga pase lo que pase (éxito, error, conflicto).
+  SAVE_IN_PROGRESS = true
+  try {
+    if (!DATA_LOADED) {
+      alert('Todavía se están cargando tus datos — esperá un segundo y volvé a intentar. Guardar ahora podría pisar información real con datos vacíos.')
       return false
     }
-  }
 
-  const payload = {
-    user_id:  CURRENT_USER.id,
-    ventas:   DATA.ventas,
-    stock:    DATA.stock,
-    gastos:   DATA.gastos,
-    clientes: DATA.clientes,
-    updated_at: new Date().toISOString()
-  }
-  const { error } = await db
-    .from('erp_data')
-    .upsert(payload, { onConflict: 'user_id' })
+    if (LOAD_FAILED) {
+      alert('No se pudieron cargar tus datos al abrir la página (hubo un error de conexión). Por seguridad, no se puede guardar así — recargá la página y volvé a intentar.')
+      return false
+    }
 
-  if (error) { console.error('Error guardando en Supabase:', error); alert('No se pudo guardar — revisá tu conexión e intentá de nuevo.'); return false }
-  SERVER_UPDATED_AT = payload.updated_at
+    if (SERVER_UPDATED_AT) {
+      const { data: actual, error: checkError } = await db
+        .from('erp_data')
+        .select('updated_at')
+        .eq('user_id', CURRENT_USER.id)
+        .single()
+
+      // Si esta consulta falla (red, timeout, lo que sea) NO sabemos si hay
+      // un conflicto real o no — tratarlo como "no hay conflicto" y guardar
+      // igual reintroduce el bug que esto existe para evitar. Ante la duda,
+      // no se guarda.
+      if (checkError) {
+        console.error('Error verificando conflicto antes de guardar:', checkError)
+        alert('No se pudo verificar que no haya cambios más nuevos antes de guardar (problema de conexión). Por seguridad no se guardó — revisá tu conexión y volvé a intentar.')
+        return false
+      }
+
+      if (actual && actual.updated_at && actual.updated_at !== SERVER_UPDATED_AT) {
+        alert('Estos datos se actualizaron desde otro dispositivo o pestaña mientras tenías esta abierta.\n\nPara no perder esos cambios, la página se va a recargar con la versión más reciente. Lo que estabas por guardar ahora no se guardó — repetilo después de que recargue.')
+        location.reload()
+        return false
+      }
+    }
+
+    const payload = {
+      user_id:  CURRENT_USER.id,
+      ventas:   DATA.ventas,
+      stock:    DATA.stock,
+      gastos:   DATA.gastos,
+      clientes: DATA.clientes,
+      updated_at: new Date().toISOString()
+    }
+    const { error } = await db
+      .from('erp_data')
+      .upsert(payload, { onConflict: 'user_id' })
+
+    if (error) { console.error('Error guardando en Supabase:', error); alert('No se pudo guardar — revisá tu conexión e intentá de nuevo.'); return false }
+    SERVER_UPDATED_AT = payload.updated_at
+    return true
+  } finally {
+    SAVE_IN_PROGRESS = false
+  }
+}
+
+// Las 11 funciones que mutan DATA antes de guardar la llaman primero — si
+// ya hay un guardado en curso, no tocan DATA. Evita el problema de índices
+// viejos (splice/unshift) apuntando al registro equivocado mientras un
+// guardado anterior todavía no terminó de re-renderizar la tabla.
+function bloqueadoPorGuardadoEnCurso() {
+  if (!SAVE_IN_PROGRESS) return false
+  alert('Todavía se está guardando lo anterior — esperá un segundo y volvé a intentar.')
   return true
 }
 
@@ -2426,6 +2474,7 @@ function handleDrop(e) {
 
 async function loadFile(file) {
   if (!file) return;
+  if (bloqueadoPorGuardadoEnCurso()) return;
   try {
     await loadXLSXLib();
   } catch (err) {
@@ -2445,17 +2494,25 @@ async function loadFile(file) {
       };
       const nuevoStock  = normStock(get('STOCK'));
       const nuevoGastos = normGastos(get('GASTOS'));
+      // Ventas cargadas a mano (o sin el campo "fuente", ventas viejas de
+      // antes de que existiera) se preservan siempre — solo se reemplazan
+      // las que ya habían sido importadas de un Excel anterior.
+      const manuales    = DATA.ventas.filter(v => v.fuente !== 'importado');
+      const importadas  = normVentas(get('VENTAS'));
+      const ventasPrevImportadasCount = DATA.ventas.length - manuales.length;
 
       // Importar reemplaza TODO el Stock y TODOS los Gastos actuales por lo
-      // que traiga el archivo (a diferencia de Ventas, que preserva las
-      // cargadas a mano). Si el archivo tiene menos productos/gastos que los
-      // que ya hay guardados, confirmamos antes — si no, un archivo viejo o
-      // parcial borra en silencio todo lo que no esté en esa hoja.
-      if (nuevoStock.length < DATA.stock.length || nuevoGastos.length < DATA.gastos.length) {
+      // que traiga el archivo (a diferencia de las ventas manuales, que se
+      // preservan). Si el archivo tiene menos productos/gastos/ventas
+      // importadas que los que ya hay guardados, confirmamos antes — si no,
+      // un archivo viejo o parcial borra en silencio todo lo que no esté en
+      // esa hoja.
+      if (nuevoStock.length < DATA.stock.length || nuevoGastos.length < DATA.gastos.length || importadas.length < ventasPrevImportadasCount) {
         const avisoStock  = nuevoStock.length  < DATA.stock.length  ? `Stock: ${DATA.stock.length} → ${nuevoStock.length} productos\n`  : '';
         const avisoGastos = nuevoGastos.length < DATA.gastos.length ? `Gastos: ${DATA.gastos.length} → ${nuevoGastos.length} registros\n` : '';
+        const avisoVentas = importadas.length < ventasPrevImportadasCount ? `Ventas importadas: ${ventasPrevImportadasCount} → ${importadas.length}\n` : '';
         const continuar = confirm(
-          `Este archivo tiene MENOS productos/gastos de los que ya tenés guardados:\n\n${avisoStock}${avisoGastos}\n` +
+          `Este archivo tiene MENOS productos/gastos/ventas de los que ya tenés guardados:\n\n${avisoStock}${avisoGastos}${avisoVentas}\n` +
           `Importar va a reemplazar todo lo actual por lo que trae el archivo — lo que no esté en la hoja se pierde.\n\n` +
           `¿Confirmás que este es el archivo correcto y querés continuar?`
         );
@@ -2473,8 +2530,6 @@ async function loadFile(file) {
       const stockPrevio    = DATA.stock
       const gastosPrevios  = DATA.gastos
 
-      const manuales = DATA.ventas.filter(v => v.fuente === 'manual');
-      const importadas = normVentas(get('VENTAS'));
       DATA.ventas = [...manuales, ...importadas];
       DATA.stock  = nuevoStock;
       DATA.gastos = nuevoGastos;
@@ -2539,6 +2594,13 @@ function normVentas(rows) {
       total: tot, costoTotal: cos, ganancia: gan,
       margen: tot > 0 ? gan/tot*100 : 0,
       estado: nrm(r.estado).toLowerCase(), notas: nrm(r.notas),
+      // Siempre 'importado', sin importar lo que diga una columna 'fuente'
+      // en el archivo (exportData() la escribe, mismo si dice 'manual', a
+      // fines informativos/de auditoría). Si acá respetáramos ese valor,
+      // reimportar tu propio backup dejaría un duplicado de cada venta
+      // manual que ya tenías (loadFile() preserva las manuales aparte, sin
+      // deduplicar contra lo importado) y AMBAS copias ajustarían stock al
+      // borrarlas — el doble de lo que corresponde.
       fuente: 'importado'
     };
   });
@@ -2552,14 +2614,31 @@ function normStock(rows) {
   }));
 }
 function normGastos(rows) {
-  return rows.map(r => ({
-    fecha: pd(r.fecha), concepto: nrm(r.concepto),
-    categoria: nrm(r.categoria), monto: +r.monto||0,
-    tipo: nrm(r.tipo).toLowerCase(), notas: nrm(r.notas),
-    // Los gastos importados de Excel no traen estado de pago — default "pagado"
-    // (la hoja GASTOS no distingue pagado/a crédito, así que no hay nada que perder).
-    estadoPago: 'pagado'
-  }));
+  return rows.map(r => {
+    const out = {
+      fecha: pd(r.fecha), concepto: nrm(r.concepto),
+      categoria: nrm(r.categoria), monto: +r.monto||0,
+      tipo: nrm(r.tipo).toLowerCase(), notas: nrm(r.notas),
+      // Los gastos de una plantilla común (sin estas columnas) no traen
+      // estado de pago — default "pagado". Si vienen de un export propio
+      // de esta app (columnas estado_pago/etc. abajo), se respeta lo que
+      // digan esas columnas en vez de perder el historial de abonos.
+      estadoPago: 'pagado'
+    };
+    if (r.estado_pago) out.estadoPago = nrm(r.estado_pago).toLowerCase();
+    if (r.monto_abonado)   out.montoAbonado   = +r.monto_abonado || 0;
+    if (r.monto_pendiente) out.montoPendiente = +r.monto_pendiente || 0;
+    if (r.fecha_vencimiento) out.fechaVencimiento = pd(r.fecha_vencimiento);
+    if (r.proveedor) out.proveedor = nrm(r.proveedor);
+    if (r.numero_comprobante) out.numeroComprobante = nrm(r.numero_comprobante);
+    if (r.abonos_json) {
+      try {
+        const parsed = JSON.parse(r.abonos_json);
+        if (Array.isArray(parsed)) out.abonos = parsed.map(a => ({ ...a, fecha: a.fecha ? new Date(a.fecha) : null }));
+      } catch (e) { /* columna corrupta o vacía: sin abonos, no rompe el import */ }
+    }
+    return out;
+  });
 }
 function pd(v) {
   if (!v) return null;
@@ -2841,8 +2920,11 @@ function set(id, v) { const el=document.getElementById(id); if(el) el.textConten
 /* ── VENTAS ─────────────────────────────────────── */
 function renderVentas() {
   const q = SEARCH.ventas;
-  // Preservar índice original antes de filtrar
-  const all = DATA.ventas.map((x, i) => ({...x, _idx: i}));
+  // Preservar índice original antes de filtrar. .reverse() es solo para
+  // mostrar la más reciente primero — DATA.ventas en sí se guarda con
+  // push() (ver saveNewSale), no unshift, así que _idx sigue apuntando al
+  // lugar real en el array pase lo que pase con el orden de visualización.
+  const all = DATA.ventas.map((x, i) => ({...x, _idx: i})).reverse();
   const v = q
     ? all.filter(x =>
         String(x.producto||'').toLowerCase().includes(q) ||
@@ -2953,7 +3035,11 @@ function renderStock() {
 /* ── GASTOS ─────────────────────────────────────── */
 function renderGastos() {
   const q = SEARCH.gastos;
-  const allGastos = DATA.gastos.map((x, i) => ({...x, _idx: i}));
+  // .reverse() es solo para mostrar el más reciente primero — DATA.gastos
+  // se guarda con push() (ver saveGasto), no unshift, así que _idx sigue
+  // apuntando al lugar real en el array pase lo que pase con el orden de
+  // visualización.
+  const allGastos = DATA.gastos.map((x, i) => ({...x, _idx: i})).reverse();
   const g = q
     ? allGastos.filter(x =>
         String(x.concepto||'').toLowerCase().includes(q) ||
@@ -3188,17 +3274,32 @@ async function exportData() {
   const hasData = DATA.ventas.length || DATA.stock.length || DATA.gastos.length;
 
   if (hasData) {
+    // Incluye 'fuente' para que un backup exportado y reimportado no
+    // pierda si una venta era manual (afecta si editarla/borrarla después
+    // sigue ajustando el stock).
     XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet([
-      ['fecha','producto','cliente','contacto','canal','cantidad','precio_unitario','costo_unitario','estado','notas'],
-      ...DATA.ventas.map(v => [fd(v.fecha), v.producto, v.cliente, v.contacto, v.canal, v.cantidad, v.precio, v.costo, v.estado, v.notas])
+      ['fecha','producto','cliente','contacto','canal','cantidad','precio_unitario','costo_unitario','estado','notas','fuente'],
+      ...DATA.ventas.map(v => [fd(v.fecha), v.producto, v.cliente, v.contacto, v.canal, v.cantidad, v.precio, v.costo, v.estado, v.notas, v.fuente || ''])
     ]), 'VENTAS');
     XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet([
       ['producto','categoria','stock_inicial','stock_actual','costo_unitario','precio_venta','proveedor','notas'],
       ...DATA.stock.map(s => [s.producto, s.categoria, s.stockInicial, s.stockActual, s.costoUnitario, s.precioVenta, s.proveedor, s.notas])
     ]), 'STOCK');
+    // Incluye estado de pago / abonos / proveedor / comprobante — antes el
+    // export solo tenía las columnas básicas, así que exportar como backup
+    // y reimportar borraba en silencio el historial de pagos a crédito.
     XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet([
-      ['fecha','concepto','categoria','monto','tipo','notas'],
-      ...DATA.gastos.map(g => [fd(g.fecha), g.concepto, g.categoria, g.monto, g.tipo, g.notas])
+      ['fecha','concepto','categoria','monto','tipo','notas','estado_pago','monto_abonado','monto_pendiente','fecha_vencimiento','proveedor','numero_comprobante','abonos_json'],
+      ...DATA.gastos.map(g => [
+        fd(g.fecha), g.concepto, g.categoria, g.monto, g.tipo, g.notas,
+        g.estadoPago || 'pagado',
+        g.montoAbonado || '',
+        g.montoPendiente || '',
+        g.fechaVencimiento ? fd(g.fechaVencimiento) : '',
+        g.proveedor || '',
+        g.numeroComprobante || '',
+        Array.isArray(g.abonos) && g.abonos.length ? JSON.stringify(g.abonos) : ''
+      ])
     ]), 'GASTOS');
     const hoy = new Date().toLocaleDateString('es-AR').replace(/\//g, '-');
     XLSX.writeFile(wb, `genstore-datos-${hoy}.xlsx`);
@@ -3307,6 +3408,8 @@ function nvCalc() {
 }
 
 async function saveNewSale() {
+  if (bloqueadoPorGuardadoEnCurso()) return
+
   const producto = document.getElementById('nv-producto').value.trim()
   const precio   = +document.getElementById('nv-precio').value
   const cantidad = +document.getElementById('nv-cantidad').value || 1
@@ -3348,16 +3451,27 @@ async function saveNewSale() {
   btn.disabled = true
   btn.innerHTML = '<span style="display:inline-block;width:11px;height:11px;border:1.5px solid rgba(0,0,0,0.3);border-top-color:#000;border-radius:50%;animation:spin 0.6s linear infinite"></span> Guardando…'
 
-  DATA.ventas.unshift(venta)  // más reciente primero
-
   // Descontar stock del producto vendido
   const stockItem = DATA.stock.find(s => s.producto.toLowerCase() === producto.toLowerCase())
+  const stockActualPrevio = stockItem ? stockItem.stockActual : null
+
+  // push, no unshift: unshift corre el índice de todas las ventas
+  // existentes — si había un cartel de "¿Eliminar tal venta?" abierto con
+  // un índice capturado, terminaba apuntando a otra venta. push nunca mueve
+  // índices existentes; renderVentas() ya muestra la más reciente primero
+  // invirtiendo el orden solo para mostrar, no en los datos.
+  DATA.ventas.push(venta)
   if (stockItem) {
     stockItem.stockActual = Math.max(0, stockItem.stockActual - cantidad)
   }
 
   const guardado = await saveToSupabase()
   if (!guardado) {
+    // Revertir: si no guardó, no puede quedar la venta ni el descuento de
+    // stock en memoria — si no, un reintento (clic de nuevo en "Guardar
+    // venta") duplicaría la venta y descontaría el stock dos veces.
+    DATA.ventas.pop()
+    if (stockItem) stockItem.stockActual = stockActualPrevio
     btn.disabled = false
     btn.innerHTML = '<svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M2 6l3 3 5-5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg> Guardar venta'
     return
@@ -3454,6 +3568,7 @@ function evCalc() {
 
 async function saveEditSale() {
   if (_editIdx === null) return
+  if (bloqueadoPorGuardadoEnCurso()) return
   const producto = document.getElementById('ev-producto').value.trim()
   const precio   = +document.getElementById('ev-precio').value
   const cantidad = +document.getElementById('ev-cantidad').value || 1
@@ -3474,7 +3589,7 @@ async function saveEditSale() {
   const productoAnterior = ventaAnterior.producto
   const cantidadAnterior = ventaAnterior.cantidad || 0
 
-  DATA.ventas[_editIdx] = {
+  const ventaEditada = {
     ...DATA.ventas[_editIdx],
     fecha,
     producto,
@@ -3491,17 +3606,27 @@ async function saveEditSale() {
     estado:     document.getElementById('ev-estado').value,
     notas:      document.getElementById('ev-notas').value.trim(),
   }
+  DATA.ventas[_editIdx] = ventaEditada
 
-  maybeCreateCliente(DATA.ventas[_editIdx].cliente, DATA.ventas[_editIdx].contacto, DATA.ventas[_editIdx].canal, fecha)
+  maybeCreateCliente(ventaEditada.cliente, ventaEditada.contacto, ventaEditada.canal, fecha)
 
-  // Solo ajustar stock si la venta original fue creada manualmente por el ERP
-  // Las ventas importadas desde Excel ya tienen el stock_actual reflejado en la planilla
+  // Ajustar stock salvo que la venta original haya sido importada desde
+  // Excel (ese stock_actual ya viene reflejado en la planilla). Antes esto
+  // chequeaba fuente === 'manual', que excluía silenciosamente cualquier
+  // venta vieja sin ese campo (fuente undefined) — ahora solo se excluyen
+  // las explícitamente importadas.
+  const fuenteAjustable = ventaAnterior.fuente !== 'importado'
   const stockAnterior = DATA.stock.find(s => s.producto.toLowerCase() === productoAnterior.toLowerCase())
-  if (stockAnterior && ventaAnterior.fuente === 'manual') {
+  const stockNuevo    = DATA.stock.find(s => s.producto.toLowerCase() === producto.toLowerCase())
+  // Capturados ANTES de mutar nada — si stockAnterior y stockNuevo son el
+  // mismo objeto (no cambió el producto), esto sigue siendo correcto.
+  const stockAnteriorPrev = stockAnterior ? stockAnterior.stockActual : null
+  const stockNuevoPrev    = stockNuevo    ? stockNuevo.stockActual    : null
+
+  if (stockAnterior && fuenteAjustable) {
     stockAnterior.stockActual = Math.max(0, stockAnterior.stockActual + cantidadAnterior)
   }
-  const stockNuevo = DATA.stock.find(s => s.producto.toLowerCase() === producto.toLowerCase())
-  if (stockNuevo && ventaAnterior.fuente === 'manual') {
+  if (stockNuevo && fuenteAjustable) {
     stockNuevo.stockActual = Math.max(0, stockNuevo.stockActual - cantidad)
   }
 
@@ -3511,6 +3636,11 @@ async function saveEditSale() {
 
   const guardado = await saveToSupabase()
   if (!guardado) {
+    // Revertir la edición y los ajustes de stock — si no, quedan en memoria
+    // esperando a que un guardado futuro no relacionado los suba igual.
+    DATA.ventas[_editIdx] = ventaAnterior
+    if (stockAnterior) stockAnterior.stockActual = stockAnteriorPrev
+    if (stockNuevo)    stockNuevo.stockActual    = stockNuevoPrev
     btn.disabled = false
     btn.innerHTML = '<svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M2 6l3 3 5-5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg> Guardar cambios'
     return
@@ -3578,6 +3708,7 @@ function handleStockBackdrop(e) {
 }
 
 async function saveStock() {
+  if (bloqueadoPorGuardadoEnCurso()) return
   const producto = document.getElementById('sk-producto').value.trim()
   if (!producto) { skFlash('Ingresá el nombre del producto.'); return }
 
@@ -3595,6 +3726,7 @@ async function saveStock() {
   const btn = document.getElementById('sk-save-btn')
   btn.disabled = true
 
+  const prev = _editStockIdx !== null ? DATA.stock[_editStockIdx] : null
   if (_editStockIdx !== null) {
     DATA.stock[_editStockIdx] = item
   } else {
@@ -3602,7 +3734,15 @@ async function saveStock() {
   }
 
   const guardado = await saveToSupabase()
-  if (!guardado) { btn.disabled = false; return }
+  if (!guardado) {
+    if (_editStockIdx !== null) {
+      DATA.stock[_editStockIdx] = prev
+    } else {
+      DATA.stock.pop()
+    }
+    btn.disabled = false
+    return
+  }
   document.getElementById('status-dot').classList.add('live')
   document.getElementById('status-txt').textContent = 'Guardado ' + new Date().toLocaleTimeString('es-AR', {hour:'2-digit', minute:'2-digit'})
   renderAll()
@@ -3639,10 +3779,19 @@ function cancelDeleteStock() {
 
 async function executeDeleteStock() {
   if (_deleteStockIdx === null) return
+  if (bloqueadoPorGuardadoEnCurso()) return
+  // Capturar el índice ANTES de cancelDeleteStock() — esa función pone
+  // _deleteStockIdx en null, así que usarla después (como hacía este
+  // código) siempre borraba el índice 0 en vez del producto elegido.
+  const idx = _deleteStockIdx
   cancelDeleteStock()
-  DATA.stock.splice(_deleteStockIdx, 1)
+  const itemEliminado = DATA.stock[idx]
+  DATA.stock.splice(idx, 1)
   const guardado = await saveToSupabase()
-  if (!guardado) return
+  if (!guardado) {
+    if (itemEliminado) DATA.stock.splice(idx, 0, itemEliminado)
+    return
+  }
   document.getElementById('status-dot').classList.add('live')
   document.getElementById('status-txt').textContent = 'Guardado ' + new Date().toLocaleTimeString('es-AR', {hour:'2-digit', minute:'2-digit'})
   renderAll()
@@ -3730,6 +3879,7 @@ function handleGastoBackdrop(e) {
 }
 
 async function saveGasto() {
+  if (bloqueadoPorGuardadoEnCurso()) return
   const concepto = document.getElementById('gs-concepto').value.trim()
   const monto    = +document.getElementById('gs-monto').value
   if (!concepto) { gsFlash('Ingresá el concepto del gasto.'); return }
@@ -3763,6 +3913,14 @@ async function saveGasto() {
   const estadoPagoSel = document.getElementById('gs-estado-pago').value
   if (estadoPagoSel === 'pendiente') {
     const montoAbonado   = Math.max(0, +document.getElementById('gs-monto-abonado').value || 0)
+    // El monto abonado no puede superar el total del gasto — si no, queda un
+    // registro imposible (ej. monto=1000, montoAbonado=5000) que además
+    // marca como "pagado" (montoPendiente clampeado a 0) algo que en
+    // realidad nunca terminó de saldarse así.
+    if (montoAbonado > monto) {
+      gsFlash('El monto abonado no puede ser mayor al monto total del gasto.')
+      return
+    }
     const montoPendiente = Math.max(0, monto - montoAbonado)
     // Si con lo abonado ya no queda nada pendiente, no tiene sentido guardarlo
     // como "a crédito" — pasa a pagado directamente.
@@ -3776,11 +3934,19 @@ async function saveGasto() {
     item.estadoPago = 'pagado'
     // Si el gasto ya tenía abonos parciales registrados (se estaba pagando
     // "a crédito" y ahora se marca como saldado desde el modal en vez de con
-    // "Registrar pago"), conservamos ese historial para trazabilidad — no
-    // hay que perder el rastro de qué se abonó y cuándo solo por cerrar la deuda.
+    // "Registrar pago"), hay que saldar el resto — antes esto dejaba
+    // montoAbonado en el valor parcial viejo mientras marcaba el gasto como
+    // "pagado", un registro inconsistente (ej. monto=100000,
+    // montoAbonado=40000, pagado). Ahora se completa el monto abonado hasta
+    // el total y se agrega un abono de cierre por la diferencia, para que
+    // el historial de abonos siga sumando lo mismo que montoAbonado.
     if (Array.isArray(gastoPrevio?.abonos) && gastoPrevio.abonos.length) {
-      item.abonos       = gastoPrevio.abonos
-      item.montoAbonado = gastoPrevio.montoAbonado || monto
+      const abonadoPrevio = gastoPrevio.montoAbonado || 0
+      const diferencia = Math.max(0, monto - abonadoPrevio)
+      item.abonos = diferencia > 0
+        ? [...gastoPrevio.abonos, { fecha: new Date(), monto: diferencia, nota: 'Saldado manualmente al marcar como pagado' }]
+        : gastoPrevio.abonos
+      item.montoAbonado = monto
       item.montoPendiente = 0
     }
   }
@@ -3796,14 +3962,26 @@ async function saveGasto() {
   const btn = document.getElementById('gs-save-btn')
   btn.disabled = true
 
+  // push, no unshift: mismo motivo que en saveNewSale — no correr los
+  // índices de gastos existentes (y de un posible cartel de "¿Eliminar tal
+  // gasto?" abierto). renderGastos() invierte el orden solo para mostrar.
+  const prevGasto = _editGastoIdx !== null ? DATA.gastos[_editGastoIdx] : null
   if (_editGastoIdx !== null) {
     DATA.gastos[_editGastoIdx] = item
   } else {
-    DATA.gastos.unshift(item)
+    DATA.gastos.push(item)
   }
 
   const guardado = await saveToSupabase()
-  if (!guardado) { btn.disabled = false; return }
+  if (!guardado) {
+    if (_editGastoIdx !== null) {
+      DATA.gastos[_editGastoIdx] = prevGasto
+    } else {
+      DATA.gastos.pop()
+    }
+    btn.disabled = false
+    return
+  }
   document.getElementById('status-dot').classList.add('live')
   document.getElementById('status-txt').textContent = 'Guardado ' + new Date().toLocaleTimeString('es-AR', {hour:'2-digit', minute:'2-digit'})
   renderAll()
@@ -3813,11 +3991,12 @@ async function saveGasto() {
 
 // Marca un gasto "a confirmar" como resuelto (click en el badge de la fila)
 async function resolverGasto(idx) {
+  if (bloqueadoPorGuardadoEnCurso()) return
   const g = DATA.gastos[idx]
   if (!g || !g.revisar) return
   delete g.revisar
   const guardado = await saveToSupabase()
-  if (!guardado) return
+  if (!guardado) { g.revisar = true; return }
   document.getElementById('status-dot').classList.add('live')
   document.getElementById('status-txt').textContent = 'Guardado ' + new Date().toLocaleTimeString('es-AR', {hour:'2-digit', minute:'2-digit'})
   renderAll()
@@ -3862,6 +4041,7 @@ function abFlash(msg) {
 
 async function saveAbono() {
   if (_abonarGastoIdx === null) return
+  if (bloqueadoPorGuardadoEnCurso()) return
   const g = DATA.gastos[_abonarGastoIdx]
   if (!g) return
   const monto = +document.getElementById('ab-monto').value
@@ -3872,17 +4052,34 @@ async function saveAbono() {
   const btn = document.getElementById('ab-save-btn')
   btn.disabled = true
 
+  // Snapshot para poder revertir si el guardado falla. Ojo: prevAbonos tiene
+  // que ser una COPIA, no la misma referencia — si abajo mutáramos el mismo
+  // array con .push(), "revertir" reasignando esa misma referencia no
+  // deshace nada (el abono nuevo se queda adentro igual).
+  const prevMontoAbonado   = g.montoAbonado
+  const prevMontoPendiente = g.montoPendiente
+  const prevEstadoPago     = g.estadoPago
+  const prevAbonos         = Array.isArray(g.abonos) ? [...g.abonos] : null
+
   g.montoAbonado   = (g.montoAbonado || 0) + monto
   g.montoPendiente = Math.max(0, g.monto - g.montoAbonado)
-  if (!Array.isArray(g.abonos)) g.abonos = []
-  g.abonos.push({ fecha: new Date(), monto })
+  // Array nuevo en vez de mutar in-place con .push(), por la misma razón
+  // que el comentario de arriba.
+  g.abonos = [...(Array.isArray(g.abonos) ? g.abonos : []), { fecha: new Date(), monto }]
   if (g.montoPendiente <= 0) {
     g.estadoPago    = 'pagado'
     g.montoPendiente = 0
   }
 
   const guardado = await saveToSupabase()
-  if (!guardado) { btn.disabled = false; return }
+  if (!guardado) {
+    g.montoAbonado   = prevMontoAbonado
+    g.montoPendiente = prevMontoPendiente
+    g.estadoPago     = prevEstadoPago
+    if (prevAbonos) { g.abonos = prevAbonos } else { delete g.abonos }
+    btn.disabled = false
+    return
+  }
   document.getElementById('status-dot').classList.add('live')
   document.getElementById('status-txt').textContent = 'Guardado ' + new Date().toLocaleTimeString('es-AR', {hour:'2-digit', minute:'2-digit'})
   renderAll()
@@ -3912,10 +4109,19 @@ function cancelDeleteGasto() {
 
 async function executeDeleteGasto() {
   if (_deleteGastoIdx === null) return
+  if (bloqueadoPorGuardadoEnCurso()) return
+  // Capturar el índice ANTES de cancelDeleteGasto() — esa función pone
+  // _deleteGastoIdx en null, así que usarla después (como hacía este
+  // código) siempre borraba el índice 0 en vez del gasto elegido.
+  const idx = _deleteGastoIdx
   cancelDeleteGasto()
-  DATA.gastos.splice(_deleteGastoIdx, 1)
+  const itemEliminado = DATA.gastos[idx]
+  DATA.gastos.splice(idx, 1)
   const guardado = await saveToSupabase()
-  if (!guardado) return
+  if (!guardado) {
+    if (itemEliminado) DATA.gastos.splice(idx, 0, itemEliminado)
+    return
+  }
   document.getElementById('status-dot').classList.add('live')
   document.getElementById('status-txt').textContent = 'Guardado ' + new Date().toLocaleTimeString('es-AR', {hour:'2-digit', minute:'2-digit'})
   renderAll()
@@ -3962,20 +4168,36 @@ function cancelDelete() {
 
 async function executeDelete() {
   if (_deleteIdx === null) return
+  if (bloqueadoPorGuardadoEnCurso()) return
+  // Capturar el índice ANTES de cancelDelete() — cancelDelete() pone
+  // _deleteIdx en null, así que usar la variable global después de esa
+  // llamada (como hacía este código) siempre borraba el índice 0 en vez
+  // del que el usuario eligió.
+  const idx = _deleteIdx
   cancelDelete()
 
-  // Devolver stock solo si la venta fue creada manualmente (las importadas no son gestionadas por el ERP)
-  const ventaEliminada = DATA.ventas[_deleteIdx]
-  if (ventaEliminada && ventaEliminada.fuente === 'manual') {
-    const stockItem = DATA.stock.find(s => s.producto.toLowerCase() === ventaEliminada.producto.toLowerCase())
-    if (stockItem) {
-      stockItem.stockActual = Math.max(0, stockItem.stockActual + (ventaEliminada.cantidad || 0))
-    }
+  // Devolver stock salvo que la venta haya sido importada desde Excel (ese
+  // stock_actual ya viene reflejado en la planilla). Antes esto chequeaba
+  // fuente === 'manual', que excluía en silencio cualquier venta vieja sin
+  // ese campo — ahora solo se excluyen las explícitamente importadas.
+  const ventaEliminada = DATA.ventas[idx]
+  const stockItem = ventaEliminada
+    ? DATA.stock.find(s => s.producto.toLowerCase() === ventaEliminada.producto.toLowerCase())
+    : null
+  const stockActualPrevio = stockItem ? stockItem.stockActual : null
+  if (ventaEliminada && stockItem && ventaEliminada.fuente !== 'importado') {
+    stockItem.stockActual = Math.max(0, stockItem.stockActual + (ventaEliminada.cantidad || 0))
   }
 
-  DATA.ventas.splice(_deleteIdx, 1)
+  DATA.ventas.splice(idx, 1)
   const guardado = await saveToSupabase()
-  if (!guardado) return
+  if (!guardado) {
+    // Revertir: reinsertar la venta en su posición original y devolver el
+    // stock a como estaba.
+    if (ventaEliminada) DATA.ventas.splice(idx, 0, ventaEliminada)
+    if (stockItem) stockItem.stockActual = stockActualPrevio
+    return
+  }
 
   document.getElementById('status-dot').classList.add('live')
   document.getElementById('status-txt').textContent = 'Guardado ' + new Date().toLocaleTimeString('es-AR', {hour:'2-digit', minute:'2-digit'})
@@ -4064,6 +4286,7 @@ function handleClienteBackdrop(e) {
 }
 
 async function saveCliente() {
+  if (bloqueadoPorGuardadoEnCurso()) return
   const nombre = document.getElementById('cl-nombre').value.trim()
   if (!nombre) { clFlash('Ingresá el nombre del cliente.'); return }
 
@@ -4087,14 +4310,27 @@ async function saveCliente() {
   const btn = document.getElementById('cl-save-btn')
   btn.disabled = true
 
+  // push, no unshift: unshift corre el índice de todos los clientes ya
+  // existentes — si había un cartel de "¿Eliminar tal cliente?" abierto con
+  // un índice capturado, terminaba apuntando a otro cliente. push nunca
+  // mueve los índices existentes (mismo patrón que maybeCreateCliente y el
+  // alta de stock nuevo).
   if (_editClienteIdx !== null) {
     DATA.clientes[_editClienteIdx] = item
   } else {
-    DATA.clientes.unshift(item)
+    DATA.clientes.push(item)
   }
 
   const guardado = await saveToSupabase()
-  if (!guardado) { btn.disabled = false; return }
+  if (!guardado) {
+    if (_editClienteIdx !== null) {
+      DATA.clientes[_editClienteIdx] = prev
+    } else {
+      DATA.clientes.pop()
+    }
+    btn.disabled = false
+    return
+  }
   document.getElementById('status-dot').classList.add('live')
   document.getElementById('status-txt').textContent = 'Guardado ' + new Date().toLocaleTimeString('es-AR', {hour:'2-digit', minute:'2-digit'})
   renderAll()
@@ -4130,10 +4366,19 @@ function cancelDeleteCliente() {
 
 async function executeDeleteCliente() {
   if (_deleteClienteIdx === null) return
+  if (bloqueadoPorGuardadoEnCurso()) return
+  // Capturar el índice ANTES de cancelDeleteCliente() — esa función pone
+  // _deleteClienteIdx en null, así que usarla después (como hacía este
+  // código) siempre borraba el índice 0 en vez del cliente elegido.
+  const idx = _deleteClienteIdx
   cancelDeleteCliente()
-  DATA.clientes.splice(_deleteClienteIdx, 1)
+  const itemEliminado = DATA.clientes[idx]
+  DATA.clientes.splice(idx, 1)
   const guardado = await saveToSupabase()
-  if (!guardado) return
+  if (!guardado) {
+    if (itemEliminado) DATA.clientes.splice(idx, 0, itemEliminado)
+    return
+  }
   document.getElementById('status-dot').classList.add('live')
   document.getElementById('status-txt').textContent = 'Guardado ' + new Date().toLocaleTimeString('es-AR', {hour:'2-digit', minute:'2-digit'})
   renderAll()
