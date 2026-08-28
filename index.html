@@ -381,6 +381,14 @@ tbody td { padding: 11px 16px; font-size: 12px; vertical-align: middle; }
 .sbar { height: 2px; background: var(--surface3); border-radius: 1px; overflow: hidden; margin-top: 5px; width: 60px; }
 .sfill { height: 100%; border-radius: 1px; }
 
+/* ── STOCK — agrupación visual de variantes de costo (L1/L2/L3) ──
+   Puramente de presentación: no cambia qué fila es cada producto ni sus
+   datos, solo cómo se ven juntas cuando comparten nombre base. */
+.stock-group-row td { background: var(--surface2); }
+.stock-group-row:hover td { background: var(--surface3); }
+.stock-subrow td { background: var(--surface1, transparent); }
+.stock-subrow .td-bold { font-weight: 400; }
+
 /* ── UPLOAD ──────────────────────────────────────── */
 .upload-zone {
   border: 1.5px dashed var(--border2);
@@ -2769,13 +2777,13 @@ function renderVentas() {
 /* ── STOCK ──────────────────────────────────────── */
 // Fila de la tabla de stock — misma plantilla para "con stock" y "sin stock",
 // sin cambiar ningún cálculo existente.
-function stockRowHtml(p, vm) {
+function stockRowHtml(p, vm, isVariant) {
   const vnd=vm[p.producto]||0, dis=p.stockActual;
   const val=dis*p.costoUnitario;
   const pct=p.stockInicial>0?dis/p.stockInicial*100:0;
   const [lbl,bc,fc]=dis<=0?['Agotado','br','var(--red)']:dis<=3?['Crítico','br','var(--red)']:dis<=5?['Bajo','ba','var(--amber)']:['OK','bg','var(--green)'];
-  return `<tr>
-      <td class="td-bold">${p.producto}</td>
+  return `<tr${isVariant ? ' class="stock-subrow"' : ''}>
+      <td class="td-bold">${isVariant ? '<span style="opacity:.45;font-weight:400">↳ </span>' : ''}${p.producto}</td>
       <td><span class="badge bn">${p.categoria||'—'}</span></td>
       <td class="td-mono">${p.stockInicial}</td>
       <td class="td-mono td-amber">${vnd}</td>
@@ -2792,6 +2800,78 @@ function stockRowHtml(p, vm) {
       </div></td>
     </tr>`;
 }
+
+/* ── STOCK — agrupación visual de variantes de costo ──────────────
+   Algunos productos quedaron cargados varias veces con un sufijo " L1"/
+   "L2"/"L3" al final del nombre porque fue la forma que se encontró en su
+   momento de distinguir tandas compradas a costo distinto (mismo producto
+   físico). stockBaseName() calcula ese nombre sin el sufijo SOLO para
+   decidir qué filas mostrar agrupadas en esta tabla.
+
+   Importante — esto es puramente visual:
+   - p.producto (el dato real) no se toca en ningún lado.
+   - El matching venta↔stock (nvAutoFill, saveNewSale, updateSale,
+     deleteVenta) sigue comparando el nombre completo tal cual está
+     guardado, exactamente igual que antes de este cambio.
+   - Si en el futuro se carga un producto nuevo con un solo costo, nunca
+     tuvo ni tendrá sufijo, y no se agrupa con nada: se ve igual que
+     siempre. La agrupación solo aparece cuando hay ≥2 filas con el mismo
+     nombre base. */
+function stockBaseName(nombre) {
+  return String(nombre || '').replace(/\s+L\d+$/i, '').trim();
+}
+
+// Qué grupos están expandidos en la vista actual. Vive solo en memoria del
+// navegador — no se guarda en Supabase ni afecta ningún dato del ERP.
+const STOCK_GROUPS_OPEN = new Set();
+function toggleStockGroup(base) {
+  if (STOCK_GROUPS_OPEN.has(base)) STOCK_GROUPS_OPEN.delete(base);
+  else STOCK_GROUPS_OPEN.add(base);
+  renderStock();
+}
+
+function stockGroupHeaderHtml(base, items, vm) {
+  const open        = STOCK_GROUPS_OPEN.has(base);
+  const stockInicial = items.reduce((s,p) => s + p.stockInicial, 0);
+  const vendido       = items.reduce((s,p) => s + (vm[p.producto]||0), 0);
+  const disponible    = items.reduce((s,p) => s + p.stockActual, 0);
+  const valor          = items.reduce((s,p) => s + p.stockActual*p.costoUnitario, 0);
+  const costos          = items.map(p => p.costoUnitario);
+  const costoTxt = Math.min(...costos) === Math.max(...costos)
+    ? f$(costos[0])
+    : `${f$(Math.min(...costos))}–${f$(Math.max(...costos))}`;
+  const categoria = items.every(p => p.categoria === items[0].categoria) ? items[0].categoria : '—';
+  const pct = stockInicial>0 ? disponible/stockInicial*100 : 0;
+  const [lbl,bc,fc] = disponible<=0?['Agotado','br','var(--red)']:disponible<=3?['Crítico','br','var(--red)']:disponible<=5?['Bajo','ba','var(--amber)']:['OK','bg','var(--green)'];
+  const baseEsc = base.replace(/\\/g,'\\\\').replace(/'/g,"\\'");
+  return `<tr class="stock-group-row" style="cursor:pointer" onclick="toggleStockGroup('${baseEsc}')">
+      <td class="td-bold">${open?'▾':'▸'} ${base} <span class="badge bn" style="margin-left:6px">${items.length} variantes de costo</span></td>
+      <td><span class="badge bn">${categoria||'—'}</span></td>
+      <td class="td-mono">${stockInicial}</td>
+      <td class="td-mono td-amber">${vendido}</td>
+      <td>
+        <div class="td-mono td-bold">${disponible}</div>
+        <div class="sbar"><div class="sfill" style="width:${Math.min(pct,100)}%;background:${fc}"></div></div>
+      </td>
+      <td class="td-mono td-amber">${costoTxt}</td>
+      <td class="td-mono td-green">${f$(valor)}</td>
+      <td><span class="badge ${bc}">${lbl}</span></td>
+      <td></td>
+    </tr>`;
+}
+
+// Arma el HTML de una lista YA agrupada ([base, items][]): una fila normal
+// si el grupo tiene un solo producto (idéntico al <tr> de siempre), o un
+// header + sus variantes si tiene más de uno.
+function renderGroupList(groupList, vm) {
+  return groupList.map(([base, items]) => {
+    if (items.length === 1) return stockRowHtml(items[0], vm);
+    const header = stockGroupHeaderHtml(base, items, vm);
+    const rows   = STOCK_GROUPS_OPEN.has(base) ? items.map(p => stockRowHtml(p, vm, true)).join('') : '';
+    return header + rows;
+  }).join('');
+}
+
 function renderStock() {
   const q = SEARCH.stock;
   const allStock = DATA.stock.map((p, i) => ({...p, _idx: i}));
@@ -2802,23 +2882,41 @@ function renderStock() {
         String(p.proveedor||'').toLowerCase().includes(q))
     : allStock;
 
-  // Separar productos con stock disponible de los agotados (stockActual <= 0),
-  // sin alterar el cálculo de cada fila ni el orden de importación original.
-  const conStock  = s.filter(p => p.stockActual > 0);
-  const sinStock  = s.filter(p => p.stockActual <= 0);
+  // Agrupar ANTES de separar disponible/agotado. Si no se agrupara acá, un
+  // producto cuyas variantes de costo quedaron repartidas entre las dos
+  // tablas (ej. la tanda L1 ya vendida del todo pero la L3 con unidades)
+  // aparecería "agotado" en una tabla y con stock en la otra por separado,
+  // escondiendo que en realidad sí queda disponible — que es exactamente el
+  // problema de orden que se está corrigiendo acá. Para un producto sin
+  // variantes (el caso normal) esto no cambia nada: sigue yendo a la misma
+  // tabla que antes, decidido por su propio stockActual.
+  const groups = {}; const order = [];
+  s.forEach(p => {
+    const base = stockBaseName(p.producto);
+    if (!groups[base]) { groups[base] = []; order.push(base); }
+    groups[base].push(p);
+  });
+  const conStockGroups = [], sinStockGroups = [];
+  order.forEach(base => {
+    const items = groups[base];
+    const totalDisponible = items.reduce((sum,p) => sum + p.stockActual, 0);
+    (totalDisponible > 0 ? conStockGroups : sinStockGroups).push([base, items]);
+  });
+  const conStock = conStockGroups.reduce((sum,[,items]) => sum + items.length, 0);
+  const sinStock = sinStockGroups.reduce((sum,[,items]) => sum + items.length, 0);
 
-  set('sk-ct', conStock.length + (q ? ` de ${DATA.stock.filter(p=>p.stockActual>0).length}` : '') + ' productos');
-  set('sk-ct-agotado', sinStock.length + (q ? ` de ${DATA.stock.filter(p=>p.stockActual<=0).length}` : '') + ' productos');
+  set('sk-ct', conStock + (q ? ` de ${DATA.stock.filter(p=>p.stockActual>0).length}` : '') + ' productos');
+  set('sk-ct-agotado', sinStock + (q ? ` de ${DATA.stock.filter(p=>p.stockActual<=0).length}` : '') + ' productos');
 
   const vm = {};
   DATA.ventas.filter(v => v.estado !== 'cancelado').forEach(v => {
     vm[v.producto] = (vm[v.producto]||0) + v.cantidad;
   });
 
-  document.getElementById('sk-body').innerHTML = conStock.map(p => stockRowHtml(p, vm)).join('')
+  document.getElementById('sk-body').innerHTML = renderGroupList(conStockGroups, vm)
     || `<tr><td colspan="9">${emptyHTML('▦','Sin inventario','Importá la hoja STOCK o agregá un producto')}</td></tr>`;
 
-  document.getElementById('sk-body-agotado').innerHTML = sinStock.map(p => stockRowHtml(p, vm)).join('')
+  document.getElementById('sk-body-agotado').innerHTML = renderGroupList(sinStockGroups, vm)
     || `<tr><td colspan="9">${emptyHTML('✓','Sin productos agotados','Los productos con 0 unidades disponibles van a aparecer acá')}</td></tr>`;
 
   const vT=DATA.stock.reduce((s,p)=>s+p.stockActual*p.costoUnitario,0);
